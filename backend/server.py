@@ -106,6 +106,67 @@ def authorize_user(request):
 
     return None
 
+# API 엔드포인트: 사용자 정보 조회
+@app.route('/users/<int:user_id>', methods=['GET'])
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if user:
+        user_data = {
+            'id': user.id,
+            'companyName': user.companyName,
+            'email': user.email,
+            'password': user.password,
+            'domain_address': user.domain_address,
+            'IP_address': user.IP_address,
+            'membership': user.membership
+        }
+        return jsonify(user_data), 200
+    else:
+        return jsonify({'message': 'User not found.'}), 404
+
+# API 엔드포인트: 사용자 정보 수정
+@app.route('/users/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    data = request.get_json()
+    user = User.query.get(user_id)
+
+    if user:
+        user.companyName = data.get('companyName', user.companyName)
+        user.email = data.get('email', user.email)
+        user.domain_address = data.get('domain_address', user.domain_address)
+        user.IP_address = data.get('IP_address', user.IP_address)
+        user.membership = data.get('membership', user.membership)
+
+        db.session.commit()
+        return jsonify({'message': 'User updated successfully.'}), 200
+    else:
+        return jsonify({'message': 'User not found.'}), 404
+
+# API 엔드포인트: 비밀번호 변경
+@app.route('/users/<int:user_id>/change_password', methods=['POST'])
+def change_password(user_id):
+    data = request.get_json()
+    new_password = data.get('new_password')
+
+    user = User.query.get(user_id)
+    if user:
+        user.password = hash_password(new_password)
+        db.session.commit()
+        return jsonify({'message': 'Password changed successfully.'}), 200
+    else:
+        return jsonify({'message': 'User not found.'}), 404
+
+# API 엔드포인트: 로그아웃 (토큰 무효화)
+@app.route('/users/logout', methods=['POST'])
+def logout():
+    access_token = request.headers.get('Authorization')
+    if access_token and access_token.startswith('Bearer '):
+        access_token = access_token.split(' ')[1]
+        invalid_tokens.add(access_token)
+        return jsonify({'message': 'Logout successful.'}), 200
+    else:
+        return jsonify({'message': 'Invalid access token.'}), 400
+
 # 회원 탈퇴 API
 @app.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
