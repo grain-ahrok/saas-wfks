@@ -1,5 +1,5 @@
 # routes.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from models import db, User
 import jwt
 import time
@@ -12,13 +12,15 @@ app = Blueprint('users', __name__, url_prefix='/users')
 def register():
     data = request.get_json()
     hashed_password = hash_password(data['password'])
+    # None 상태로 저장하지 않고 빈 문자열로 변경
+    membership = ''
     new_user = User(
         companyName=data['companyName'],
         email=data['email'],
         password=hashed_password,
         domain_address=data['domain_address'],
         IP_address=data['IP_address'],
-        membership=data['membership']
+        membership=membership
     )
     db.session.add(new_user)
     db.session.commit()
@@ -27,12 +29,14 @@ def register():
 
 # 엑세스 토큰 생성 함수 (유효시간 30분)
 def generate_access_token(membership):
+    if membership == '':
+        membership = "비회원"
     expiration_time = time.time() + 1800
     token = {
         "membership": membership,
         "exp": expiration_time
     }
-    access_token = jwt.encode(token, app.config['SECRET_KEY'], algorithm='HS256')
+    access_token = jwt.encode(token, current_app.config['SECRET_KEY'], algorithm='HS256')
     return access_token
 
 # 로그인 API

@@ -3,3 +3,7 @@ __pycache__/
 
 # Ignore server.py
 server.py
+# Ignore Database File
+instance/
+
+.gitignore
