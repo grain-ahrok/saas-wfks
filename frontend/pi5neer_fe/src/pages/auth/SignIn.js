@@ -1,6 +1,6 @@
-import styles from './AuthMain.module.css';
+import styles from './Auth.module.css';
 
-function AuthMain() {
+function SignIn() {
     return (
         <div className={styles.Screen}>
             <div className={styles.LogoWindow}>
@@ -10,15 +10,20 @@ function AuthMain() {
             <div className={styles.InputWindow}>
                 <div className={styles.ShadowBox}>
                     <div className={styles.InputPadding}>
-                        <h3>Login</h3>
-                        <input className={styles.InputField}></input>
-                        <input className={styles.InputField}></input>
+                        <h2>Sign in</h2>
+                        <input className={styles.InputField} placeholder="Input Company Name"></input>
+                        <input className={styles.InputField} placeholder="Input Password" type="password"></input>
                         <button className={styles.LoginBtn} type="button">Login</button>
+                        <div className={styles.NavigateBtn}>
+                            <a href="./signup">sign up</a>
+                            <div>&nbsp;/&nbsp;</div>
+                            <a href="#">forgot my password</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     );
 }
-  export default AuthMain;
+  export default SignIn;
   

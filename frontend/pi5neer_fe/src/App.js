@@ -1,11 +1,17 @@
-import AuthMain from './pages/auth/AuthMain.js'
+import { BrowserRouter, Route, Routes} from "react-router-dom";
+import SignIn from './pages/auth/SignIn.js'
+import SignUp from './pages/auth/SignUp.js'
 import './App.css'
 
 function App() {
   return (
-    <div>
-      <AuthMain/>
-    </div>
+      <BrowserRouter>
+        <Routes>
+          <Route exact path="/" element={<SignIn />}/>
+          <Route path="/signup" element={<SignUp />}/>
+        </Routes>
+        
+      </BrowserRouter>
   )
 }
 
