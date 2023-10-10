@@ -4,6 +4,9 @@ __pycache__/
 # Ignore server.py
 server.py
 
+# Ignore db
+*.db
+
 # Byte-compiled / optimized / DLL files
 *.py[cod]
 *$py.class
