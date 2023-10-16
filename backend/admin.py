@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, Admin
+from models import Admin
 from utils import bcrypt
 
 app = Blueprint('admin', __name__, url_prefix='/admin')
