@@ -1,6 +1,6 @@
 # users.py
 from flask import Blueprint, request, jsonify, current_app
-#BluePrint는 앞에서 설명해서 생략
+#BluePrint
 #request를 통해 클라이언트로부터 전송된 데이터, 요청 메소드, URL, 헤더 및 기타 요청 관련된 정보 가져옴
 #jsonify를 통해 JSON응답으로 변환하는 데 사용되며
 #라우팅 함수에서 사용되어 Python 객체를 JSON 형식으로 변환하여 클라이언트에 응답 제공
