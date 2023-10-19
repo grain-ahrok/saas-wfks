@@ -1,9 +1,21 @@
-# routes.py
+# users.py
 from flask import Blueprint, request, jsonify, current_app
+#BluePrint는 앞에서 설명해서 생략
+#request를 통해 클라이언트로부터 전송된 데이터, 요청 메소드, URL, 헤더 및 기타 요청 관련된 정보 가져옴
+#jsonify를 통해 JSON응답으로 변환하는 데 사용되며
+#라우팅 함수에서 사용되어 Python 객체를 JSON 형식으로 변환하여 클라이언트에 응답 제공
+#현재 활성화된 인스턴스에 대한 프록시 객체 current_app
+#주로 Flask 확장이나 BluePrint 같이 더 큰 규모의 응용 프로그램을 개발할 때 유용하게 사용
 from models import db, User
-import jwt
+#models 모듈에서 db와 User 클래스를 가져옴
+import jwt 
+#client-server간 정보를 안전하게 전송하기 위한 인터넷 표준 jwt
+# 사용자 인증 상태 유지, 사용자 식별하고 요청 처리
 import time
+#유효시간 관련
 from utils import hash_password, bcrypt, invalid_tokens
+#비밀번호 관련
+
 
 app = Blueprint('users', __name__, url_prefix='/users')
 
