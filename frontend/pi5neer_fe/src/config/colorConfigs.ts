@@ -1,17 +1,21 @@
- import {colors} from "@mui/material"
- 
- const colorConfigs = {
+
+const colorConfigs = {
+    logo : {
+        color: "#000000"
+    },
     sidebar : {
-        bg : "#233044",
-        color : "#eeeeee",
-        hoverBg : "#1e293a",
-        activeBg : "#1e253a",
+        bg : "#FFFFFF",
+        unselectedColor : "#9197B3",
+        selectedColor : "#FFFFFF",
+        hoverBg : "#CEEBFF",
+        activeBg : "#18A0FB",
     },
     topbar : {
-        bg: "#fff",
+        bg: "#FFFFFF",
         color : "#000"
     },
-    mainBg : colors.grey["100"]
+    mainBg : "#eeeee",
+    red : "#ff0000"
  };
 
  export default colorConfigs; 

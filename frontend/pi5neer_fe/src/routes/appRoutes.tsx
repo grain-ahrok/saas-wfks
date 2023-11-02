@@ -2,10 +2,12 @@ import React from "react"
 import { RouteType } from "./config";
 import SecuritySettingLayout from "../pages/securitySetting/SecuritySettingLayout"
 import ExceptionUrlPage from "../pages/securitySetting/ExceptionUrlPage"
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined"
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ExceptionIpPage from "../pages/securitySetting/ExceptionIpPage";
 import DomainSettingPage from "../pages/domainSetting/DomainSettingPage";
-import {FormatListBulletedOutlined } from "@mui/icons-material";
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
+import SubjectIcon from '@mui/icons-material/Subject';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import SecurityLogPage from "../pages/securityLog/SecurityLogPage";
 import BlockedIpPage from "../pages/securitySetting/BlockedIpPage";
@@ -24,7 +26,7 @@ const appRoutes: RouteType[] = [
         state: "dashboard",
         sidebarProps: {
             displayText: "대시보드",
-            icon: <FormatListBulletedOutlined />
+            icon: <SpaceDashboardIcon />
         }
     },
     {
@@ -33,7 +35,7 @@ const appRoutes: RouteType[] = [
         state: "security-logs",
         sidebarProps: {
             displayText: "보안로그",
-            icon: <FormatListBulletedOutlined />
+            icon: <SubjectIcon />
         }
     },
     {
@@ -42,7 +44,7 @@ const appRoutes: RouteType[] = [
         state: "security-settings",
         sidebarProps: {
             displayText: "보안 설정 관리",
-            icon: <DashboardOutlinedIcon />
+            icon: <AdminPanelSettingsIcon />
         },
         child: [
             {
@@ -90,7 +92,7 @@ const appRoutes: RouteType[] = [
         state: "domain-settings",
         sidebarProps: {
             displayText: "도메인 설정 관리",
-            icon: <FormatListBulletedOutlined />
+            icon: <ManageAccountsIcon />
         }
     }
 ]

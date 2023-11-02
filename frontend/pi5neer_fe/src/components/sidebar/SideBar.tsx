@@ -1,10 +1,11 @@
-/* eslint-disable react/jsx-no-undef */
-import { Avatar, Box, Drawer, List, Stack, Toolbar, Typography } from "@mui/material";
+import { Box, Drawer, List, Stack, Toolbar, Typography } from "@mui/material";
 import sizeConfigs from "../../config/sizeConfigs";
 import colorConfigs from "../../config/colorConfigs";
 import appRoutes from "../../routes/appRoutes";
 import SidebarItem from "./SidebarItem";
 import SidebarItemCollapse from "./SidebarItemCollapse";
+import AcUnitIcon from '@mui/icons-material/AcUnit';
+import styleConfigs from "../../config/styleConfigs";
 
 const SideBar = () => {
      return (
@@ -15,21 +16,24 @@ const SideBar = () => {
                flexShrink: 0,
                "& .MuiDrawer-paper" : {
                   width : sizeConfigs.sidebar.width,
+                  padding : "12px",
                   boxSizing : "border-box",
                   borderRight : "0px",
                   backgroundColor : colorConfigs.sidebar.bg,
-                  color : colorConfigs.sidebar.color
+                  color : colorConfigs.sidebar.unselectedColor,
+                  borderRadius: "24px",
+                  boxShadow: styleConfigs.boxShadow
                }
             }}>
-            <List disablePadding >
-               <Toolbar sx={{marginBottom : "20px", marginTop : "12px"}}>
+            <List disablePadding>
+               <Toolbar sx={{marginBottom : "8px", marginTop : "8px"}}>
                   <Stack 
-                     sx={{width: "100px"}}
+                     sx={{width: "100px", color: colorConfigs.logo.color}}
                      direction="row"
                      justifyContent="center">
-                     <Avatar src="%PUBLIC_URL%/img/test.png"/>
+                     <AcUnitIcon/>
                      <Box sx={{marginLeft : "12px"}}>
-                        <Typography variant='h6'>
+                        <Typography variant='h5'>
                            Pi5neer
                         </Typography>
                      </Box>
