@@ -1,11 +1,18 @@
 # utils.py
 from flask_bcrypt import Bcrypt
+#Bcrypt는 해시 함수를 사용하여 비밀번호를 안전하게 저장하고 검증하는 데 사용
 
+#bcrypt 객체 초기화
 bcrypt = Bcrypt()
+#유효하지 않은 토큰을 저장하는 데 사용되는 빈 집합(set)을 정의
 invalid_tokens = set()
 
+#비밀번호를 해시화하는 함수를 정의
 def hash_password(password):
     return bcrypt.generate_password_hash(password).decode('utf-8')
+#주어진 비밀번호를 해시화하여 반환
+#generate_password_hash Bcrypt 알고리즘을 사용하여 안전한 해시를 생성 후 
+#decode('utf-8') : 바이트 문자열을 유니코드 문자열로 변환하여 반환
 
 '''
 ---------------------------------------
