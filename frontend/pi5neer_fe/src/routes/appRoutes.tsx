@@ -21,7 +21,7 @@ const appRoutes: RouteType[] = [
         state: "dashboard"
     },
     {
-        path: "/dashboard",
+        path: "/customers/dashboard",
         element: <DashboardPage/>,
         state: "dashboard",
         sidebarProps: {
@@ -30,7 +30,7 @@ const appRoutes: RouteType[] = [
         }
     },
     {
-        path: "/security-logs",
+        path: "/customers/security-logs",
         element: <SecurityLogPage />,
         state: "security-logs",
         sidebarProps: {
@@ -39,7 +39,7 @@ const appRoutes: RouteType[] = [
         }
     },
     {
-        path: "/security-settings",
+        path: "/customers/security-settings",
         element: <SecuritySettingLayout />,
         state: "security-settings",
         sidebarProps: {
@@ -53,7 +53,7 @@ const appRoutes: RouteType[] = [
                 state: "security-settings.index",
             },
             {
-                path: "/security-settings/exception-urls",
+                path: "/customers/security-settings/exception-urls",
                 element: <ExceptionUrlPage />,
                 state: "security-settings.exception-urls",
                 sidebarProps: {
@@ -61,7 +61,7 @@ const appRoutes: RouteType[] = [
                 }
             },
             {
-                path: "/security-settings/exception-ips",
+                path: "/customers/security-settings/exception-ips",
                 element: <ExceptionIpPage />,
                 state: "security-settings.exception-ips",
                 sidebarProps: {
@@ -69,7 +69,7 @@ const appRoutes: RouteType[] = [
                 }
             },
             {
-                path: "/security-settings/blocked-ips",
+                path: "/customers/security-settings/blocked-ips",
                 element: <BlockedIpPage />,
                 state: "security-settings.blocked-ips",
                 sidebarProps: {
@@ -77,7 +77,7 @@ const appRoutes: RouteType[] = [
                 }
             },
             {
-                path: "/security-settings/policy-details",
+                path: "/customers/security-settings/policy-details",
                 element: <DetailPolicyPage />,
                 state: "security-settings.policy-details",
                 sidebarProps: {
@@ -87,7 +87,7 @@ const appRoutes: RouteType[] = [
         ]
     },
     {
-        path: "/domain-settings",
+        path: "/customers/domain-settings",
         element: <DomainSettingPage />,
         state: "domain-settings",
         sidebarProps: {
