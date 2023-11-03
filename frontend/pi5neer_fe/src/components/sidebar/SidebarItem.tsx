@@ -1,10 +1,11 @@
 import React from 'react'
 import { RouteType } from '../../routes/config'
-import { ListItemButton, ListItemIcon } from '@mui/material';
+import { ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import colorConfigs from '../../config/colorConfigs';
 import { RootState } from '../../redux/store';
 import { useSelector } from 'react-redux';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
 type Props = {
     item: RouteType;
@@ -19,19 +20,27 @@ const SidebarItem = ({ item }: Props) => {
                 to={item.path}
                 sx={{
                     "&: hover": {
-                        backgroundColor: colorConfigs.sidebar.hoverBg
+                        backgroundColor: appState === item.state ? colorConfigs.sidebar.activeBg :  colorConfigs.sidebar.hoverBg
                     },
                     backgroundColor : appState === item.state ? colorConfigs.sidebar.activeBg : "unset",
-                    paddingY: "12px",
-                    paddingX: "24px"
+                    borderRadius : "8px",
+                    paddingY: "8px",
+                    paddingX: "12px"
                 }}>
 
                 <ListItemIcon sx={{
-                    color: colorConfigs.sidebar.color
-                }}>
+                    color: appState === item.state ? colorConfigs.sidebar.selectedColor : colorConfigs.sidebar.unselectedColor,
+                }}> 
                     {item.sidebarProps.icon && item.sidebarProps.icon}
                 </ListItemIcon>
-                {item.sidebarProps.displayText}
+                <ListItemText>
+                    <Typography sx={{
+                        color: appState === item.state ? colorConfigs.sidebar.selectedColor : colorConfigs.sidebar.unselectedColor
+                    }}>
+                        {item.sidebarProps.displayText}
+                    </Typography>
+                </ListItemText>
+                {appState === item.state ? null : <KeyboardArrowRightIcon sx={{ color: colorConfigs.sidebar.unselectedColor}} />}
             </ListItemButton>
         ) : null
     )

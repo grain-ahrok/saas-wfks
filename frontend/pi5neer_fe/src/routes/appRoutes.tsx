@@ -2,10 +2,12 @@ import React from "react"
 import { RouteType } from "./config";
 import SecuritySettingLayout from "../pages/securitySetting/SecuritySettingLayout"
 import ExceptionUrlPage from "../pages/securitySetting/ExceptionUrlPage"
-import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined"
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ExceptionIpPage from "../pages/securitySetting/ExceptionIpPage";
 import DomainSettingPage from "../pages/domainSetting/DomainSettingPage";
-import {FormatListBulletedOutlined } from "@mui/icons-material";
+import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
+import SubjectIcon from '@mui/icons-material/Subject';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import SecurityLogPage from "../pages/securityLog/SecurityLogPage";
 import BlockedIpPage from "../pages/securitySetting/BlockedIpPage";
@@ -19,30 +21,30 @@ const appRoutes: RouteType[] = [
         state: "dashboard"
     },
     {
-        path: "/dashboard",
+        path: "/customers/dashboard",
         element: <DashboardPage/>,
         state: "dashboard",
         sidebarProps: {
             displayText: "대시보드",
-            icon: <FormatListBulletedOutlined />
+            icon: <SpaceDashboardIcon />
         }
     },
     {
-        path: "/security-logs",
+        path: "/customers/security-logs",
         element: <SecurityLogPage />,
         state: "security-logs",
         sidebarProps: {
             displayText: "보안로그",
-            icon: <FormatListBulletedOutlined />
+            icon: <SubjectIcon />
         }
     },
     {
-        path: "/security-settings",
+        path: "/customers/security-settings",
         element: <SecuritySettingLayout />,
         state: "security-settings",
         sidebarProps: {
             displayText: "보안 설정 관리",
-            icon: <DashboardOutlinedIcon />
+            icon: <AdminPanelSettingsIcon />
         },
         child: [
             {
@@ -51,7 +53,7 @@ const appRoutes: RouteType[] = [
                 state: "security-settings.index",
             },
             {
-                path: "/security-settings/exception-urls",
+                path: "/customers/security-settings/exception-urls",
                 element: <ExceptionUrlPage />,
                 state: "security-settings.exception-urls",
                 sidebarProps: {
@@ -59,7 +61,7 @@ const appRoutes: RouteType[] = [
                 }
             },
             {
-                path: "/security-settings/exception-ips",
+                path: "/customers/security-settings/exception-ips",
                 element: <ExceptionIpPage />,
                 state: "security-settings.exception-ips",
                 sidebarProps: {
@@ -67,7 +69,7 @@ const appRoutes: RouteType[] = [
                 }
             },
             {
-                path: "/security-settings/blocked-ips",
+                path: "/customers/security-settings/blocked-ips",
                 element: <BlockedIpPage />,
                 state: "security-settings.blocked-ips",
                 sidebarProps: {
@@ -75,7 +77,7 @@ const appRoutes: RouteType[] = [
                 }
             },
             {
-                path: "/security-settings/policy-details",
+                path: "/customers/security-settings/policy-details",
                 element: <DetailPolicyPage />,
                 state: "security-settings.policy-details",
                 sidebarProps: {
@@ -85,12 +87,12 @@ const appRoutes: RouteType[] = [
         ]
     },
     {
-        path: "/domain-settings",
+        path: "/customers/domain-settings",
         element: <DomainSettingPage />,
         state: "domain-settings",
         sidebarProps: {
             displayText: "도메인 설정 관리",
-            icon: <FormatListBulletedOutlined />
+            icon: <ManageAccountsIcon />
         }
     }
 ]
