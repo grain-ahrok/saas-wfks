@@ -11,6 +11,7 @@ def admin_login():
     username = data.get('username')
     password = data.get('password')
 
+    #admin 변수는 db 쿼리 결과로서 Admin객체를 나타냄.
     admin = Admin.query.filter_by(username=username).first()
 
     if admin:
