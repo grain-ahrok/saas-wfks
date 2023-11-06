@@ -1,12 +1,25 @@
 import { Box, Typography } from '@mui/material'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import colorConfigs from '../../config/colorConfigs'
 import DomainItem from './DomainItem'
-import { domainTestList } from './DomainItemTestList'
 
-type Props = {}
 
-const DomainSettingPage = (props: Props) => {
+const DomainSettingPage = () => {
+  // TODO : app 저장소에서 불러오기
+
+  const [domainList, setData] = useState([]);
+  useEffect(() => {
+    const url = '/app/' + 1 + '/domain-list';
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data['result']);
+      })
+      .catch((error) => {
+        console.error('요청 중 오류 발생:', error);
+      });
+    }, []);
+
   return (
     <Box>
       <Box sx={{
@@ -29,7 +42,7 @@ const DomainSettingPage = (props: Props) => {
           도메인을 wf.awstest.piolink.net로 업데이트해야 합니다.
         </Typography>
       </Box>
-      {domainTestList.map((domain, index) => (
+      {domainList.map((domain, index) => (
         <DomainItem domain={domain}></DomainItem>
       ))}
     </Box>
