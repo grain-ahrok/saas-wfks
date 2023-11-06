@@ -1,11 +1,16 @@
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import DomainItem from './DomainItem'
 import DomainNoticeBox from './DomainNoticeBox'
+import colorConfigs from '../../config/colorConfigs'
+import DomainCreateModal from './DomainCreateModal'
 
 
 const DomainSettingPage = () => {
-  // TODO : app 저장소에서 불러오기
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const [domainList, setData] = useState([]);
   useEffect(() => {
@@ -22,7 +27,28 @@ const DomainSettingPage = () => {
 
   return (
     <Box>
-      <DomainNoticeBox/>
+        <Box sx={{
+          textAlign : "right",
+          marginBottom : "8px"
+        }}>
+          <Button sx={{
+            color : colorConfigs.button.blue,
+            backgroundColor : colorConfigs.button.white,
+            border : 1,
+            borderColor : colorConfigs.button.blue,
+            borderRadius : "40px",
+            paddingX : "32px",
+            margin : "4px",
+            "&: hover" : {
+            }
+          }}
+          onClick={openModal}
+          >
+            도메인 추가하기
+          </Button>
+          <DomainCreateModal isOpen={isModalOpen} closeModal={closeModal}/>
+      </Box>
+      <DomainNoticeBox></DomainNoticeBox>
       {domainList.map((domain, index) => (
         <DomainItem domain={domain}/>
       ))}
