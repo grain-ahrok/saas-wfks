@@ -1,16 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { DomainType } from '../../models/DomainType'
 import { Box, IconButton, Typography } from '@mui/material'
 import styleConfigs from '../../config/styleConfigs'
 import colorConfigs from '../../config/colorConfigs'
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import { activeStatus } from '../../enums/StatusEnum'
+import DomainUpdateModal from './DomainUpdateModal'
 
 type Props = {
     domain: DomainType
 }
 
 const DomainItem = ({ domain }: Props) => {
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+  
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
     return (
         <Box 
             sx={{
@@ -58,12 +65,16 @@ const DomainItem = ({ domain }: Props) => {
                 </Box>
                 
             </Box>
+
+
+            {/* domain 수정 및 삭제 버튼 */}
             <IconButton sx={{
-                width : "45px",
-                height : "45px"
-            }}>
+                width: "45px",
+                height: "45px"
+            }} onClick={openModal}>
                 <DriveFileRenameOutlineIcon/>
             </IconButton>
+            <DomainUpdateModal isOpen={isModalOpen} closeModal={closeModal}/>
         </Box>
     )
 }
