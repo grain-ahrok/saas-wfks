@@ -1,7 +1,8 @@
-# models.py
 from flask_sqlalchemy import SQLAlchemy
-#db 객체를 통해 SQLAlchemy 초기화
+from flask_bcrypt import Bcrypt
+
 db = SQLAlchemy()
+bcrypt = Bcrypt()
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -10,10 +11,29 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     domain_address = db.Column(db.String(255))
     IP_address = db.Column(db.String(15))
+    Port_number = db.Column(db.String(15))
     membership = db.Column(db.String(20))
-    
-#각 특성에 맞는 7개의 필드로 구성된 User 클래스
 
+    @classmethod
+    def create(cls, **kwargs):
+        hashed_password = bcrypt.generate_password_hash(kwargs['password']).decode('utf-8')
+        del kwargs['password']  # Remove plain text password from kwargs
+        kwargs['password'] = hashed_password
+        user = cls(**kwargs)
+        db.session.add(user)
+        db.session.commit()
+        return user
+
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        db.session.commit()
+
+    def change_password(self, new_password):
+        self.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
+        db.session.commit()
+        
+#각 특성에 맞는 7개의 필드로 구성된 User 클래스
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False)

@@ -2,10 +2,10 @@ from flask import Blueprint, request, jsonify, redirect, url_for
 from models import Admin
 from utils import bcrypt
 
-app = Blueprint('admin', __name__, url_prefix='/admin')
+admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 # 관리자 로그인 API
-@app.route('/login', methods=['POST'])
+@admin.route('/login', methods=['POST'])
 def admin_login():
     data = request.get_json()
     username = data.get('username')
@@ -24,7 +24,7 @@ def admin_login():
     else:
         return jsonify({"message": "Login failed. User not found."}), 401
 
-@app.route('/admin_page', methods=['GET'])
+@admin.route('/admin_page', methods=['GET'])
 def admin_page():
     # 관리자 페이지에 대한 로직을 여기에 추가
     return "Welcome to the admin page!"
