@@ -3,7 +3,7 @@ import { activeStatus } from "../enums/StatusEnum"
 export type DomainType = {
     id : number,
     ipVer : ipVer,
-    ipAddr : string,
+    ip : string,
     protocol? : protocol, 
     port? : number,
     status : activeStatus,

@@ -37,7 +37,7 @@ const DomainItem = ({ domain }: Props) => {
                         IP 주소
                     </Typography>
                     <Typography>
-                        {domain.ipAddr}
+                        {domain.ip}
                     </Typography>
                 </Box>
                 {domain.domain.map((item, index) => (
@@ -74,7 +74,7 @@ const DomainItem = ({ domain }: Props) => {
             }} onClick={openModal}>
                 <DriveFileRenameOutlineIcon/>
             </IconButton>
-            <DomainUpdateModal isOpen={isModalOpen} closeModal={closeModal}/>
+            <DomainUpdateModal isOpen={isModalOpen} closeModal={closeModal} domain={domain}/>
         </Box>
     )
 }

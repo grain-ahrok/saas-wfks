@@ -1,17 +1,68 @@
 import { Box, Button, Divider, Switch, TextField, Typography } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
 import ModalWrapper from '../../components/layout/ModalWrapper'
 import colorConfigs from '../../config/colorConfigs'
 import DomainNoticeBox from './DomainNoticeBox'
+import { DomainType } from '../../models/DomainType'
+import { activeStatus } from '../../enums/StatusEnum'
 
 type Props = {
   isOpen: boolean,
-  closeModal: any
+  closeModal: any,
+  domain: DomainType
 }
 
-const DomainUpdateModal = ({ isOpen, closeModal }: Props) => {
+const DomainUpdateModal = (props: Props) => {
+
+  const [ip, setIP] = useState(props.domain.ip);
+  const [port, setPort] = useState(props.domain.port);
+  const [domainName, setDomainName] = useState(props.domain.domain[0].name);
+  const [status, setStatus] = useState(props.domain.status === activeStatus.enable ? true : false)
+
+
+  function updateDomain() {
+    const url = '/app/' + 1 + '/domain-list';
+
+    let jsonData = {
+      id: props.domain.id,
+      ip: ip,
+      port: port,
+      status: status ? activeStatus.enable : activeStatus.disable,
+      domain: {
+        id: props.domain.domain[0].id,
+        name: props.domain.domain[0].name
+      }
+    }
+
+    fetch(url, { method: 'put', body: JSON.stringify(jsonData) })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.header.isSuccessful !== 'true') {
+          alert("다시 시도해주세요");
+        }
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error('요청 중 오류 발생:', error);
+      });
+  }
+
+  function deleteDomain() {
+    const url = '/app/' + 1 + '/domain-list';
+    fetch(url, {method : 'delete', body : JSON.stringify(props.domain)})
+      .then((response) => response.json())
+      .then((data) => {
+        if(data.header.isSuccessful !== 'true') {
+          alert("다시 시도해주세요");
+        }
+      })
+      .catch((error) => {
+        console.error('요청 중 오류 발생:', error);
+    });
+  }
+
   return (
-    <ModalWrapper isOpen={isOpen} closeModal={closeModal}>
+    <ModalWrapper isOpen={props.isOpen} closeModal={props.closeModal}>
       <Box sx={{
         padding : "20px",
         borderRadius : "24px",
@@ -27,25 +78,25 @@ const DomainUpdateModal = ({ isOpen, closeModal }: Props) => {
         <Box display="flex" padding="4px"> 
           <Typography width="20%">IP 주소</Typography>
           <Box width="80%" >
-            <TextField fullWidth size='small'></TextField>
+            <TextField fullWidth size='small' value={ip} onChange={(e) => setIP(e.target.value)}></TextField>
           </Box>
         </Box>
 
         <Box display="flex" padding="4px">
           <Typography width="20%">포트 번호</Typography>
-          <TextField size='small'></TextField>
+          <TextField size='small' value={port} onChange={(e) => setPort(Number(e.target.value))}></TextField>
         </Box>
 
         <Box display="flex" padding="4px">
           <Typography width="20%">도메인 주소</Typography>
           <Box width="80%">
-            <TextField fullWidth size='small'></TextField>
+            <TextField fullWidth size='small' value={domainName} onChange={(e) => setDomainName(e.target.value)}></TextField>
           </Box>
         </Box>
 
         <Box display="flex" padding="4px" >
           <Typography width="20%">상태</Typography>
-          <Switch defaultChecked/>
+          <Switch defaultChecked checked={status} onChange={(e) => setStatus(e.target.checked)}/>
         </Box>
 
         <Box sx={{
@@ -59,9 +110,12 @@ const DomainUpdateModal = ({ isOpen, closeModal }: Props) => {
             borderRadius : "40px",
             paddingX : "32px",
             margin : "4px"
-          }}>삭제하기</Button>
+          }}
+            onClick={deleteDomain}
+          >삭제하기</Button>
           
-          <Button sx={{
+          <Button
+            sx={{
             color : colorConfigs.button.white,
             backgroundColor : colorConfigs.button.blue,
             border : 1,
@@ -72,7 +126,9 @@ const DomainUpdateModal = ({ isOpen, closeModal }: Props) => {
             "&: hover" : {
               color : colorConfigs.button.blue
             }
-          }}>수정하기</Button>
+          }}
+            onClick={updateDomain}
+          >수정하기</Button>
         </Box>
       </Box>
     </ModalWrapper>
