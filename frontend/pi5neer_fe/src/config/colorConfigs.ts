@@ -14,8 +14,21 @@ const colorConfigs = {
         bg: "#FFFFFF",
         color : "#000"
     },
+    stauts : {
+        enable : "#33C468",
+        disable : "#9197B3"
+    },
+    button : {
+        red : "#FB2618",
+        blue : "#367FAF",
+        white : "#FFFFFF"
+    },
+    switch : {
+        enable : "#33C468"
+    },
     mainBg : "#eeeee",
-    red : "#ff0000"
+    noticeBoxBg : "#F1F5F9",
+    red : "#ff0000",
  };
 
  export default colorConfigs; 
