@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config
-from models import db, bcrypt
+from models import db, bcrypt, Config as DBConfig
 from routes.users import users
 from routes.customer import customer
 from routes.admin import Pi5neer
@@ -8,6 +8,8 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.config.from_obejct(DBConfig)
+
 db.init_app(app)
 bcrypt.init_app(app)
 
