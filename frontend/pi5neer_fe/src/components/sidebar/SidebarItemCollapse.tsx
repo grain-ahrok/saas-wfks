@@ -53,9 +53,7 @@ const SidebarItemCollapse = ({ item }: Props) => {
                     <List>
                         {item.child?.map((route, index) => (
                             route.sidebarProps ? (
-                                route.child ? null : (
-                                    <SidebarInsideItem item={route} key={index} />
-                                )
+                                <SidebarInsideItem item={route} key={index} />
                             ) : null
                         ))}
                     </List>
