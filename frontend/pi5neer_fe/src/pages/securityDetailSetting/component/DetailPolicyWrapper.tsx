@@ -1,11 +1,11 @@
 import React, { ReactNode, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { setAppState } from '../../redux/features/appSateSlice'
-import appRoutes from '../../routes/appRoutes';
 import { Box, Button } from '@mui/material';
-import colorConfigs from '../../config/colorConfigs';
-import { RootState } from '../../redux/store';
 import { Link } from 'react-router-dom';
+import { RootState } from '../../../redux/store';
+import { setAppState } from '../../../redux/features/appSateSlice';
+import appRoutes from '../../../routes/appRoutes';
+import colorConfigs from '../../../config/colorConfigs';
 
 type Props = {
   state?: string,
@@ -15,7 +15,6 @@ type Props = {
 const DetailPolicyWrapper = (props: Props) => {
   const { appState } = useSelector((state: RootState) => state.appState)
   const dispatch = useDispatch()
-
 
   useEffect(() => {
     if (props.state) {
@@ -48,7 +47,12 @@ const DetailPolicyWrapper = (props: Props) => {
         }
 
       </Box>
-      {props.children}
+      <Box sx={{
+        paddingY : "20px",
+        paddingX : "10px"
+      }}>
+        {props.children}
+      </Box>
     </Box>
   )
 }

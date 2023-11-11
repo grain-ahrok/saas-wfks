@@ -1,6 +1,8 @@
 import React from 'react'
 
-type Props = {}
+type Props = {
+  name : string,
+}
 
 const DirectoryListingPage = (props: Props) => {
   return (

@@ -3,8 +3,8 @@ import { RouteType } from "./config";
 import appRoutes from "./appRoutes";
 import { Route } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
-import DetailPolicyWrapper from "../pages/securityDetailSetting/DetailPolicyWrapper";
 import MainLayout from "../components/layout/MainLayout";
+import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
 
 const generateRoute = (): ReactNode => {
 

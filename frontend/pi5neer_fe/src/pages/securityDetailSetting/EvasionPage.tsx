@@ -1,6 +1,8 @@
 import React from 'react'
 
-type Props = {}
+type Props = {
+  name : string,
+}
 
 const EvasionPage = (props: Props) => {
   return (

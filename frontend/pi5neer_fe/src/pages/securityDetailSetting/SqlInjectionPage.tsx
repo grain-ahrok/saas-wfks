@@ -1,10 +1,18 @@
-import React from 'react'
+import { Box, Typography } from '@mui/material'
+import colorConfigs from '../../config/colorConfigs'
+import ActiveStatusBox from './component/ActiveStatusBox'
 
-type Props = {}
+type Props = {
+  name : string,
+}
 
 const SqlInjectionPage = (props: Props) => {
+  
+
   return (
-    <div>SqlInjectionPage</div> 
+    <Box>
+      <ActiveStatusBox name={props.name}></ActiveStatusBox>
+    </Box>
   )
 }
 

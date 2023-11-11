@@ -20,12 +20,12 @@ import AccessControlPage from "../pages/securityDetailSetting/AccessControlPage"
 import RequestFloodPage from "../pages/securityDetailSetting/RequestFloodPage";
 import CredentialStuffingPage from "../pages/securityDetailSetting/CredentialStuffingPage";
 import CookieProtectionPage from "../pages/securityDetailSetting/CookieProtectionPage";
-import BufferOverflowPage from "../pages/securityDetailSetting/BufferOverflowPage";
-import DirectoryListingPage from "../pages/securityDetailSetting/DirectoryListingPage";
 import ShellCodePage from "../pages/securityDetailSetting/ShellCodePage";
-import DetailPolicyWrapper from "../pages/securityDetailSetting/DetailPolicyWrapper";
 import SignUp from "../pages/auth/SignUp";
 import SignIn from "../pages/auth/SignIn";
+import DirectoryListingPage from "../pages/securityDetailSetting/DirectoryListingPage";
+import BufferOverflowPage from "../pages/securityDetailSetting/BufferOverflowPage";
+import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
 
 
 const appUserRoutes: RouteType[] = [
@@ -103,7 +103,7 @@ const appCustomerRoutes: RouteType[] = [
             },
             {
                 path: "/customers/security-settings/policy-details",
-                element: <DetailPolicyWrapper children={<SqlInjectionPage></SqlInjectionPage>}></DetailPolicyWrapper>,
+                element: <DetailPolicyWrapper children={<SqlInjectionPage name={"SQL-Injection"}></SqlInjectionPage>}></DetailPolicyWrapper>,
                 state: "security-settings.policy-details.sql-injection",
                 sidebarProps: {
                     displayText: "정책 상세 관리"
@@ -126,7 +126,7 @@ const appCustomerRoutes: RouteType[] = [
 const appPolicyDetailRoutes: RouteType[] = [
     {
         path: "/customers/security-settings/policy-details/sql-injection",
-        element: <SqlInjectionPage />,
+        element: <SqlInjectionPage name={"SQL-Injection"} />,
         state: "security-settings.policy-details.sql-injection",
         sidebarProps: {
             displayText: "SQL-Injection"
@@ -134,7 +134,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/url_regex",
-        element: <UrlRegxPage />,
+        element: <UrlRegxPage name={"URL 정규식 검사"} />,
         state: "security-settings.policy-details.url_regex",
         sidebarProps: {
             displayText: "URL 정규식 검사"
@@ -142,7 +142,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/xss",
-        element: <XssPage />,
+        element: <XssPage name={"XSS"} />,
         state: "security-settings.policy-details.xss",
         sidebarProps: {
             displayText: "XSS"
@@ -150,7 +150,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/directory_listing",
-        element: <DirectoryListingPage />,
+        element: <DirectoryListingPage name={"디렉토리 리스팅"} />,
         state: "security-settings.policy-details.directory_listing",
         sidebarProps: {
             displayText: "디렉토리 리스팅"
@@ -158,7 +158,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/shellcode",
-        element: <ShellCodePage />,
+        element: <ShellCodePage name={"쉘코드"} />,
         state: "security-settings.policy-details.shellcode",
         sidebarProps: {
             displayText: "쉘코드"
@@ -166,7 +166,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/up-download",
-        element: <UpDownloadPage />,
+        element: <UpDownloadPage name={"업/다운로드 검사"} />,
         state: "security-settings.policy-details.up-download",
         sidebarProps: {
             displayText: "업/다운로드 검사"
@@ -174,7 +174,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/request-flood",
-        element: <RequestFloodPage />,
+        element: <RequestFloodPage name={"과다 요청 제어"} />,
         state: "security-settings.policy-details.request-flood",
         sidebarProps: {
             displayText: "과다 요청 제어"
@@ -182,7 +182,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/access-control",
-        element: <AccessControlPage />,
+        element: <AccessControlPage name={"접근 제어"} />,
         state: "security-settings.policy-details.access-control",
         sidebarProps: {
             displayText: "접근 제어"
@@ -190,7 +190,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/evasion",
-        element: <EvasionPage />,
+        element: <EvasionPage name={"검사 회피"} />,
         state: "security-settings.policy-details.evasion",
         sidebarProps: {
             displayText: "검사 회피"
@@ -198,7 +198,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/credential-stuffing",
-        element: <CredentialStuffingPage />,
+        element: <CredentialStuffingPage name={"크리덴셜 스터프"} />,
         state: "security-settings.policy-details.credential-stuffing",
         sidebarProps: {
             displayText: "크리덴셜 스터프"
@@ -206,7 +206,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/cookie-protection",
-        element: <CookieProtectionPage />,
+        element: <CookieProtectionPage name={"쿠키 보호"} />,
         state: "security-settings.policy-details.cookie-protection",
         sidebarProps: {
             displayText: "쿠키 보호"
@@ -214,7 +214,7 @@ const appPolicyDetailRoutes: RouteType[] = [
     },
     {
         path: "/customers/security-settings/policy-details/buffer-overflow",
-        element: <BufferOverflowPage />,
+        element: <BufferOverflowPage name={"버퍼 오버 플로우"} />,
         state: "security-settings.policy-details.buffer-overflow",
         sidebarProps: {
             displayText: "버퍼 오버 플로우"

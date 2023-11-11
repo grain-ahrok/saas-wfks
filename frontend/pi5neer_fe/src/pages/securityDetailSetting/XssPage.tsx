@@ -1,6 +1,8 @@
 import React from 'react'
 
-type Props = {}
+type Props = {
+  name : string,
+}
 
 const XssPage = (props: Props) => {
   return (
