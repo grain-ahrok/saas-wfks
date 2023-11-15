@@ -11,18 +11,46 @@ import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import SecurityLogPage from "../pages/securityLog/SecurityLogPage";
 import BlockedIpPage from "../pages/securitySetting/BlockedIpPage";
-import DetailPolicyPage from "../pages/securitySetting/DetailPolicyPage";
+import SqlInjectionPage from "../pages/securityDetailSetting/SqlInjectionPage";
+import UrlRegxPage from "../pages/securityDetailSetting/UrlRegxPage";
+import XssPage from "../pages/securityDetailSetting/XssPage";
+import UpDownloadPage from "../pages/securityDetailSetting/UpDownloadPage";
+import EvasionPage from "../pages/securityDetailSetting/EvasionPage";
+import AccessControlPage from "../pages/securityDetailSetting/AccessControlPage";
+import RequestFloodPage from "../pages/securityDetailSetting/RequestFloodPage";
+import CredentialStuffingPage from "../pages/securityDetailSetting/CredentialStuffingPage";
+import CookieProtectionPage from "../pages/securityDetailSetting/CookieProtectionPage";
+import ShellCodePage from "../pages/securityDetailSetting/ShellCodePage";
+import SignUp from "../pages/auth/SignUp";
+import SignIn from "../pages/auth/SignIn";
+import DirectoryListingPage from "../pages/securityDetailSetting/DirectoryListingPage";
+import BufferOverflowPage from "../pages/securityDetailSetting/BufferOverflowPage";
+import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
 
 
-const appRoutes: RouteType[] = [
+const appUserRoutes: RouteType[] = [
+    {
+        path: "/users/signup",
+        state: "signup",
+        element: <SignUp />
+    },
+    {
+        path: "/users/signin",
+        state: "signin",
+        element: <SignIn />
+    }
+]
+
+const appCustomerRoutes: RouteType[] = [
     {
         index: true,
         element: <DashboardPage />,
         state: "dashboard"
     },
     {
+        index: true,
         path: "/customers/dashboard",
-        element: <DashboardPage/>,
+        element: <DashboardPage />,
         state: "dashboard",
         sidebarProps: {
             displayText: "대시보드",
@@ -30,6 +58,7 @@ const appRoutes: RouteType[] = [
         }
     },
     {
+        index: true,
         path: "/customers/security-logs",
         element: <SecurityLogPage />,
         state: "security-logs",
@@ -39,6 +68,7 @@ const appRoutes: RouteType[] = [
         }
     },
     {
+        index: false,
         path: "/customers/security-settings",
         element: <SecuritySettingLayout />,
         state: "security-settings",
@@ -47,11 +77,6 @@ const appRoutes: RouteType[] = [
             icon: <AdminPanelSettingsIcon />
         },
         child: [
-            {
-                index: true,
-                element: <ExceptionUrlPage />,
-                state: "security-settings.index",
-            },
             {
                 path: "/customers/security-settings/exception-urls",
                 element: <ExceptionUrlPage />,
@@ -78,11 +103,11 @@ const appRoutes: RouteType[] = [
             },
             {
                 path: "/customers/security-settings/policy-details",
-                element: <DetailPolicyPage />,
-                state: "security-settings.policy-details",
+                element: <DetailPolicyWrapper children={<SqlInjectionPage name={"SQL-Injection"}></SqlInjectionPage>}></DetailPolicyWrapper>,
+                state: "security-settings.policy-details.sql-injection",
                 sidebarProps: {
                     displayText: "정책 상세 관리"
-                }
+                },
             }
         ]
     },
@@ -96,5 +121,112 @@ const appRoutes: RouteType[] = [
         }
     }
 ]
+
+
+const appPolicyDetailRoutes: RouteType[] = [
+    {
+        path: "/customers/security-settings/policy-details/sql-injection",
+        element: <SqlInjectionPage name={"SQL-Injection"} />,
+        state: "security-settings.policy-details.sql-injection",
+        sidebarProps: {
+            displayText: "SQL-Injection"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/url_regex",
+        element: <UrlRegxPage name={"URL 정규식 검사"} />,
+        state: "security-settings.policy-details.url_regex",
+        sidebarProps: {
+            displayText: "URL 정규식 검사"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/xss",
+        element: <XssPage name={"XSS"} />,
+        state: "security-settings.policy-details.xss",
+        sidebarProps: {
+            displayText: "XSS"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/directory_listing",
+        element: <DirectoryListingPage name={"디렉토리 리스팅"} />,
+        state: "security-settings.policy-details.directory_listing",
+        sidebarProps: {
+            displayText: "디렉토리 리스팅"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/shellcode",
+        element: <ShellCodePage name={"쉘코드"} />,
+        state: "security-settings.policy-details.shellcode",
+        sidebarProps: {
+            displayText: "쉘코드"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/up-download",
+        element: <UpDownloadPage name={"업/다운로드 검사"} />,
+        state: "security-settings.policy-details.up-download",
+        sidebarProps: {
+            displayText: "업/다운로드 검사"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/request-flood",
+        element: <RequestFloodPage name={"과다 요청 제어"} />,
+        state: "security-settings.policy-details.request-flood",
+        sidebarProps: {
+            displayText: "과다 요청 제어"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/access-control",
+        element: <AccessControlPage name={"접근 제어"} />,
+        state: "security-settings.policy-details.access-control",
+        sidebarProps: {
+            displayText: "접근 제어"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/evasion",
+        element: <EvasionPage name={"검사 회피"} />,
+        state: "security-settings.policy-details.evasion",
+        sidebarProps: {
+            displayText: "검사 회피"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/credential-stuffing",
+        element: <CredentialStuffingPage name={"크리덴셜 스터프"} />,
+        state: "security-settings.policy-details.credential-stuffing",
+        sidebarProps: {
+            displayText: "크리덴셜 스터프"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/cookie-protection",
+        element: <CookieProtectionPage name={"쿠키 보호"} />,
+        state: "security-settings.policy-details.cookie-protection",
+        sidebarProps: {
+            displayText: "쿠키 보호"
+        }
+    },
+    {
+        path: "/customers/security-settings/policy-details/buffer-overflow",
+        element: <BufferOverflowPage name={"버퍼 오버 플로우"} />,
+        state: "security-settings.policy-details.buffer-overflow",
+        sidebarProps: {
+            displayText: "버퍼 오버 플로우"
+        }
+    },
+
+]
+
+const appRoutes = {
+    appUserRoutes: appUserRoutes,
+    appCustomerRoutes: appCustomerRoutes,
+    appPolicyDetailRoutes: appPolicyDetailRoutes
+}
 
 export default appRoutes;

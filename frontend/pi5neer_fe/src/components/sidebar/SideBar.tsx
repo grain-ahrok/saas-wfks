@@ -6,8 +6,11 @@ import SidebarItem from "./SidebarItem";
 import SidebarItemCollapse from "./SidebarItemCollapse";
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import styleConfigs from "../../config/styleConfigs";
+import { RouteType } from "../../routes/config";
 
 const SideBar = () => {
+   
+   const customers : RouteType[] = appRoutes.appCustomerRoutes
      return (
         <Drawer 
             variant="permanent"
@@ -39,15 +42,15 @@ const SideBar = () => {
                      </Box>
                   </Stack>
                </Toolbar>
-               {appRoutes.map((route, index) => (
-                  route.sidebarProps ? (
-                     route.child ? (
-                        <SidebarItemCollapse item={route} key={index}/>
-                     ) : (
-                        <SidebarItem item={route} key={index}/>
-                     )
-                  ) : null
-               ))}
+              { customers ? customers.map((route, index) => (
+                    route.sidebarProps ? (
+                       route.child ? (
+                          <SidebarItemCollapse item={route} key={index} />
+                       ) : (
+                          <SidebarItem item={route} key={index} />
+                       )
+                    ) : null
+                 )) : null }
             </List>
          </Drawer>
      )

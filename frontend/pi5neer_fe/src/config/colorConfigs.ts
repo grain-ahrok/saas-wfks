@@ -21,12 +21,18 @@ const colorConfigs = {
     button : {
         red : "#FB2618",
         blue : "#367FAF",
+        pioBg : "#18A0FB",
         white : "#FFFFFF"
     },
     switch : {
         enable : "#33C468"
     },
-    mainBg : "#eeeee",
+    warning : {
+        high : "#FB2618",
+        medium : "#FFAF38",
+        low : "#EFD650",
+    },
+    mainBg : "#FFFFFF",
     noticeBoxBg : "#F1F5F9",
     red : "#ff0000",
  };

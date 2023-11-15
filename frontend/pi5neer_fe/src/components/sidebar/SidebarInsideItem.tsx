@@ -23,8 +23,8 @@ const SidebarInsideItem = ({ item }: Props) => {
                 }}>
                 <Typography sx={{
                     color: colorConfigs.sidebar.unselectedColor,
-                    textDecoration: appState === item.state ? "underline" : "none",
-                    fontWeight: appState === item.state ? "700" : "400",
+                    textDecoration: appState.split(".")[1] === item.state.split(".")[1] ? "underline" : "none",
+                    fontWeight: appState.split(".")[1] === item.state.split(".")[1] ? "700" : "400",
                     fontSize : "14px"
                 }}>
                     {item.sidebarProps.displayText}
