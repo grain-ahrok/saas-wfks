@@ -13,7 +13,7 @@ type Props = {
 };
 
 const DetailPolicyWrapper = (props: Props) => {
-  const { appState } = useSelector((state: RootState) => state.appState)
+  const { appState } = useSelector((state: RootState) => state.appState);
   const dispatch = useDispatch()
 
   useEffect(() => {
