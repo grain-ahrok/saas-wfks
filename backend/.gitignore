@@ -8,3 +8,6 @@ server.py
 instance/
 
 
+test.py
+
+/migrations

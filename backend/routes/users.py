@@ -1,15 +1,28 @@
 from flask import Blueprint, request, jsonify,session
-from models import db, User
-from utils import bcrypt,login_with_external_server
+from models.user import User
+from models import *
+from utils import *
+import urllib3
+import automic_setting
 
 users = Blueprint('users', __name__, url_prefix='/users')
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
 @users.route('/signup', methods=['POST'])
 def register():
     data = request.get_json()
-    user = User.create(**data)
+    user_data = {
+        "companyName":data.get('companyName'),
+        "email":data.get('email'),
+        "password":data.get('password'),
+        "membership":data.get('membership')
+    }
+    user = User.create(**user_data)
+    automic_setting.automic_setting(data,user.id)
+    
+    
     return jsonify({"message": "User registered successfully.", "user_id": user.id}), 201
-    # /kui/api/v3/system/account/manager/user_list waf사이트 아이디 생성 API
+    
 @users.route('/signin', methods=['POST'])
 def login():
     data = request.get_json()
@@ -22,13 +35,13 @@ def login():
         if user.membership == 'Basic':
             try:
                 #토큰 생성
-                access_token, refresh_token = login_with_external_server()
+                token = generate_token()
 
-                if access_token and refresh_token:
-                    session['token'] = access_token
-                    session['refresh_token'] = refresh_token
-                    session['id'] = user.id
-                    session['ip'] = user.IP_address
+                if token:
+                    session['token'] = token
+                    session['user_id'] = user.id
+                    session['ip'] = data.get('IP_address')
+                    session['domain_address'] = data.get('doamin_address')
                     return jsonify({"id": user.id, "message": "Login successful."}), 200
                 else:
                     return jsonify({"message": "Login failed. External server error."}), 401
@@ -49,9 +62,6 @@ def get_all_users():
             'companyName': user.companyName,
             'email': user.email,
             'password': user.password,
-            'domain_address': user.domain_address,
-            'IP_address': user.IP_address,
-            'Port_number': user.Port_number,
             'membership': user.membership
         } for user in users
     ]
@@ -66,9 +76,6 @@ def get_user(user_id):
             'companyName': user.companyName,
             'email': user.email,
             'password': user.password,
-            'domain_address': user.domain_address,
-            'IP_address': user.IP_address,
-            'Port_number': user.Port_number,
             'membership': user.membership
         }
         return jsonify(user_data), 200
@@ -98,7 +105,12 @@ def change_password(user_id):
 
 @users.route('/logout', methods=['POST'])
 def logout():
-    # Implement your logout logic here
+    if 'user_id' in session:
+        # Clear the user's session data
+        session.pop('user_id', None)
+        session.pop('token', None)
+        session.pop('ip', None)
+        session.pop('domain_address', None)
     return jsonify({'message': 'Logout successful.'}), 200
 
 @users.route('/<int:user_id>', methods=['DELETE'])
@@ -110,4 +122,7 @@ def delete_user(user_id):
         return jsonify({"message": f"User {user_id} deleted successfully."}), 200
     else:
         return jsonify({"error": "User not found."}), 404
+    
+
+    
     
