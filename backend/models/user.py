@@ -12,7 +12,7 @@ class User(db.Model):
     created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     # User 모델과 UserApplication 모델 간의 관계 (일대다)
-    applications = db.relationship('UserApplication', backref='user', lazy=True)
+    user_applications = db.relationship('UserApplication', backref='user', lazy=True)
 
 
     @classmethod
@@ -29,6 +29,18 @@ class User(db.Model):
         for key, value in kwargs.items():
             setattr(self, key, value)
         db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def get_all_domains(cls):
+        return cls.query.all()
+
+    @classmethod
+    def get_domain_by_id(cls, domain_id):
+        return cls.query.get(domain_id)
 
     def change_password(self, new_password):
         self.password = bcrypt.generate_password_hash(new_password).decode('utf-8')

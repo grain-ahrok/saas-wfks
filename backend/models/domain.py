@@ -17,3 +17,20 @@ class Domain(db.Model):
         db.session.add(domin)
         db.session.commit()
         return domin
+    
+    def update(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def get_all_domains(cls):
+        return cls.query.all()
+
+    @classmethod
+    def get_domain_by_id(cls, domain_id):
+        return cls.query.get(domain_id)

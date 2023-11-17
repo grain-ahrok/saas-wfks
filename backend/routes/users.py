@@ -20,7 +20,6 @@ def register():
     user = User.create(**user_data)
     automic_setting.automic_setting(data,user.id)
     
-    
     return jsonify({"message": "User registered successfully.", "user_id": user.id}), 201
     
 @users.route('/signin', methods=['POST'])

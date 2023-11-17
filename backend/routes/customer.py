@@ -3,6 +3,7 @@ import requests
 from utils import make_api_request
 import json
 import urllib3
+from models.domain import Domain,datetime
 
 customer = Blueprint('customer', __name__, url_prefix='/customer')
 
@@ -51,20 +52,67 @@ def security_logs():
     else:
         return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
 
+@customer.route('/domain-settings', methods=['GET', 'PUT', 'POST'])
+def manage_domain_settings():
+    url = f"https://wf.awstest.piolink.net:8443/kui/api/v3/{session['user_application_id']}/general/domain_list"
+    if request.method == 'GET':
+        response = make_api_request(url,method='GET')
+        return jsonify(response.json())
+    elif request.method == 'PUT':
+        data = request.json
+        data = {
+            "status": data.get("status"),
+            "domain": data.get("domain"),
+            "desc": data.get("desc")
+        }
+        domain_id = data.get("id")
+        domain = Domain.get_domain_by_id(domain_id)
+        
+        response = make_api_request(url, method='POST', data=data)
+        if response.status_code == 200:
+            if domain:
+                domain.update(
+                    status=data.get("status"),
+                    name=data.get("domain"),
+                    desc=data.get("desc")
+                )
+                return jsonify({"message": f"Domain with id {domain_id} updated successfully."}), 200
+            else:
+                return jsonify({"error": f"Domain with id {domain_id} not found."}), 404
+        return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+    
+    elif request.method == 'POST':
+        data = request.json
+        id = data.get("id")
+        main_ip = data.get("main_ip")
+        setting_ip = data.get("setting_ip")
+        port_number = data.get("port_number")
+        domain = data.get("domain")
+        status = data.get("status")
+        desc = data.get("desc")
+        data = {
+            "status": status,
+            "domain": domain,
+            "desc": desc
+        }
+        response = make_api_request(url, method='POST', data=data)
+        
 
+        if response.status_code == 200:
+            
+            new_domain = Domain.create(
+                name=data.get("domain"),
+                user_application_id=session['user_application_id'],
+                updated_at=datetime.utcnow()
+            )
 
+        return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
 
-# def send_api_request(url, method='GET', data=None):
-#     headers = {"Authorization": "token "+session['token']}
-#     if method == 'GET':
-#         response = requests.get(url, headers=headers, verify=False)
-#     elif method == 'PUT':
-#         response = requests.put(url, headers=headers, json=data, verify=False)
-#     elif method == 'POST':
-#         response = requests.post(url, headers=headers, json=data, verify=False)
-#     return response.json()
-
-
+    elif request.method == 'DELETE':
+        data = request.json
+        id = data.get("id")
+        data = {"id": id}    
+        return jsonify(make_api_request(url, method='DELETE', data=data))  
 
 
 # @customer.route('/security-settings/exception-urls', methods=['GET','POST','PUT','DELETE'])
@@ -240,37 +288,7 @@ def security_logs():
 # def get_policy_infomation_signature(policy_name):
 #     return jsonify(utils.get_policy_information())
 
-# @customer.route('/domain-settings', methods=['GET', 'PUT', 'POST'])
-# def manage_domain_settings():
-#     if request.method == 'GET':
-#         url = api_base_url + f"{session['id']}/general/domain_list"
-#         return jsonify(send_api_request(url, method='GET'))
-#     elif request.method == 'PUT':
-#         data = request.json
-#         id = data.get("id")
-#         data = {
-#             "status": data.get("status"),
-#             "domain": data.get("domain"),
-#             "desc": data.get("desc")
-#         }
-#         url = api_base_url + f"{session['id']}/general/domain_list"
-#         return jsonify(send_api_request(url, method='PUT', data=data))
-#     elif request.method == 'POST':
-#         data = request.json
-#         id = data.get("id")
-#         main_ip = data.get("main_ip")
-#         setting_ip = data.get("setting_ip")
-#         port_number = data.get("port_number")
-#         domain = data.get("domain")
-#         setting_domain = data.get("setting_domain")
-#         desc = data.get("desc")
-#         data = {
-#             "status": "enable",
-#             "domain": domain,
-#             "desc": desc
-#         }
-#         url = api_base_url + "/app"
-#         return jsonify(send_api_request(url, method='POST', data=data))  
+
 
 
 

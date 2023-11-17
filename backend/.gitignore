@@ -9,5 +9,5 @@ instance/
 
 
 test.py
-
+.env
 /migrations

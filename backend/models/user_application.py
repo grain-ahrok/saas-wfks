@@ -11,10 +11,10 @@ class UserApplication(db.Model):
     ip_addr = db.Column(db.String(40), default='0.0.0.0')
     port = db.Column(db.Integer, default=80)
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
     security_policy_id = db.Column(db.Integer, db.ForeignKey('security_policy.id'), nullable=False)
-    # UserApplication 모델과 User 모델 간의 관계 (다대일)
-    user = db.relationship('User', backref=db.backref('user_applications', lazy=True))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Correct the foreign key reference
+    user_rel = db.relationship('User', backref='user_application')  # Change the backref name
 
     @classmethod
     def create(cls, **kwargs):
@@ -27,3 +27,15 @@ class UserApplication(db.Model):
         for key, value in kwargs.items():
             setattr(self, key, value)
         db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    @classmethod
+    def get_all_domains(cls):
+        return cls.query.all()
+
+    @classmethod
+    def get_domain_by_id(cls, domain_id):
+        return cls.query.get(domain_id)

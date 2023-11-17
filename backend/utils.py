@@ -25,6 +25,8 @@ def make_api_request(url, method="GET", headers=None, data=None):
             response = requests.post(url, headers=headers, json=data, verify=False)
         elif method == "PUT":
             response = requests.put(url, headers=headers, json=data, verify=False)
+        elif method == "DELETE":
+            response = requests.delete(url, headers=headers, json=data, verify=False)
         else:
             raise ValueError(f"Unsupported HTTP method: {method}")
 
