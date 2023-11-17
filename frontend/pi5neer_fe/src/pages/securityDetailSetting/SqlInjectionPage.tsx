@@ -38,6 +38,24 @@ function createData (
   return {id, warning, title, color}
 }
 
+const rows = [
+  createData(1, 3, 'alter를 이용한 SQL Injection 공격'),
+  createData(1, 3, 'SQL Injection을 이용하여 CMD 쉘을 직접 제어 하기 위한 공격문1'),
+  createData(1, 3, 'delete from을 이용한 SQL Injection 공격'),
+  createData(1, 2, 'SQL Injection을 사용하여 웹 쉘을 생성하려는 방법'),
+  createData(1, 1, 'RANDOMBLOB 함수를 이용한 Time-based Blind Injection'),
+  createData(1, 3, 'alter를 이용한 SQL Injection 공격'),
+  createData(1, 3, 'SQL Injection을 이용하여 CMD 쉘을 직접 제어 하기 위한 공격문1'),
+  createData(1, 3, 'delete from을 이용한 SQL Injection 공격'),
+  createData(1, 2, 'SQL Injection을 사용하여 웹 쉘을 생성하려는 방법'),
+  createData(1, 1, 'RANDOMBLOB 함수를 이용한 Time-based Blind Injection'),
+  createData(1, 3, 'alter를 이용한 SQL Injection 공격'),
+  createData(1, 3, 'SQL Injection을 이용하여 CMD 쉘을 직접 제어 하기 위한 공격문1'),
+  createData(1, 3, 'delete from을 이용한 SQL Injection 공격'),
+  createData(1, 2, 'SQL Injection을 사용하여 웹 쉘을 생성하려는 방법'),
+  createData(1, 1, 'RANDOMBLOB 함수를 이용한 Time-based Blind Injection'),
+];
+
 
 const SqlInjectionPage = (props: Props) => {
 
