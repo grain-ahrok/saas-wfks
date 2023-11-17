@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, redirect, url_for
-from models import Admin
+from models.admin import Admin
 from utils import bcrypt
 
 Pi5neer = Blueprint('admin', __name__, url_prefix='/Pi5neer')
