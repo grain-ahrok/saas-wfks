@@ -41,6 +41,7 @@ def login():
                     session['user_id'] = user.id
                     session['ip'] = data.get('IP_address')
                     session['domain_address'] = data.get('doamin_address')
+                    #session['app_id'] = 
                     return jsonify({"id": user.id, "message": "Login successful."}), 200
                 else:
                     return jsonify({"message": "Login failed. External server error."}), 401

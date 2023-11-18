@@ -12,7 +12,7 @@ class User(db.Model):
     created_at = db.Column(db.TIMESTAMP, default=datetime.utcnow)
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     # User 모델과 UserApplication 모델 간의 관계 (일대다)
-    user_applications = db.relationship('UserApplication', backref='user', lazy=True)
+    user_applications = db.relationship('UserApplication', back_populates='user', overlaps="user,user_applications")
 
 
     @classmethod

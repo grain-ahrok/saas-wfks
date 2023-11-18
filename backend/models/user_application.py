@@ -13,9 +13,10 @@ class UserApplication(db.Model):
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     security_policy_id = db.Column(db.Integer, db.ForeignKey('security_policy.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # Correct the foreign key reference
-    user_rel = db.relationship('User', backref='user_application')  # Change the backref name
-
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', back_populates='user_applications', overlaps="user,user_applications")
+    
+    
     @classmethod
     def create(cls, **kwargs):
         application = cls(**kwargs)
