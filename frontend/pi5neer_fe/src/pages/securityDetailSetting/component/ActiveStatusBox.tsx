@@ -1,15 +1,20 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { securityStatus } from '../../../enums/StatusEnum';
 import colorConfigs from '../../../config/colorConfigs';
 
 type Props = {
-    name : string
+    name : string,
+    status : string,
+    onValueChange: (value: string) => void;
 }
 
 const ActiveStatusBox = (props: Props) => {
 
-    const [value, setValue] = useState(securityStatus.excpetion.toString());
+    function handleRadioChange(newValue : string) {
+        props.onValueChange(newValue);
+      };
+
     return (
         <Box sx={{
             backgroundColor: colorConfigs.noticeBoxBg,
@@ -33,9 +38,8 @@ const ActiveStatusBox = (props: Props) => {
                 <FormControl>
                     <RadioGroup
                         aria-labelledby="demo-controlled-radio-buttons-group"
-                        value={value}
-                        onChange={(e) => setValue(e.target.value.toString())}
-                    >
+                        value={props.status}
+                        onChange={(e => handleRadioChange(e.target.value.toString()))}>
                         <Box display="flex">
                             <Box sx={{
                                 padding: "18px"
