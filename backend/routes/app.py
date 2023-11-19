@@ -316,6 +316,7 @@ def get_policy_details(security_policy_id,policy_name):
         policy_data_extractors = json.load(json_file)
     setting_names =  policy_data_extractors[policy_name]
     token = generate_token()
+    
     headers = {'Authorization': 'token ' + token}
     if request.method == 'GET':
         result = {'result': {'status': 'unknown'}}
@@ -359,18 +360,54 @@ def get_policy_details(security_policy_id,policy_name):
                 ex_url = f'{url}/{setting_name}'
                 response = make_api_request(ex_url, "GET", headers)
                 security_policy_json = response.json()
-                
-                updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)}
-                response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
+                if policy_name == 'credential_stuffing':
+                    for key in security_policy_json:
+                        if key == 'action':
+                            security_policy_json[key] = status
+                    print(security_policy_json)
+                    response = make_api_request(ex_url,method='PUT',headers=headers,data=security_policy_json)
+                else:
+                    if setting_name == "adv_options":
+                        # 주어진 파라미터를 추출
+                        session_user_define_time = request.args.get('session_user_define_time')
+                        session_request_count = request.args.get('session_request_count')
+                        proxy_user_define_time = request.args.get('proxy_user_define_time')
+                        proxy_request_count = request.args.get('proxy_request_count')
+
+                        # 기존 코드에서 "_status"로 끝나는 키와 특정 키들에 대한 값을 추출
+                        keys_to_include = ["session_user_define_time", "proxy_request_count", "session_request_count", "proxy_user_define_time"]
+                        updated_data = {}
+
+                        for key in security_policy_json:
+                            if key.endswith("_status"):
+                                # status 값이 있으면 해당 키를 status 값으로 교체
+                                security_policy_json[key] = status
+
+                        # 나머지 키들에 대해서도 동일한 로직 유지
+                        for key in keys_to_include:
+                            request_value = locals().get(key)
+                            if request_value is not None:
+                                # security_policy_json에서 해당 키를 파라미터 값으로 교체
+                                security_policy_json[key] = int(request_value)
+                                
+                        print(security_policy_json)
+                        response = make_api_request(ex_url,method='PUT',headers=headers,data=security_policy_json)
+                        
+                    else:
+                        updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)}
+                        response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
         else:
             ex_url = f'{url}/{setting_names}'
             response = make_api_request(ex_url, "GET", headers)
             security_policy_json = response.json()
             if setting_names == 'sig_list':
                 updated_data = [{"id": item.get("id"), "status": status , "block_id": item.get("block_id")} for item in security_policy_json]
+                response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
             elif isinstance(security_policy_json, dict):
-                updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)} 
-            response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
+                for key in security_policy_json:
+                    if key.endswith("_status") :
+                        security_policy_json[key] = status  
+                response = make_api_request(ex_url,method='PUT',headers=headers,data=security_policy_json)
         return response.json()
 
 
