@@ -3,6 +3,7 @@ from config import Config
 from routes.users import users
 from routes.app import app as route_app
 from routes.admin import Pi5neer
+from routes.security_policy import security_policy_
 from flask_cors import CORS
 from models import db, bcrypt
 from models import *  
@@ -27,6 +28,7 @@ bcrypt.init_app(app)
 app.register_blueprint(users)
 app.register_blueprint(route_app)
 app.register_blueprint(Pi5neer)
+app.register_blueprint(security_policy_)
 
 # Configure CORS    
 CORS(app, origins='http://127.0.0.1:3000', supports_credentials=True)

@@ -6,7 +6,9 @@ import urllib3
 from models.domain import Domain,datetime
 from models.log import Log
 from models.user_application import UserApplication
+from models.security_policy import SecurityPolicy
 import base64
+
 app = Blueprint('app', __name__, url_prefix='/app')
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
@@ -306,110 +308,6 @@ def manage_domain_settings(app_id):
             return response.json()  
         else:
             return jsonify({"error": "도메인 삭제에 실패하셨습니다.."}), 500
-
-
-@app.route('/security_policy/<int:security_policy_id>/<policy_name>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def get_policy_details(security_policy_id,policy_name):
-    url = f'https://wf.awstest.piolink.net:8443/api/v3/security_policy/{security_policy_id}/{policy_name}'
-    filename = 'backend/json/security_policy_name.json'
-    with open(filename, 'r') as json_file:
-        policy_data_extractors = json.load(json_file)
-    setting_names =  policy_data_extractors[policy_name]
-    token = generate_token()
-    
-    headers = {'Authorization': 'token ' + token}
-    if request.method == 'GET':
-        result = {'result': {'status': 'unknown'}}
-        if isinstance(setting_names, list):
-            for setting_name in setting_names:
-                ex_url = f'{url}/{setting_name}'
-                response = make_api_request(ex_url,method='GET',headers=headers)
-                data = response.json()
-                if policy_name == 'credential_stuffing':
-                    result['result'][setting_name] = data
-                    result['result']['status'] = data.get('action', 'unknown')
-                   
-                else:
-                    status_key_value_pair = next((item for item in data.items() if item[0].endswith("_status")), None)
-                    if status_key_value_pair:
-                        _, status_value = status_key_value_pair
-                    result['result'][setting_name] = data
-                    result['result']['status'] = status_value
-           
-            return result
-                 
-        else:
-            url = f'{url}/{setting_names}'
-            response = make_api_request(url,method='GET',headers=headers)
-            data = response.json()
-            result['result'][setting_names] = data
-            if setting_names == 'sig_list':
-                result['result']['status'] = data[0]['status']
-            else:
-                status_key_value_pair = next((item for item in data.items() if item[0].endswith("_status")), None)
-                if status_key_value_pair:
-                    _, status_value = status_key_value_pair
-                result['result']['status'] = status_value
-            return result
-        
-    elif request.method == 'PUT':     
-        data = request.json
-        status = data.get('status')
-        if isinstance(setting_names, list):
-            for setting_name in setting_names:
-                ex_url = f'{url}/{setting_name}'
-                response = make_api_request(ex_url, "GET", headers)
-                security_policy_json = response.json()
-                if policy_name == 'credential_stuffing':
-                    for key in security_policy_json:
-                        if key == 'action':
-                            security_policy_json[key] = status
-                    print(security_policy_json)
-                    response = make_api_request(ex_url,method='PUT',headers=headers,data=security_policy_json)
-                else:
-                    if setting_name == "adv_options":
-                        # 주어진 파라미터를 추출
-                        session_user_define_time = request.args.get('session_user_define_time')
-                        session_request_count = request.args.get('session_request_count')
-                        proxy_user_define_time = request.args.get('proxy_user_define_time')
-                        proxy_request_count = request.args.get('proxy_request_count')
-
-                        # 기존 코드에서 "_status"로 끝나는 키와 특정 키들에 대한 값을 추출
-                        keys_to_include = ["session_user_define_time", "proxy_request_count", "session_request_count", "proxy_user_define_time"]
-                        updated_data = {}
-
-                        for key in security_policy_json:
-                            if key.endswith("_status"):
-                                # status 값이 있으면 해당 키를 status 값으로 교체
-                                security_policy_json[key] = status
-
-                        # 나머지 키들에 대해서도 동일한 로직 유지
-                        for key in keys_to_include:
-                            request_value = locals().get(key)
-                            if request_value is not None:
-                                # security_policy_json에서 해당 키를 파라미터 값으로 교체
-                                security_policy_json[key] = int(request_value)
-                                
-                        print(security_policy_json)
-                        response = make_api_request(ex_url,method='PUT',headers=headers,data=security_policy_json)
-                        
-                    else:
-                        updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)}
-                        response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
-        else:
-            ex_url = f'{url}/{setting_names}'
-            response = make_api_request(ex_url, "GET", headers)
-            security_policy_json = response.json()
-            if setting_names == 'sig_list':
-                updated_data = [{"id": item.get("id"), "status": status , "block_id": item.get("block_id")} for item in security_policy_json]
-                response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
-            elif isinstance(security_policy_json, dict):
-                for key in security_policy_json:
-                    if key.endswith("_status") :
-                        security_policy_json[key] = status  
-                response = make_api_request(ex_url,method='PUT',headers=headers,data=security_policy_json)
-        return response.json()
-
 
 
 # @app.route('/security-settings/exception-urls', methods=['GET','POST','PUT','DELETE'])

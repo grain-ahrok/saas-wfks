@@ -1,6 +1,7 @@
 # security_policy.py
 from . import db
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
 # security_policy.py
 class SecurityPolicy(db.Model):
@@ -48,11 +49,26 @@ class SecurityPolicy(db.Model):
         db.session.commit()
 
     @classmethod
-    def get_all_domains(cls):
+    def get_all_security_policy(cls):
         return cls.query.all()
 
     @classmethod
-    def get_domain_by_id(cls, domain_id):
-        return cls.query.get(domain_id)
+    def get_security_policy_by_id(cls, security_policy_id):
+        return cls.query.get(security_policy_id)
 
-
+    def update_security_policy_by_wf_id(self, wf_security_policy_id, **kwargs):
+        security_policy = self.query.filter_by(wf_security_policy_id=wf_security_policy_id).first()
+        if security_policy:
+            try:
+                for key, value in kwargs.items():
+                    setattr(security_policy, key, value)
+                db.session.commit()
+                return security_policy
+            except IntegrityError as e:
+                db.session.rollback()
+                db.session.close()
+                print(f"An error occurred while updating security policy: {str(e)}")
+                raise  # Re-raise the exception after logging
+        else:
+            print(f"No security policy found with wf_security_policy_id: {wf_security_policy_id}")
+            return None
