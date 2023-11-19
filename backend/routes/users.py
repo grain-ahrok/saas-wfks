@@ -126,16 +126,15 @@ def delete_user(user_id):
     
 
 @users.route('/<int:user_id>/forgot_password', methods=['POST'])
-def forgot_password():
+def forgot_password(user_id):
     data = request.get_json()
     email = data.get('email')
 
-    user = User.query.filter_by(email=email).first()
+    user = User.query.filter((User.id == user_id) & (User.email == email)).first()
 
     if user:
         user.send_temporary_password()
         return jsonify({"message": "Temporary password sent successfully."}), 200
     else:
         return jsonify({"message": "User not found."}), 404
-    
     
