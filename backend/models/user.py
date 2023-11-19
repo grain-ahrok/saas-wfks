@@ -5,6 +5,7 @@ import secrets
 import string
 from flask_mail import Message
 from app import mail
+from flask import current_app
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -36,6 +37,7 @@ class User(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+        
     def generate_temporary_password(self):
         temporary_password = ' '.join(secrets.choice(string.ascii_letters+string.digits) for _ in range(12))
         self.change_password(temporary_password)
@@ -44,8 +46,9 @@ class User(db.Model):
     
     def send_reset_password_email(self, temporary_password):
         msg = Message('Password Reset', recipients=[self.email])
-        msg.body = f'Your temporary password is: {temporary_password}. Please use it to log in and reset your password.'
-        mail.send(msg)
+        with current_app.app_context():
+            msg.body = f'Your temporary password is: {temporary_password}. Please use it to log in and reset your password.'
+            mail.send(msg)
         
     @classmethod
     def get_all_domains(cls):
