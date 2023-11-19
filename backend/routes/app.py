@@ -1,12 +1,13 @@
 from flask import Blueprint, session, jsonify, request
 import requests
-from utils import make_api_request
+from utils import make_api_request,generate_token
 import json
 import urllib3
 from models.domain import Domain,datetime
 from models.log import Log
+from models.user_application import UserApplication
 import base64
-customer = Blueprint('customer', __name__, url_prefix='/customer')
+app = Blueprint('app', __name__, url_prefix='/app')
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
@@ -23,7 +24,7 @@ def fetch_dashboard_data(data_type):
     
     return json.loads(response_content)
 
-@customer.route('/dashboard', methods=['GET'])
+@app.route('/dashboard', methods=['GET'])
 def dashboard():
     data_timeline_response = fetch_dashboard_data("data_timeline")
     data_pie_response = fetch_dashboard_data("data_pie")
@@ -39,7 +40,7 @@ def dashboard():
 
     return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
 
-@customer.route('/app/<int:app_id>/logs', methods=['GET'])
+@app.route('/<int:app_id>/logs', methods=['GET'])
 def security_logs(app_id):
     # Check if logs are already present in the database
     existing_logs = Log.query.all()
@@ -100,7 +101,7 @@ def security_logs(app_id):
             
         # Return filtered logs from the database with pagination and unique hosts
         return jsonify({
-            "database_logs": filtered_logs,
+            "database_logs": paginated_logs,
             "hosts": list(set(log.host for log in existing_logs)),
             "total_pages": total_pages
         }), 200
@@ -196,7 +197,7 @@ def security_logs(app_id):
             
             # Return both logs from the database and external API with pagination and unique hosts
             return jsonify({
-                "database_logs": filtered_logs,
+                "database_logs": paginated_logs,
                 "hosts": list(set(log.host for log in existing_logs)),
                 "total_pages": total_pages
             }), 200
@@ -208,9 +209,9 @@ def security_logs(app_id):
 
 
 
-@customer.route('/domain-settings', methods=['GET', 'PUT', 'POST','DELETE'])
-def manage_domain_settings():
-    url = f"https://wf.awstest.piolink.net:8443/kui/api/v3/{session['app_id']}/general/domain_list"
+@app.route('/<int:app_id>/domain-list', methods=['GET', 'PUT', 'POST','DELETE'])
+def manage_domain_settings(app_id):
+    url = f"https://wf.awstest.piolink.net:8443/kui/api/v3/{app_id}/general/domain_list"
     if request.method == 'GET':
         response = make_api_request(url,method='GET')
         return jsonify(response.json())
@@ -221,35 +222,48 @@ def manage_domain_settings():
             "domain": data.get("domain"),
             "desc": data.get("desc")
         }
-        domain_id = data.get("id")
-        domain = Domain.get_domain_by_id(domain_id)
-        
         response = make_api_request(url, method='POST', data=data)
+        domain_id = data.get("domain")
+        domain = Domain.get_domain_by_id(domain_id)
         if response.status_code == 200:
             if domain:
                 domain.update(
-                    status=data.get("status"),
                     name=data.get("domain"),
-                    desc=data.get("desc")
                 )
-                return jsonify({"message": f"Domain with id {domain_id} updated successfully."}), 200
+                ip_lists = data.get('ip_list')
+                app_data = UserApplication.get_app_by_id(app_id)
+                for ip_list in ip_lists:
+                    client_ip, mask_bits = ip_list.get('ip').split("/")
+                    mask_bits = int(mask_bits)
+                    ip_data = [
+                        {
+                            "id": request.args.get('id'),
+                            "status": "enable",
+                            "version": ip_list.get('version'),
+                            "client_ip": client_ip,
+                            "client_mask": mask_bits,
+                            "ip": app_data.ip_addr,
+                            "port": ip_list.get('port'),
+                            "desc": ""
+                        }
+                    ]
+                    response = make_api_request(url, method='POST', data=ip_data)
+        
+                
             else:
                 return jsonify({"error": f"Domain with id {domain_id} not found."}), 404
         return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+
+ 
     
     elif request.method == 'POST':
         data = request.json
-        id = data.get("id")
-        main_ip = data.get("main_ip")
-        setting_ip = data.get("setting_ip")
-        port_number = data.get("port_number")
         domain = data.get("domain")
         status = data.get("status")
-        desc = data.get("desc")
         data = {
             "status": status,
             "domain": domain,
-            "desc": desc
+            "desc": ""
         }
         response = make_api_request(url, method='POST', data=data)
         
@@ -258,20 +272,110 @@ def manage_domain_settings():
             
             new_domain = Domain.create(
                 name=data.get("domain"),
-                user_application_id=session['user_application_id'],
+                user_application_id=app_id,
                 updated_at=datetime.utcnow()
             )
+
+            app_data = UserApplication.get_app_by_id(app_id)
+            
+
+            ip_lists = data.get('ip_list')
+            for ip_list in ip_lists:
+                ip_data = [
+                    {
+                        "status": "enable",
+                        "version": ip_list.get('version'),
+                        "client_ip": client_ip,
+                        "client_mask": mask_bits,
+                        "ip": app_data.ip_addr,
+                        "port": ip_list.get('port'),
+                        "desc": ""
+                    }
+                ]
+                response = make_api_request(url, method='POST', data=ip_data)
+                
 
         return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
 
     elif request.method == 'DELETE':
         data = request.json
         id = data.get("id")
-        data = {"id": id}    
-        return jsonify(make_api_request(url, method='DELETE', data=data))  
+        data = [{"id": id}]
+        response = make_api_request(url, method='DELETE', data=data)
+        if response.status_code == 200:
+            return response.json()  
+        else:
+            return jsonify({"error": "도메인 삭제에 실패하셨습니다.."}), 500
 
 
-# @customer.route('/security-settings/exception-urls', methods=['GET','POST','PUT','DELETE'])
+@app.route('/security_policy/<int:security_policy_id>/<policy_name>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def get_policy_details(security_policy_id,policy_name):
+    url = f'https://wf.awstest.piolink.net:8443/api/v3/security_policy/{security_policy_id}/{policy_name}'
+    filename = 'backend/json/security_policy_name.json'
+    with open(filename, 'r') as json_file:
+        policy_data_extractors = json.load(json_file)
+    setting_names =  policy_data_extractors[policy_name]
+    token = generate_token()
+    headers = {'Authorization': 'token ' + token}
+    if request.method == 'GET':
+        result = {'result': {'status': 'unknown'}}
+        if isinstance(setting_names, list):
+            for setting_name in setting_names:
+                ex_url = f'{url}/{setting_name}'
+                response = make_api_request(ex_url,method='GET',headers=headers)
+                data = response.json()
+                if policy_name == 'credential_stuffing':
+                    result['result'][setting_name] = data
+                    result['result']['status'] = data.get('action', 'unknown')
+                   
+                else:
+                    status_key_value_pair = next((item for item in data.items() if item[0].endswith("_status")), None)
+                    if status_key_value_pair:
+                        _, status_value = status_key_value_pair
+                    result['result'][setting_name] = data
+                    result['result']['status'] = status_value
+           
+            return result
+                 
+        else:
+            url = f'{url}/{setting_names}'
+            response = make_api_request(url,method='GET',headers=headers)
+            data = response.json()
+            result['result'][setting_names] = data
+            if setting_names == 'sig_list':
+                result['result']['status'] = data[0]['status']
+            else:
+                status_key_value_pair = next((item for item in data.items() if item[0].endswith("_status")), None)
+                if status_key_value_pair:
+                    _, status_value = status_key_value_pair
+                result['result']['status'] = status_value
+            return result
+        
+    elif request.method == 'PUT':     
+        data = request.json
+        status = data.get('status')
+        if isinstance(setting_names, list):
+            for setting_name in setting_names:
+                ex_url = f'{url}/{setting_name}'
+                response = make_api_request(ex_url, "GET", headers)
+                security_policy_json = response.json()
+                
+                updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)}
+                response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
+        else:
+            ex_url = f'{url}/{setting_names}'
+            response = make_api_request(ex_url, "GET", headers)
+            security_policy_json = response.json()
+            if setting_names == 'sig_list':
+                updated_data = [{"id": item.get("id"), "status": status , "block_id": item.get("block_id")} for item in security_policy_json]
+            elif isinstance(security_policy_json, dict):
+                updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)} 
+            response = make_api_request(ex_url,method='PUT',headers=headers,data=updated_data)
+        return response.json()
+
+
+
+# @app.route('/security-settings/exception-urls', methods=['GET','POST','PUT','DELETE'])
 # def exception_urls():
 #     if request.method == 'GET':
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow", method='GET'))    
@@ -299,7 +403,7 @@ def manage_domain_settings():
 #         }
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow", method='DELETE',data=delete_data))    
 
-# @customer.route('/security-settings/apply-urls',methods=['GET','POST','PUT','DELETE'])
+# @app.route('/security-settings/apply-urls',methods=['GET','POST','PUT','DELETE'])
 # def apply_urls():
 #     if request.method == 'GET':
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_url_list", method='GET'))    
@@ -327,7 +431,7 @@ def manage_domain_settings():
 #         }
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_url_list", method='DELETE', data=delete_data))    
  
-# @customer.route('/security-settings/exception-urls',methods=['GET','POST','PUT','DELETE'])
+# @app.route('/security-settings/exception-urls',methods=['GET','POST','PUT','DELETE'])
 # def exception_ips():
 #     if request.method == 'GET':
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/exception_ip_list", method='GET'))    
@@ -363,7 +467,7 @@ def manage_domain_settings():
 #         }
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/exception_ip_list", method='DELETE', data=delete_data))    
 
-# @customer.route('/security-settings/apply-ips',methods=['GET','POST','PUT','DELETE'])
+# @app.route('/security-settings/apply-ips',methods=['GET','POST','PUT','DELETE'])
 # def apply_ips():
 #     if request.method == 'GET':
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_ip_list", method='GET'))    
@@ -398,7 +502,7 @@ def manage_domain_settings():
 #         }
 #         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_ip_list", method='DELETE', data=delete_data)) 
 
-# @customer.route('/security-settings/blocked-ips',methods=['GET','POST','PUT','DELETE'])
+# @app.route('/security-settings/blocked-ips',methods=['GET','POST','PUT','DELETE'])
 # def blocked_ips():
 #     url = api_base_url + f"system/block_ip_filter/ip_list"
 #     if request.method == 'GET':
@@ -431,7 +535,7 @@ def manage_domain_settings():
 #         return jsonify(send_api_request(url, method='DELETE',data=delete_data))
     
 
-# @customer.route('/security-settings/policy-details/<policy_name>', methods=['GET','POST','PUT','DELETE'])
+# @app.route('/security-settings/policy-details/<policy_name>', methods=['GET','POST','PUT','DELETE'])
 # def get_policy_details(policy_name):
 #     if request.method == 'GET':
 #         return jsonify(utils.get_policy_data(policy_name, method='GET'))
@@ -440,7 +544,7 @@ def manage_domain_settings():
 #         return jsonify(utils.get_policy_data(policy_name,method='PUT',data=data))
     
 
-# @customer.route('/security-settings/policy-details/<policy_name>/information', methods=['GET'])
+# @app.route('/security-settings/policy-details/<policy_name>/information', methods=['GET'])
 # def get_policy_infomation_signature(policy_name):
 #     return jsonify(utils.get_policy_information())
 

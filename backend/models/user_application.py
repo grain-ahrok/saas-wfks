@@ -38,5 +38,5 @@ class UserApplication(db.Model):
         return cls.query.all()
 
     @classmethod
-    def get_domain_by_id(cls, domain_id):
-        return cls.query.get(domain_id)
+    def get_app_by_id(cls, app_id):
+        return cls.query.get(app_id)

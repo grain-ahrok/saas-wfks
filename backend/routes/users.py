@@ -40,6 +40,7 @@ def login():
                     session['token'] = token
                     session['user_id'] = user.id
                     session['ip'] = data.get('IP_address')
+                    session['companyName'] = data.get('companyName')
                     session['domain_address'] = data.get('doamin_address')
                     #session['app_id'] = 
                     return jsonify({"id": user.id, "message": "Login successful."}), 200

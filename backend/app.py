@@ -1,7 +1,7 @@
 from flask import Flask
 from config import Config
 from routes.users import users
-from routes.customer import customer
+from routes.app import app as route_app
 from routes.admin import Pi5neer
 from flask_cors import CORS
 from models import db, bcrypt
@@ -25,7 +25,7 @@ bcrypt.init_app(app)
 
 # Import and register routes
 app.register_blueprint(users)
-app.register_blueprint(customer)
+app.register_blueprint(route_app)
 app.register_blueprint(Pi5neer)
 
 # Configure CORS    
