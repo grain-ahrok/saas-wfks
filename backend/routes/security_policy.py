@@ -1,6 +1,6 @@
 from flask import Blueprint, session, jsonify, request
 import requests
-from utils import make_api_request,generate_token,determine_ip_version
+from utils import make_api_request,generate_token
 import json
 import urllib3
 from models.domain import Domain,datetime
@@ -354,6 +354,64 @@ def apply_ip_list(security_policy_id):
                 delete_data = [{'id': id} for id in ids]
                 response = make_api_request(url, method='DELETE', data=delete_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
+            return response.json()
+    except requests.exceptions.RequestException as e:
+        # API 요청 중에 오류가 발생한 경우 처리
+        error_message = f"API 요청 중 오류 발생: {str(e)}"
+        return jsonify({'error': error_message}), 500
+
+    except Exception as e:
+        # 기타 예외가 발생한 경우 처리
+        error_message = f"알 수 없는 오류 발생: {str(e)}"
+        return jsonify({'error': error_message}), 500
+    
+
+
+@security_policy_.route('/<int:security_policy_id>/block_ip_filter/ip_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def block_ip_filter(security_policy_id):
+    token = generate_token()
+    headers = {'Authorization': 'token ' + token}
+
+    try:
+        if request.method == 'GET':
+            url = f'https://wf.awstest.piolink.net:8443/api/v3/system/block_ip_filter/ip_list'
+            response = make_api_request(url, method='GET', headers=headers)
+            return response.json()
+
+        elif request.method == 'POST':
+            data = request.json
+            url = f'https://wf.awstest.piolink.net:8443/api/v3/system/block_ip_filter/ip_list'
+            post_data = {
+                "client_ip": data.get('client_ip'),
+                "client_mask":data.get('client_mask'),
+                "desc":data.get('desc')
+            }
+            response = make_api_request(url, method='POST', data=post_data, headers=headers)
+            print(f"block_ip_filter: {response.content}")
+            return response.json()
+        elif request.method == 'PUT':
+            data = request.json
+            
+            url = f'https://wf.awstest.piolink.net:8443/api/v3/system/block_ip_filter/ip_list'
+            put_data = {
+                "id": request.args.get('id'),
+                "client_ip": data.get('client_ip'),
+                "client_mask": data.get('client_mask'),
+                "time": 15,
+                "timeunit": "second",
+                "permanent_status": "disable",
+                "desc": data.get('desc')
+            }
+            response = make_api_request(url, method='PUT', data=put_data, headers=headers)
+            print(f"block_ip_filter: {response.content}")
+            return response.json()
+        elif request.method == 'DELETE':
+            data = request.json()
+            url = f'https://wf.awstest.piolink.net:8443/api/v3/system/block_ip_filter/ip_list'
+            ids = data.get('ids', [])  
+            delete_data = [{'id': id} for id in ids]
+            response = make_api_request(url, method='DELETE', data=delete_data, headers=headers)
+            print(f"block_ip_filter: {response.content}")
             return response.json()
     except requests.exceptions.RequestException as e:
         # API 요청 중에 오류가 발생한 경우 처리
