@@ -2,7 +2,7 @@
     "data_timeline": {
         "reqType": "addContents",
         "viewType": "chart",
-        "contentsName": "공격 이룸(시간)",
+        "contentsName": "공격 이름(시간)",
         "dataType": "attack",
         "contentsData": "attack_name_timeline",
         "chartTypeSum": "spline",
@@ -21,7 +21,7 @@
     "data_pie": {
         "reqType": "addContents",
         "viewType": "chart",
-        "contentsName": "공격 이룸",
+        "contentsName": "공격 이름",
         "dataType": "attack",
         "contentsData": "attack_name",
         "chartTypeSum": "pie",
@@ -40,7 +40,7 @@
     "data_name_time": {
         "reqType": "addContents",
         "viewType": "chart",
-        "contentsName": "공격 이룸(시간)",
+        "contentsName": "공격 이름(시간)",
         "dataType": "attack",
         "contentsData": "attack_name_timeline",
         "chartTypeSum": "spline",
