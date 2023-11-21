@@ -8,39 +8,90 @@ from models.log import Log
 from models.user_application import UserApplication
 from models.security_policy import SecurityPolicy
 import base64
-
+from models import *
+from datetime import datetime, timedelta
+from collections import Counter
+from sqlalchemy import func
+from datetime import datetime, timedelta
 app = Blueprint('app', __name__, url_prefix='/app')
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
-def fetch_dashboard_data(data_type):
-    url = 'https://wf.awstest.piolink.net:8443/cgi-bin/dashboard/'
-    with open('backend/json/dashboard_data.json', 'r', encoding='utf-8') as json_file:
-        dashboard_data = json.load(json_file)
+@app.route('/<int:app_id>/dashboard', methods=['GET'])
+def dashboard(app_id):
+    response_data = fetch_dashboard_data("data_timeline")
 
-    data = dashboard_data.get(data_type)
-    cookies = {'PB_LANG': 'ko', 'UI': 'wafwaf'}
-    response = requests.post(url, data=data,verify=False,cookies=cookies)
-    response.raise_for_status() 
-    response_content = response.content.decode('utf-8')
-    
-    return json.loads(response_content)
-
-@app.route('/dashboard', methods=['GET'])
-def dashboard():
-    data_timeline_response = fetch_dashboard_data("data_timeline")
-    data_pie_response = fetch_dashboard_data("data_pie")
-    data_name_time_response = fetch_dashboard_data("data_name_time")
-    
-    if data_timeline_response and data_pie_response and data_name_time_response:
-        response_data = {
-            "timeline_data": data_timeline_response,
-            "pie_data": data_pie_response,
-            "name_time": data_name_time_response
-        }
-        return jsonify(response_data)
+    if response_data:
+        
+        return jsonify(response_data), 200
 
     return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+
+def fetch_dashboard_data(app_id):
+    current_time = datetime(2023, 11, 18, 5, 25, 15)
+    start_time_1hour_interval = current_time - timedelta(hours=1)
+    log_1hour = get_logs_by_time_range(start_time_1hour_interval, current_time)
+    data_timeline_response = count_occurrences_in_intervals(log_1hour, start_time_1hour_interval, 15)
+    data_pie_response =  count_category_occurrences(log_1hour)
+    start_time_1years_interval = current_time - timedelta(days=365)
+    log_1year = get_logs_by_year_range(start_time_1years_interval, current_time)
+    response_data = {"detect_attack": data_timeline_response,
+                     "attack_name": data_pie_response,
+                     "tarffic":log_1year}
+    return response_data
+
+def count_category_occurrences(logs):
+    # Extract category values from logs
+    categories = [log.category for log in logs]
+
+    # Use Counter to count occurrences of each category
+    category_counts = Counter(categories)
+
+    return category_counts
+def get_logs_by_time_range(start_time, end_time):
+    # Retrieve all logs within the time range
+    logs = db.session.query(Log).filter(
+        Log.timestamp >= start_time,
+        Log.timestamp < end_time
+    ).all()
+    return logs
+
+def get_logs_by_year_range(start_time, end_time):
+    result = db.session.query(
+    func.DATE_FORMAT(Log.timestamp, '%Y-%m').label('month'),
+    func.count().label('count')
+    ).filter(
+        Log.timestamp >= start_time
+    ).group_by(func.DATE_FORMAT(Log.timestamp, '%Y-%m')).all()
+
+    # Create a dictionary to store month-wise log counts
+    month_counts = {month: count for month, count in result}
+
+    # Output the dictionary
+    print(month_counts)
+    return month_counts
+
+def count_occurrences_in_intervals(logs, end_time, interval_minutes):
+    current_time = end_time
+    start_time = current_time + timedelta(minutes=60)
+
+    # Create a list to store counts for each interval
+    interval_counts = []
+
+    # Iterate over each minute interval
+
+    while current_time !=start_time:
+        interval_start = current_time
+        interval_end = current_time + timedelta(minutes=interval_minutes)
+        print(interval_start,interval_end)
+        # Count occurrences within the current interval
+        count = sum(1 for log in logs if interval_start <= datetime.strptime(log.timestamp, '%Y-%m-%d %H:%M:%S') < interval_end)
+        interval_counts.append({"interval": f"{interval_start} - {interval_end}", "count": count})
+        current_time = interval_end
+
+    #print(interval_counts)
+    return interval_counts
+
 
 @app.route('/<int:app_id>/logs', methods=['GET'])
 def security_logs(app_id):
@@ -111,8 +162,34 @@ def security_logs(app_id):
         # Fetch logs from the external API
         url = 'https://wf.awstest.piolink.net:8443/cgi-bin/logviewer/'
         headers = {'Cookie': 'PB_LANG=ko; UI=wafwaf'}
-        data = {'log_type': 'security',
-                'param': 'eyJhY3Rpb24iOiJzZWxlY3QiLCJmaWx0ZXIiOnsiZGV0YWlsIjp7fSwiYmFzaWMiOnt9LCJwZXJpb2QiOiIyNTkyMDAwIn0sImxpbWl0IjoxMDAsInBhZ2VQYXJhbSI6bnVsbH0='}
+        encoded_string = "eyJhY3Rpb24iOiJzZWxlY3QiLCJmaWx0ZXIiOnsiZGV0YWlsIjp7fSwiYmFzaWMiOnsiYXBwX2lkIjpbIjEiXX0sInBlcmlvZCI6IjI1OTIwMDAifSwibGltaXQiOjEwMCwicGFnZVBhcmFtIjpudWxsfQ="
+
+        # Decode the Base64 string
+        decoded_bytes = base64.urlsafe_b64decode(encoded_string + '=' * (-len(encoded_string) % 4))
+
+        # Decode the bytes to UTF-8 string
+        decoded_string = decoded_bytes.decode('utf-8')
+        # JSON 문자열을 파이썬 객체로 변환
+        decoded_data = json.loads(decoded_string)
+
+        # app_id 업데이트
+        decoded_data['filter']['basic']['app_id'] = [app_id]
+
+        # 다시 JSON 문자열로 변환
+        updated_encoded_string = json.dumps(decoded_data)
+        
+        # Encode the UTF-8 string to bytes
+        encoded_bytes = decoded_string.encode('utf-8')
+
+        # Encode the bytes to Base64
+        encoded_string = base64.urlsafe_b64encode(encoded_bytes).decode()
+
+   
+        data = {
+            'log_type': 'security',
+            'param': encoded_string
+        }
+
 
         response = requests.post(url, data=data, verify=False, headers=headers)
 
@@ -129,11 +206,10 @@ def security_logs(app_id):
             # Save logs to the database
             for log_data in app_logs:
                 decoded_url = base64.b64decode(log_data[6]).decode('utf-8')
-                timestamp = datetime.fromtimestamp(log_data[1])
                 host = base64.b64decode(log_data[7])
                 formatted_log = {
                     'no': log_data[0],
-                    'timestamp': timestamp.strftime('%Y-%m-%d %H:%M:%S'),  # 수정된 부분
+                    'timestamp': log_data[1],  # 수정된 부분
                     'category': log_data[2]['text'],  # 수정된 부분
                     'app_name': log_data[3],
                     'risk_level': log_data[4]['text'],  # 수정된 부분
@@ -310,174 +386,7 @@ def manage_domain_settings(app_id):
             return jsonify({"error": "도메인 삭제에 실패하셨습니다.."}), 500
 
 
-# @app.route('/security-settings/exception-urls', methods=['GET','POST','PUT','DELETE'])
-# def exception_urls():
-#     if request.method == 'GET':
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow", method='GET'))    
-#     elif request.method == 'POST':
-#         data = request.json
-#         post_data : {
-#             "status": "enable",
-#             "url": data.get('url'),
-#             "desc": "default"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow", method='POST', data=post_data))    
-#     elif request.method == 'PUT':
-#         data = request.json
-#         put_data : {
-#             "id": data.get('id'),
-#             "status": "enable",
-#             "url": data.get('url'),
-#             "desc": "default"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow", method='PUT', data=put_data))    
-#     elif request.method == 'DELETE':
-#         data = request.json
-#         delete_data : {
-#             "id" : data.get('id')
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow", method='DELETE',data=delete_data))    
 
-# @app.route('/security-settings/apply-urls',methods=['GET','POST','PUT','DELETE'])
-# def apply_urls():
-#     if request.method == 'GET':
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_url_list", method='GET'))    
-#     elif request.method == 'POST':
-#         data = request.json
-#         post_data = {
-#             "status": "enable",
-#             "url": data.get('url'),
-#             "desc": "desc"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_url_list", method='POST', data=post_data))    
-#     elif request.method == 'PUT':
-#         data = request.json
-#         put_data = {
-#             "id": data.get('id'),
-#             "status": "enable",
-#             "url": data.get('url'),
-#             "desc": "default"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_url_list", method='PUT', data=put_data))    
-#     elif request.method == 'DELETE':
-#         data = request.json
-#         delete_data = {
-#             "id": data.get('id')
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_url_list", method='DELETE', data=delete_data))    
- 
-# @app.route('/security-settings/exception-urls',methods=['GET','POST','PUT','DELETE'])
-# def exception_ips():
-#     if request.method == 'GET':
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/exception_ip_list", method='GET'))    
-#     elif request.method == 'POST':
-#         data = request.json
-#         post_data = {
-#             "status": "enable",
-#             "version": "ipv4",
-#             "client_ip": data.get('client_ip'),
-#             "client_mask": data.get('client_mask'),
-#             "server_ip": data.get('server_ip'),
-#             "server_mask": data.get('server_mask'),
-#             "desc": "desc"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/exception_ip_list", method='POST', data=post_data))    
-#     elif request.method == 'PUT':
-#         data = request.json
-#         put_data = {
-#             "id":data.get('id'),
-#             "status": "enable",
-#             "version": "ipv4",
-#             "client_ip": data.get('client_ip'),
-#             "client_mask": data.get('client_mask'),
-#             "server_ip": data.get('server_ip'),
-#             "server_mask": data.get('server_mask'),
-#             "desc": "desc"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/exception_ip_list", method='PUT', data=put_data))    
-#     elif request.method == 'DELETE':
-#         data = request.json
-#         delete_data = {
-#             "id": data.get('id')
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/exception_ip_list", method='DELETE', data=delete_data))    
-
-# @app.route('/security-settings/apply-ips',methods=['GET','POST','PUT','DELETE'])
-# def apply_ips():
-#     if request.method == 'GET':
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_ip_list", method='GET'))    
-#     elif request.method == 'POST':
-#         post_data = {
-#             "status": "enable",
-#             "version": "ipv4",
-#             "client_ip": data.get('client_ip'),
-#             "client_mask": data.get('client_mask'),
-#             "server_ip": data.get('server_ip'),
-#             "server_mask": data.get('server_mask'),
-#             "desc": "desc"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_ip_list", method='POST', data=post_data)) 
-#     elif request.method == 'PUT':
-#         data = request.json
-#         put_data = {
-#             "id":3,
-#             "status": "enable",
-#             "version": "ipv4",
-#             "client_ip": data.get('client_ip'),
-#             "client_mask": data.get('client_mask'),
-#             "server_ip": data.get('server_ip'),
-#             "server_mask": data.get('server_mask'),
-#             "desc": "desc"
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_ip_list", method='PUT', data=put_data)) 
-#     elif request.method == 'DELETE':
-#         data = request.json
-#         delete_data = {
-#             "id": data.get('id')
-#         }
-#         return jsonify(send_api_request(api_base_url + f"security_policy/{session['id']}/buffer_overflow/apply_ip_list", method='DELETE', data=delete_data)) 
-
-# @app.route('/security-settings/blocked-ips',methods=['GET','POST','PUT','DELETE'])
-# def blocked_ips():
-#     url = api_base_url + f"system/block_ip_filter/ip_list"
-#     if request.method == 'GET':
-#         return jsonify(send_api_request(url, method='GET')) 
-#     elif request.method == 'POST':
-#         data = request.json
-#         post_data = {
-#             "client_ip": data.get('client_ip'),
-#             "client_mask": data.get('client_mask'),
-#             "desc":"none"
-#         }
-#         return jsonify(send_api_request(url, method='POST',data=post_data)) 
-#     elif request.method == 'PUT':
-#         data = request.json
-#         put_data = {
-#             "id": data.get('id'),
-#             "client_ip": data.get('client_ip'),
-#             "client_mask": data.get('client_mask'),
-#             "time": 15,
-#             "timeunit": "second",
-#             "permanent_status": "disable",
-#             "desc": "none"
-#         }
-#         return jsonify(send_api_request(url, method='PUT',data=put_data)) 
-#     elif request.method == 'DELETE':
-#         data = request.json
-#         delete_data = {
-#             "id": data.get('id'),
-#         }
-#         return jsonify(send_api_request(url, method='DELETE',data=delete_data))
-    
-
-# @app.route('/security-settings/policy-details/<policy_name>', methods=['GET','POST','PUT','DELETE'])
-# def get_policy_details(policy_name):
-#     if request.method == 'GET':
-#         return jsonify(utils.get_policy_data(policy_name, method='GET'))
-#     elif request.method == 'PUT':
-#         data = request.json
-#         return jsonify(utils.get_policy_data(policy_name,method='PUT',data=data))
-    
 
 # @app.route('/security-settings/policy-details/<policy_name>/information', methods=['GET'])
 # def get_policy_infomation_signature(policy_name):

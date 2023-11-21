@@ -288,4 +288,3 @@ def automic_setting(data,userId):
             domain = Domain.create(**domain_data)
     except Exception as e:
         print(f"An error occurred: {e}")
-        

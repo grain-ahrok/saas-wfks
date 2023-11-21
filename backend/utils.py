@@ -66,7 +66,12 @@ def generate_token():
         return None
 
 
-
+def determine_ip_version(ip):
+    try:
+        ip_obj = ipaddress.ip_address(ip)
+        return "ipv4" if ip_obj.version == 4 else "ipv6"
+    except ValueError:
+        return None
 
 
 

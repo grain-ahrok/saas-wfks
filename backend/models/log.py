@@ -1,9 +1,9 @@
-from . import db, datetime
-
+from . import db
+from datetime import datetime
 class Log(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     no = db.Column(db.Integer)  # 추가: No.
-    timestamp = db.Column(db.String(255))  # 추가: 시간
+    timestamp = db.Column(db.DateTime, index=True)
     category = db.Column(db.String(50))  # 추가: 분류
     app_name = db.Column(db.String(50))  # 추가: 애플리케이션 이름
     risk_level = db.Column(db.String(50))  # 추가: 공격 위험도
@@ -79,8 +79,8 @@ class Log(db.Model):
             'attacker_ip': self.attacker_ip,
             'server_ip_port': self.server_ip_port,
             'country': self.country,
-            'action': self.action,
-            'app_id': self.app_id
+            'action': self.action
+            
         }
 
     def __str__(self):
