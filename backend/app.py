@@ -18,11 +18,15 @@ from models.security_policy import SecurityPolicy
 from models.sp_url import SpUrl
 from models.sp_ip import SpIp
 
+from flask_mail import Mail # forgot pw 관련
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
 db.init_app(app)
 bcrypt.init_app(app)
+
+mail=Mail(app) # forgot pw 관련
 
 # Import and register routes
 app.register_blueprint(users)
