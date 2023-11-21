@@ -8,7 +8,8 @@ from flask_cors import CORS
 from models import db, bcrypt
 from models import *  
 from flask_migrate import Migrate
-from datetime import datetime
+from flask_jwt_extended import JWTManager
+from datetime import datetime,timedelta
 # Import and register models
 from models.admin import Admin
 from models.user import User
@@ -17,10 +18,14 @@ from models.user_application import UserApplication
 from models.security_policy import SecurityPolicy
 from models.sp_url import SpUrl
 from models.sp_ip import SpIp
-
+from decouple import config as config_
 from flask_mail import Mail # forgot pw 관련
 
 app = Flask(__name__)
+
+app.config['JWT_SECRET_KEY'] = config_['key']  
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)  # 30분으로 설정
+jwt = JWTManager(app)
 app.config.from_object(Config)
 
 db.init_app(app)

@@ -8,9 +8,10 @@ from models.log import Log
 from models.user_application import UserApplication
 from models.security_policy import SecurityPolicy
 import base64
+from flask_jwt_extended import jwt_required
 
 security_policy_ = Blueprint('security_policy', __name__, url_prefix='/security_policy')
-
+security_policy_.before_request(jwt_required())
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 policy_names = ["sql_injection","buffer_overflow","request_flood","evasion","cookie_protection","directory_listing","download","url_regex","xss","shellcode","upload","access_control","credential_stuffing"]
 @security_policy_.route('/<int:security_policy_id>/<policy_name>', methods=['GET', 'POST', 'PUT', 'DELETE'])
@@ -422,3 +423,29 @@ def block_ip_filter(security_policy_id):
         # 기타 예외가 발생한 경우 처리
         error_message = f"알 수 없는 오류 발생: {str(e)}"
         return jsonify({'error': error_message}), 500
+    
+
+    
+
+@security_policy_.route('/security-settings/policy-details/<policy_name>/information', methods=['GET'])
+def get_policy_infomation_signature(policy_name):
+    external_url = "https://wf.awstest.piolink.net:8443/api/kui/api/v3/information/signature"
+    token = generate_token()
+    headers = {'Authorization': 'token ' + token}
+    response = make_api_request(external_url, 'GET', headers)
+
+    if response is not None and response.status_code == 200:
+        data = response.json()
+        print(data)
+        # extracted_data = [
+        #     {
+        #         "origin_sig_id": item.get("origin_sig_id"),
+        #         "severity": item.get("severity"),
+        #         "ko_description": item.get("ko_description"),
+        #         "poc_example": item.get("poc_example")
+        #     }
+        #     for item in data
+        # ]
+        return data
+    return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+    

@@ -13,8 +13,9 @@ from datetime import datetime, timedelta
 from collections import Counter
 from sqlalchemy import func
 from datetime import datetime, timedelta
+from flask_jwt_extended import jwt_required
 app = Blueprint('app', __name__, url_prefix='/app')
-
+app.before_request(jwt_required())
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
 @app.route('/<int:app_id>/dashboard', methods=['GET'])
@@ -385,12 +386,6 @@ def manage_domain_settings(app_id):
         else:
             return jsonify({"error": "도메인 삭제에 실패하셨습니다.."}), 500
 
-
-
-
-# @app.route('/security-settings/policy-details/<policy_name>/information', methods=['GET'])
-# def get_policy_infomation_signature(policy_name):
-#     return jsonify(utils.get_policy_information())
 
 
 

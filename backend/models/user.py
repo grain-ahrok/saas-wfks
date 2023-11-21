@@ -4,7 +4,7 @@ from datetime import datetime  # Import the datetime class from the datetime mod
 import secrets
 import string
 from flask_mail import Message
-from app import mail
+#from app import mail
 from flask import current_app
 
 class User(db.Model):

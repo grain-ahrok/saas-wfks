@@ -4,9 +4,13 @@ from models import *
 from utils import *
 import urllib3
 import automic_setting
+from flask_jwt_extended import jwt_required, get_jwt_identity,create_access_token,unset_jwt_cookies
 
 users = Blueprint('users', __name__, url_prefix='/users')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
+
+def jwt_generate_token(identity):
+    return create_access_token(identity=identity)
 
 @users.route('/signup', methods=['POST'])
 def register():
@@ -37,13 +41,8 @@ def login():
                 token = generate_token()
 
                 if token:
-                    session['token'] = token
-                    session['user_id'] = user.id
-                    session['ip'] = data.get('IP_address')
-                    session['companyName'] = data.get('companyName')
-                    session['domain_address'] = data.get('doamin_address')
-                    #session['app_id'] = 
-                    return jsonify({"id": user.id, "message": "Login successful."}), 200
+                    jwt_token = jwt_generate_token(identity=user.id)
+                    return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token}), 200
                 else:
                     return jsonify({"message": "Login failed. External server error."}), 401
             except Exception as e:
@@ -55,6 +54,7 @@ def login():
         return jsonify({"message": "Login failed. Invalid credentials."}), 401
 
 @users.route('/users', methods=['GET'])
+@jwt_required()
 def get_all_users():
     users = User.query.all()
     user_list = [
@@ -69,6 +69,7 @@ def get_all_users():
     return jsonify({'users': user_list}), 200
 
 @users.route('/<int:user_id>', methods=['GET'])
+@jwt_required()
 def get_user(user_id):
     user = User.query.get(user_id)
     if user:
@@ -84,6 +85,7 @@ def get_user(user_id):
         return jsonify({'message': 'User not found.'}), 404
 
 @users.route('/<int:user_id>', methods=['PUT'])
+@jwt_required()
 def update_user(user_id):
     data = request.get_json()
     user = User.query.get(user_id)
@@ -105,16 +107,14 @@ def change_password(user_id):
         return jsonify({'message': 'User not found.'}), 404
 
 @users.route('/logout', methods=['POST'])
+@jwt_required()
 def logout():
-    if 'user_id' in session:
-        # Clear the user's session data
-        session.pop('user_id', None)
-        session.pop('token', None)
-        session.pop('ip', None)
-        session.pop('domain_address', None)
-    return jsonify({'message': 'Logout successful.'}), 200
+    response = jsonify({"message": "로그아웃 성공."})
+    unset_jwt_cookies(response)
+    return response, 200
 
 @users.route('/<int:user_id>', methods=['DELETE'])
+@jwt_required()
 def delete_user(user_id):
     user = User.query.get(user_id)
     if user:
@@ -138,3 +138,8 @@ def forgot_password(user_id):
     else:
         return jsonify({"message": "User not found."}), 404
     
+@users.route('/protected', methods=['GET'])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
