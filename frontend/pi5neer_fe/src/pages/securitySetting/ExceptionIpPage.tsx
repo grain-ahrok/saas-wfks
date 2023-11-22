@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Box from '@mui/material/Box';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
@@ -14,21 +11,21 @@ import Divider from '@mui/material-next/Divider';
 import TextField from '@mui/material/TextField';
 
 
-import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
 
 
 type Props = {}
 let rows = [
-  {id : 0 , ip : '0', subnet_mast : '0', reason : 'test' } //line for test
+  {id : '0' , ip : '0', subnet_mast : '0', reason : 'test' } //line for test
 ];
 
-type exceptionip = {
-  id : number,
+interface exceptionip  {
+  id : string,
   ip : string,
   subnet_mask : string,
   reason : string
 }
+
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 100 },
@@ -50,20 +47,68 @@ const style = {
   m:'2rem'
 };
 
-const ExceptionIpPage = (props: Props) => {
 
+
+const ExceptionIpPage = (props: Props) => {
+    const ipref = useRef('0');
+    const subnetref = useRef('0');
+    const reasonref = useRef('0');
+
+    let now_id=-1;
     const [open, setOpen] = React.useState(false);
-    const handleOpen = () => setOpen(true);
+    const handleOpen = function(params : GridRowParams) {
+      const rowData:exceptionip = params.row as exceptionip;
+      console.log(rowData);
+      setOpen(true);
+    }
+    const handleOpenbutton = () => {
+      now_id = -1;
+      setOpen(true);
+    }
     const handleClose = () => setOpen(false);
 
+    //get 부분 완료
     const url = '/security_policy/' + 1 + '/exception_ip_list';
     fetch(url)
       .then((response) => response.json())
-      .then((data) => { rows = data;
+      .then((data) => { 
+        rows = data['result'];
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
       });
+
+    //POST(Add) 부분, PUT(수정) 부분
+    const send_button = function() {
+
+      const formdata = new FormData();
+      formdata.append("network_ip",ipref.current);
+      formdata.append("subnet_mask",subnetref.current);
+      formdata.append("reason",reasonref.current);
+
+
+      if(now_id == -1){
+        const response = fetch(url,{
+          method: 'POST',
+          body:formdata
+        })
+        console.log("POST(Add) response is : ",response);
+      }
+      else {
+        const response = fetch(url,{
+          method: 'PUT',
+          body:
+            JSON.stringify({
+              "request":{
+                "security_policy_id" : now_id
+              },
+              "after":formdata
+            })
+      })
+        console.log("PUT(edit) response is : ",response);
+      }
+    }
+    
 
   return (
     <Box>
@@ -72,57 +117,15 @@ const ExceptionIpPage = (props: Props) => {
           <Box>
             적용 IP 목록
           </Box>
-
           <Stack direction='row' spacing={3}>
             <Button variant="outlined" startIcon={<DeleteIcon />}>
               Delete
             </Button>
-            <Button variant="contained" endIcon={<SendIcon />} onClick={handleOpen}>
-              Edit
+            <Button variant="contained" endIcon={<SendIcon />} onClick={handleOpenbutton}>
+              ADD
             </Button>
-            <Modal
-              open={open}
-              onClose={handleClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-            >
-              <Stack sx={style} spacing = {3}>  
-                <Typography id="modal-modal-title" variant="h6" component="h2">
-                  수정하기
-                </Typography>
-                <Divider />
-                
-                <TextField
-                  required
-                  id="outlined-required"
-                  label="Required"
-                  defaultValue="Hello World"
-                />
-                <TextField
-                  required
-                  id="outlined-required"
-                  label="Required"
-                  defaultValue="Hello World"
-                />
 
-                <TextField
-                  required
-                  id="outlined-required"
-                  label="Required"
-                  defaultValue="Hello World"
-                />
-                
-                <Box>
-
-                <Button variant="contained" endIcon={<SendIcon />}>
-                Send
-                </Button>
-
-                </Box>
-
-
-                </Stack>
-            </Modal>
+            
           </Stack>
         </Grid>
         <br></br>
@@ -136,11 +139,53 @@ const ExceptionIpPage = (props: Props) => {
               },
             }}
             pageSizeOptions={[5, 10]}
-            checkboxSelection
+            
+            onRowClick={handleOpen}
           />
         </div>
       </Grid>
       <br></br>
+
+      <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+      >
+        <Stack sx={style} spacing = {3}>  
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            security INFO
+          </Typography>
+          <Divider />
+            <TextField
+              required
+              id="outlined-required"
+              label="IP"
+              defaultValue="127.0.0.01"
+              inputRef={ipref}
+            />
+            <TextField
+              required
+              id="outlined-required"
+              label="subnet_mask"
+              defaultValue="255.255.255.0"
+              inputRef={subnetref}
+            />
+            <TextField
+              required
+              id="outlined-required"
+              label="Reason"
+              defaultValue="Just"
+              inputRef={reasonref}
+            />
+            <Box  display="flex" justifyContent="flex-end">
+            <Button variant="contained" endIcon={<SendIcon />} onClick={() => send_button()}>
+            Send
+            </Button>
+            </Box>
+          </Stack>
+        </Modal>
+
       <Grid>
         <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
           <Box>
@@ -151,7 +196,7 @@ const ExceptionIpPage = (props: Props) => {
               Delete
             </Button>
             <Button variant="contained" endIcon={<SendIcon />}>
-              Edit
+              ADD
             </Button>
           </Stack>
         </Grid>
