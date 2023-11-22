@@ -291,9 +291,12 @@ def security_logs(app_id):
 @app.route('/<int:app_id>/domain-list', methods=['GET', 'PUT', 'POST','DELETE'])
 def manage_domain_settings(app_id):
     url = f"https://wf.awstest.piolink.net:8443/kui/api/v3/{app_id}/general/domain_list"
+    web_firewall_ip = "43.200.213.102"
+    web_firewall_port = 8443  # 포트 정보
     if request.method == 'GET':
         response = make_api_request(url,method='GET')
         return jsonify(response.json())
+    
     elif request.method == 'PUT':
         data = request.json
         data = {
@@ -311,6 +314,7 @@ def manage_domain_settings(app_id):
                 )
                 ip_lists = data.get('ip_list')
                 app_data = UserApplication.get_app_by_id(app_id)
+                
                 for ip_list in ip_lists:
                     client_ip, mask_bits = ip_list.get('ip').split("/")
                     mask_bits = int(mask_bits)
@@ -327,6 +331,8 @@ def manage_domain_settings(app_id):
                         }
                     ]
                     response = make_api_request(url, method='POST', data=ip_data)
+                    
+                add_host_entry(web_firewall_ip,data.get("domain"),web_firewall_port)
         
                 
             else:
@@ -388,6 +394,23 @@ def manage_domain_settings(app_id):
 
 
 
+def add_host_entry(web_firewall_ip, domain, web_firewall_port=None):
+    try:
+        # hosts 파일 경로
+        hosts_path = r'C:\\windows\\system32\\drivers\\etc\\hosts'
 
+        # 추가할 엔트리
+        if web_firewall_port:
+            new_entry = f'\n{web_firewall_ip}:{web_firewall_port} {domain}'
+        else:
+            new_entry = f'\n{web_firewall_ip} {domain}'
+
+        # hosts 파일 열기 (append 모드)
+        with open(hosts_path, 'a') as hosts_file:
+            hosts_file.write(new_entry)
+
+        print(f'Successfully added entry: {web_firewall_ip}:{web_firewall_port} {domain} to hosts file.')
+    except Exception as e:
+        print(f'Error adding entry to hosts file: {str(e)}')
 
 
