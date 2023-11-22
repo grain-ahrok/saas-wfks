@@ -1,10 +1,7 @@
-import { securityStatus } from "../enums/StatusEnum"
-
 export type SignatureType = {
-    id: Number
-    status?: securityStatus
-    warning: Number
-    title: String
-    poc_example: String
-    impact: String
+    id: string
+    warning: String
+    ko_desc : String
+    poc_example?: String
+    impact?: String
 }

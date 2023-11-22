@@ -9,7 +9,7 @@ type Props = {
 
 const XssPage = (props: Props) => {
 
-  const security_policy_id = 1;
+  const security_policy_id = 3;
   const url = `/security_policy/${security_policy_id}/xss`;
 
   const [status, setStatus] = useState('');
@@ -20,8 +20,8 @@ const XssPage = (props: Props) => {
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setStatus(data['status']);
-        setData(data['result'].sigList);
+        setStatus(data['result']['status']);
+        setData(data['result']['sig_list']);
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);

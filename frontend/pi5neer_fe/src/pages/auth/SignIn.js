@@ -24,13 +24,13 @@ function SignIn() {
             return;
         }
 
-        await axios.post("/users/login", {
+        await axios.post("/users/signin", {
             companyName : cName,
             password : pw,
           })
           .then((response) => {
             if (response.status = 200) {
-              return navigate("/main");
+              return navigate("/customers/dashboard");
             } else if (response.status = 401) {
                 alert("다시 확인해주세요");
             }

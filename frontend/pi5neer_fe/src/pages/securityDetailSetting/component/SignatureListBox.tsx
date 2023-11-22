@@ -57,10 +57,10 @@ const SignatureListBox = (props: Props) => {
                         {props.sigList.map((row) => (
                             <TableRow hover key={row.id.toString()}>
                                 <TableCell align="center" sx={{
-                                    color: warningToColor(row.warning),
+                                    color: warningToColor(Number(row.warning)),
                                     fontWeight: "bold"
-                                }}>{warningToStr(row.warning)}</TableCell>
-                                <TableCell sx={{ paddingX: "60px", fontSize: "16px", fontWeight: "bold" }} align="left">{row.title}</TableCell>
+                                }}>{warningToStr(Number(row.warning))}</TableCell>
+                                <TableCell sx={{ paddingX: "60px", fontSize: "16px", fontWeight: "bold" }} align="left">{row.ko_desc}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

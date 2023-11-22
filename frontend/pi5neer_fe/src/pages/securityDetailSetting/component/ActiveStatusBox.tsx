@@ -10,7 +10,7 @@ type Props = {
 }
 
 const ActiveStatusBox = (props: Props) => {
-
+    
     function handleRadioChange(newValue : string) {
         props.onValueChange(newValue);
       };

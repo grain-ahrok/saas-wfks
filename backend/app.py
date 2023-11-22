@@ -23,7 +23,7 @@ from flask_mail import Mail # forgot pw 관련
 
 app = Flask(__name__)
 
-app.config['JWT_SECRET_KEY'] = config_['key']  
+app.config['JWT_SECRET_KEY'] = config_('key')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)  # 30분으로 설정
 jwt = JWTManager(app)
 app.config.from_object(Config)

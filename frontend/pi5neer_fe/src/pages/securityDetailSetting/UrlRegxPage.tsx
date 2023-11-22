@@ -20,8 +20,8 @@ const UrlRegxPage = (props: Props) => {
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setStatus(data['status']);
-        setData(data['result'].sigList);
+        setStatus(data['result']['status']);
+        setData(data['result']['sig_list']);
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);

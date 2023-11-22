@@ -22,7 +22,7 @@ def register():
         "membership":data.get('membership')
     }
     user = User.create(**user_data)
-    automic_setting.automic_setting(data,user.id)
+    # automic_setting.automic_setting(data,user.id)
     
     return jsonify({"message": "User registered successfully.", "user_id": user.id}), 201
     
@@ -35,21 +35,18 @@ def login():
     user = User.query.filter_by(companyName=companyName).first()
 
     if user and bcrypt.check_password_hash(user.password, password):
-        if user.membership == 'Basic':
-            try:
-                #토큰 생성
-                token = generate_token()
+        try:
+            #토큰 생성
+            token = generate_token()
 
-                if token:
-                    jwt_token = jwt_generate_token(identity=user.id)
-                    return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token}), 200
-                else:
-                    return jsonify({"message": "Login failed. External server error."}), 401
-            except Exception as e:
+            if token:
+                jwt_token = jwt_generate_token(identity=user.id)
+                return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token}), 200
+            else:
+                return jsonify({"message": "Login failed. External server error."}), 401
+        except Exception as e:
                 # 예외 처리: 원격 서버와의 통신에 문제가 있을 경우
-                return jsonify({"message": f"Login failed. {str(e)}"}), 401
-        else:
-            return jsonify({"message": "Login failed. Membership is not 'basic'."}), 401
+            return jsonify({"message": f"Login failed. {str(e)}"}), 401
     else:
         return jsonify({"message": "Login failed. Invalid credentials."}), 401
 

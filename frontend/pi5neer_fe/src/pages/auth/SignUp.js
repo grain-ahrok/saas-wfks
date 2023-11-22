@@ -49,12 +49,12 @@ function SignUp() {
             password : pw,
             domain_address : doAddr,
             IP_address : ipAddr,
-            membership : 'Basic'
+            membership : 'basic'
           })
           .then((response) => {
             if ((response.status = 201)) {
                 alert("회원가입 되셨습니다. 로그인 해 주세요");
-              return navigate("/signin");
+              return navigate("/users/signin");
             }
           })
           .catch((err) => {
@@ -82,7 +82,7 @@ function SignUp() {
                             <button className={styles.LoginBtn} type="submit">Register</button>
                         </form>
                         <div className={styles.NavigateBtn} >
-                            <a href="./">sign in</a>
+                            <a href="/users/signin">sign in</a>
                         </div>
                     </div>
                 </div>

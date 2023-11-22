@@ -150,7 +150,8 @@ def configure_security_policies(data, headers, token):
     security_policy_id = get_security_policy_id(data.get('companyName'),token)
     if security_policy_id:
         print(f"Security policy ID: {security_policy_id}")
-        filename = 'backend/json/security_policy_name.json'
+
+        filename = './json/security_policy_name.json'
         with open(filename, 'r') as json_file:
             policy_data_extractors = json.load(json_file)
 
@@ -186,7 +187,7 @@ def create_user_application(data, headers, security_policy_id, protocol, port, i
 
     if response:
         existing_priorities = get_existing_priorities(user_application_url, headers)
-        filename = 'backend/json/application.json'
+        filename = './json/application.json'
 
         with open(filename, 'r') as json_file:
             user_app_data = json.load(json_file)

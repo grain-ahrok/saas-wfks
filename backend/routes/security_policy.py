@@ -11,13 +11,13 @@ import base64
 from flask_jwt_extended import jwt_required
 
 security_policy_ = Blueprint('security_policy', __name__, url_prefix='/security_policy')
-security_policy_.before_request(jwt_required())
+# security_policy_.before_request(jwt_required())
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 policy_names = ["sql_injection","buffer_overflow","request_flood","evasion","cookie_protection","directory_listing","download","url_regex","xss","shellcode","upload","access_control","credential_stuffing"]
 @security_policy_.route('/<int:security_policy_id>/<policy_name>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def get_policy_details(security_policy_id, policy_name):
     url = f'https://wf.awstest.piolink.net:8443/api/v3/security_policy/{security_policy_id}/{policy_name}'
-    filename = 'backend/json/security_policy_name.json'
+    filename = './json/security_policy_name.json'
     
     with open(filename, 'r') as json_file:
         policy_data_extractors = json.load(json_file)
@@ -47,9 +47,9 @@ def get_policy_details(security_policy_id, policy_name):
                             
                         result['result'][setting_name] = data
                         result['result']['status'] = status_value
-                
                 return result
             else:
+                
                 url = f'{url}/{setting_names}'
                 response = make_api_request(url, method='GET', headers=headers)
                 data = response.json()
@@ -64,10 +64,10 @@ def get_policy_details(security_policy_id, policy_name):
                         _, status_value = status_key_value_pair
                         
                     result['result']['status'] = status_value
-                    
                 return result
 
         elif request.method == 'PUT':
+
             data = request.json
             status = data.get('status')
 
@@ -101,7 +101,7 @@ def get_policy_details(security_policy_id, policy_name):
                     updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)}
                     response = make_api_request(ex_url, method='PUT', headers=headers, data=updated_data)
 
-            sp = SecurityPolicy.update_security_policy_by_wf_id(security_policy_id, policy_name=status)
+            # sp = SecurityPolicy.update_security_policy_by_wf_id(security_policy_id, policy_name=status)
             return response.json()
 
     except requests.exceptions.RequestException as e:
