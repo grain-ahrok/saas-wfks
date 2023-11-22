@@ -22,7 +22,7 @@ def register():
         "membership":data.get('membership')
     }
     user = User.create(**user_data)
-    # automic_setting.automic_setting(data,user.id)
+    automic_setting.automic_setting(data,user.id)
     
     return jsonify({"message": "User registered successfully.", "user_id": user.id}), 201
     
