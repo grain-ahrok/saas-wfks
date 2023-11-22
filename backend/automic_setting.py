@@ -257,10 +257,10 @@ def automic_setting(data,userId):
             source_nat_status_data = {"status": "enable"}
             source_nat_status_response = requests.post(source_nat_status_url, headers=headers, json=source_nat_status_data, verify=False)
             print_result("Source NAT Status", source_nat_status_response)
-
+            
             # Source NAT IP List
             source_nat_ip_list_url = f'https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/load_balance/source_nat_ip_list'
-            source_nat_ip_list_data = {"status": "enable", "client_ip": ip_address, "version": ip_version, "desc": companyName}
+            source_nat_ip_list_data = {"status": "enable", "client_ip": "172.31.0.194", "version": ip_version, "desc": companyName}
             source_nat_ip_list_response = requests.post(source_nat_ip_list_url, headers=headers, json=source_nat_ip_list_data, verify=False)
             print_result("Source NAT IP List", source_nat_ip_list_response)
 
