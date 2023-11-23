@@ -42,17 +42,17 @@ const DomainUpdateModal = (props: Props) => {
     }
 
 
-    fetch(url, { method: 'put', body: JSON.stringify(jsonData) })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.header.isSuccessful !== 'true') {
-          alert("다시 시도해주세요");
-        }
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.error('요청 중 오류 발생:', error);
-      });
+  fetch(url, { method: 'put', body: JSON.stringify(jsonData) })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.header.isSuccessful !== 'true') {
+        alert("다시 시도해주세요");
+      }
+      window.location.reload();
+    })
+    .catch((error) => {
+      console.error('요청 중 오류 발생:', error);
+    });
   }
 
   function deleteDomain() {
