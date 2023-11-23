@@ -3,13 +3,13 @@ import React, { useState } from 'react'
 import ModalWrapper from '../../components/layout/ModalWrapper'
 import colorConfigs from '../../config/colorConfigs'
 import DomainNoticeBox from './DomainNoticeBox'
-import { DomainType } from '../../models/DomainType'
+import { AppType } from '../../models/DomainType'
 import { activeStatus } from '../../enums/StatusEnum'
 
 type Props = {
   isOpen: boolean,
   closeModal: any,
-  domain: DomainType
+  domain: AppType
 }
 
 const DomainUpdateModal = (props: Props) => {

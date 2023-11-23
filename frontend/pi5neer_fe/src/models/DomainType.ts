@@ -1,16 +1,20 @@
 import { activeStatus } from "../enums/StatusEnum"
 
+export type AppType = {
+    id: number
+    ip: string
+    ipVer? : ipVer
+    port?: number
+    status: activeStatus
+    domain: string
+    server_name: string
+    domain_list: DomainType[]
+}
+
 export type DomainType = {
-    id : number,
-    ipVer : ipVer,
-    ip : string,
-    protocol? : protocol, 
-    port? : number,
-    status : activeStatus,
-    domain : {
-        id : number,
-        name : string
-    }[],
+    id: number
+    name: string
+    desc: string
 }
 
 export enum ipVer {
