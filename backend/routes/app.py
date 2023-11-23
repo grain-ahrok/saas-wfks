@@ -302,8 +302,8 @@ def manage_domain_settings(app_id):
                 "id" : item.id, 
                 "ip" : item.ip_addr, 
                 "port" : item.port, 
-                "status" : "enable", 
-                "server_name" : "server_name",
+                "status" : item.status, 
+                "server_name" : item.sever_name,
                 "domain_list" : Domain.get_domains_by_app_id(item.id),
             } for item in user_app]
         return json.dumps(apps, indent=2)

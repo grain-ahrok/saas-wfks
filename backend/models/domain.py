@@ -7,7 +7,7 @@ class Domain(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256))
     user_application_id = db.Column(db.Integer, db.ForeignKey('user_application.id'), nullable=False)
-    # desc = db.Column(db.String(256), nullable=True)
+    desc = db.Column(db.String(256), nullable=True)
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
@@ -42,5 +42,5 @@ class Domain(db.Model):
         domain_list = [{
                 "id" : item.id,
                 "name" : item.name,
-                "desc" : "item.desc" } for item in domains]
+                "desc" : item.desc } for item in domains]
         return domain_list

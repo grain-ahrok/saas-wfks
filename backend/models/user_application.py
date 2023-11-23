@@ -6,8 +6,8 @@ from datetime import datetime
 class UserApplication(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     wf_app_id = db.Column(db.Integer)
-    # server_name = db.Column(db.Enum('enable', 'disable', default='enable'))
-    # status = db.Column(db.String(40))
+    server_name = db.Column(db.Enum('enable', 'disable', default='enable'))
+    status = db.Column(db.String(40))
     protocol = db.Column(db.Enum('http', 'https'), default='http')
     ip_ver = db.Column(db.Enum('ipv4', 'ipv6'), default='ipv4')
     ip_addr = db.Column(db.String(40), default='0.0.0.0')
