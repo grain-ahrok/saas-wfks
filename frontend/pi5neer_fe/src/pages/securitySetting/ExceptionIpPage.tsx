@@ -12,11 +12,12 @@ import TextField from '@mui/material/TextField';
 
 
 import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
+import { Dictionary } from '@reduxjs/toolkit';
 
 
 type Props = {}
 let rows = [
-  {id : '0' , ip : '0', subnet_mast : '0', reason : 'test' } //line for test
+  {id : '0' , ip : '0', subnet_mask : '0', reason : 'test' } //line for test
 ];
 
 interface exceptionip  {
@@ -50,22 +51,33 @@ const style = {
 
 
 const ExceptionIpPage = (props: Props) => {
+
+    const [deletebutton, setdeletebutton] = useState(false);
+
     const ipref = useRef('0');
     const subnetref = useRef('0');
     const reasonref = useRef('0');
 
-    let now_id=-1;
+    let now_id = -1;
     const [open, setOpen] = React.useState(false);
+
     const handleOpen = function(params : GridRowParams) {
       const rowData:exceptionip = params.row as exceptionip;
+      now_id = Number(rowData.id);
       console.log(rowData);
+      setdeletebutton(true);
       setOpen(true);
     }
     const handleOpenbutton = () => {
       now_id = -1;
+      setdeletebutton(false);
       setOpen(true);
     }
-    const handleClose = () => setOpen(false);
+    const handleClose = function() {
+      now_id = 0;
+      setOpen(false);
+      console.log(now_id);
+    } 
 
     //get 부분 완료
     const url = '/security_policy/' + 1 + '/exception_ip_list';
@@ -82,31 +94,35 @@ const ExceptionIpPage = (props: Props) => {
     const send_button = function() {
 
       const formdata = new FormData();
+
+      
       formdata.append("network_ip",ipref.current);
       formdata.append("subnet_mask",subnetref.current);
       formdata.append("reason",reasonref.current);
 
-
       if(now_id == -1){
+
         const response = fetch(url,{
           method: 'POST',
           body:formdata
         })
-        console.log("POST(Add) response is : ",response);
+        alert("POST(Add) response is : " + response);
       }
       else {
+        formdata.append("request_id",now_id.toString());
         const response = fetch(url,{
           method: 'PUT',
-          body:
-            JSON.stringify({
-              "request":{
-                "security_policy_id" : now_id
-              },
-              "after":formdata
-            })
+          body:formdata
       })
-        console.log("PUT(edit) response is : ",response);
+        alert("PUT(edit) response is : " + response);
       }
+    }
+    //DELETE(delete) 부분
+    const delete_button = function() {
+      const response = fetch(url,{
+        method: 'DELETE'
+      })
+      alert(response)
     }
     
 
@@ -118,9 +134,6 @@ const ExceptionIpPage = (props: Props) => {
             적용 IP 목록
           </Box>
           <Stack direction='row' spacing={3}>
-            <Button variant="outlined" startIcon={<DeleteIcon />}>
-              Delete
-            </Button>
             <Button variant="contained" endIcon={<SendIcon />} onClick={handleOpenbutton}>
               ADD
             </Button>
@@ -178,10 +191,14 @@ const ExceptionIpPage = (props: Props) => {
               defaultValue="Just"
               inputRef={reasonref}
             />
-            <Box  display="flex" justifyContent="flex-end">
-            <Button variant="contained" endIcon={<SendIcon />} onClick={() => send_button()}>
-            Send
-            </Button>
+            <Box display="flex" justifyContent="space-between">
+                {deletebutton && <Button variant="contained" endIcon={<DeleteIcon />} onClick={() => delete_button()} >
+                Delete this policy
+                </Button>
+                }
+              <Button variant="contained" endIcon={<SendIcon />} onClick={() => send_button()}>
+              Send
+              </Button>
             </Box>
           </Stack>
         </Modal>
@@ -192,9 +209,6 @@ const ExceptionIpPage = (props: Props) => {
             예외 IP 목록
           </Box>
           <Stack direction='row' spacing={3}>
-            <Button variant="outlined" startIcon={<DeleteIcon />}>
-              Delete
-            </Button>
             <Button variant="contained" endIcon={<SendIcon />}>
               ADD
             </Button>
