@@ -284,27 +284,65 @@ def security_logs(app_id):
             return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
 
 
-    
-
-
 
 @app.route('/<int:app_id>/domain-list', methods=['GET', 'PUT', 'POST','DELETE'])
 def manage_domain_settings(app_id):
-    url = f"https://wf.awstest.piolink.net:8443/kui/api/v3/{app_id}/general/domain_list"
+    url = f"https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/general/domain_list"
+    url2 = f"https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/general/apply_ip_list"
     web_firewall_ip = "43.200.213.102"
     web_firewall_port = 8443  # 포트 정보
+    token = generate_token()
+    headers = {'Authorization': 'token ' + token}
+
+
     if request.method == 'GET':
-        response = make_api_request(url,method='GET')
-        return jsonify(response.json())
+        user_id = session['user_id']
+        user_app = UserApplication.get_app_by_user_id(user_id=user_id)
+        apps = [{
+                "id" : item.id, 
+                "ip" : item.ip_addr, 
+                "port" : item.port, 
+                "status" : "enable", 
+                "server_name" : "server_name",
+                "domain_list" : Domain.get_domains_by_app_id(item.id),
+            } for item in user_app]
+        return json.dumps(apps, indent=2)
     
+
     elif request.method == 'PUT':
         data = request.json
-        data = {
-            "status": data.get("status"),
-            "domain": data.get("domain"),
-            "desc": data.get("desc")
-        }
-        response = make_api_request(url, method='POST', data=data)
+        
+        if "apps" in data and data["apps"]:
+            app_data = data["apps"][0]  # Assuming there's only one item in "apps" list
+
+            # Extracting information from the nested dictionary
+            app_info = {
+                "id": app_data.get("id"),
+                "ip": app_data.get("ip"),
+                "port": app_data.get("port"),
+                "status": app_data.get("status"),
+                "domain": app_data.get("domain"),
+                "server_name": app_data.get("server_name"),
+            }
+
+            # Extracting information from the nested list of dictionaries
+            domain_list = []
+            for domain_data in app_data.get("domain_list", []):
+                domain_info = {
+                    "name": domain_data.get("name"),
+                    "id": domain_data.get("id"),
+                    "desc": domain_data.get("desc", ""),  # Assuming "desc" might not always be present
+                }
+                domain_list.append(domain_info)
+                response = make_api_request(domain_url, method='POST', data=domain_info)
+            # Combining all extracted information
+            result_data = {
+                "app_info": app_info,
+                "domain_list": domain_list
+            }
+        else:
+            result_data = {}
+            
         domain_id = data.get("domain")
         domain = Domain.get_domain_by_id(domain_id)
         if response.status_code == 200:
@@ -333,7 +371,6 @@ def manage_domain_settings(app_id):
                     response = make_api_request(url, method='POST', data=ip_data)
                     
                 add_host_entry(web_firewall_ip,data.get("domain"),web_firewall_port)
-        
                 
             else:
                 return jsonify({"error": f"Domain with id {domain_id} not found."}), 404
@@ -343,44 +380,36 @@ def manage_domain_settings(app_id):
     
     elif request.method == 'POST':
         data = request.json
-        domain = data.get("domain")
         status = data.get("status")
-        data = {
-            "status": status,
-            "domain": domain,
-            "desc": ""
-        }
-        response = make_api_request(url, method='POST', data=data)
+        domain_list = data.get("domain_list")
         
+        domains = [item.get("domain") for item in domain_list]
+        app_table = UserApplication.get_app_by_wf_app_id(app_id)
+        print(app_table.id)
 
-        if response.status_code == 200:
+        for domain in domains:
+            data = {
+                "status": status,
+                "domain": domain,
+                "desc": ""
+            }
+            response = make_api_request(domain_url, method='POST', headers=headers,data=data)
             
-            new_domain = Domain.create(
-                name=data.get("domain"),
-                user_application_id=app_id,
-                updated_at=datetime.utcnow()
-            )
+            if response.status_code == 200:
+                new_domain = Domain.create(
+                    name=domain,
+                    user_application_id=app_table.id,
+                    updated_at=datetime.utcnow()
+                )
 
-            app_data = UserApplication.get_app_by_id(app_id)
-            
-
-            ip_lists = data.get('ip_list')
-            for ip_list in ip_lists:
-                ip_data = [
-                    {
-                        "status": "enable",
-                        "version": ip_list.get('version'),
-                        "client_ip": client_ip,
-                        "client_mask": mask_bits,
-                        "ip": app_data.ip_addr,
-                        "port": ip_list.get('port'),
-                        "desc": ""
-                    }
-                ]
-                response = make_api_request(url, method='POST', data=ip_data)
-                
-
-        return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+        # Server List
+        server_list_url = f'https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/load_balance/server_list'
+        server_list_data = [{"status": "enable", "version": data.get('version'), "server_name": data.get("servername"), "server_ip": data.get("ip"), "server_port": data.get('port'),  "desc": ""}]
+        server_list_response = make_api_request(server_list_url,method="POST", headers=headers, data=server_list_data)
+        if server_list_response.status_code == 200:
+            return server_list_response.json()
+        else:        
+            return jsonify({"error": "server_list_response."}), 500
 
     elif request.method == 'DELETE':
         data = request.json
