@@ -32,6 +32,11 @@ const colorConfigs = {
         medium : "#FFAF38",
         low : "#EFD650",
     },
+    chart : {
+        high : "#FB2618",
+        medium : "#FFE3CE",
+        low : "FFF4CB"
+    },
     mainBg : "#FFFFFF",
     noticeBoxBg : "#F1F5F9",
     red : "#ff0000",
