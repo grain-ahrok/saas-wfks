@@ -127,7 +127,7 @@ const ExceptionIpPage = (props: Props) => {
       <Grid>
         <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
           <Box>
-            적용 IP 목록
+            적용 URL 목록
           </Box>
           <Stack direction='row' spacing={3}>
             <Button variant="contained" endIcon={<SendIcon />} onClick={handleOpenbutton}>
@@ -195,7 +195,7 @@ const ExceptionIpPage = (props: Props) => {
       <Grid>
         <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
           <Box>
-            예외 IP 목록
+            예외 URL 목록
           </Box>
           <Stack direction='row' spacing={3}>
             <Button variant="contained" endIcon={<SendIcon />}>
