@@ -3,26 +3,26 @@ import { activeStatus } from "../enums/StatusEnum"
 export type AppType = {
     id: number
     ip: string
-    ipVer? : ipVer
+    protocol? : protocolEnum
+    ip_ver? : ipVerEnum
     port?: number
     status: activeStatus
-    domain: string
     server_name: string
     domain_list: DomainType[]
 }
 
 export type DomainType = {
-    id: number
+    id?: number
     name: string
-    desc: string
+    desc?: string
 }
 
-export enum ipVer {
+export enum ipVerEnum {
     ipv4 = "ipv4",
     ipv6 = 'ipv6'
 };
 
-export enum protocol {
+export enum protocolEnum {
     http = "http",
     https = "https"
 };

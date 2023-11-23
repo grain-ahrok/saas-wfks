@@ -14,7 +14,6 @@ type Props = {
 const DomainItem = ({ app }: Props) => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
 
@@ -35,7 +34,7 @@ const DomainItem = ({ app }: Props) => {
             <Box>
                 <Box sx={{ justifyContent: "space-between", display: "flex", minWidth: "340px", width: "520px" }}>
                     <Box>
-                    <Typography variant='h5' sx={{ paddingBottom: "12px" }}>Halo halo</Typography>
+                    <Typography variant='h5' sx={{ paddingBottom: "12px" }}>{app.server_name} </Typography>
                     </Box>
                     <IconButton sx={{
                         width: "60px",
@@ -46,7 +45,7 @@ const DomainItem = ({ app }: Props) => {
                 </Box>
                 <Box display="flex" sx={{paddingY : "6px"}}>
                     <Typography sx={{ width: "130px", fontWeight: '600'}}> IP 주소 </Typography>
-                    <Typography>{app.ip}</Typography>
+                    <Typography>{app.ip}:{app.port}</Typography>
                 </Box>
                 {app.domain_list.map((item, index) => (
                     <Box display="flex">
@@ -65,7 +64,7 @@ const DomainItem = ({ app }: Props) => {
                 </Box>
             </Box>
             
-            <DomainUpdateModal isOpen={isModalOpen} closeModal={closeModal} domain={app} />
+            <DomainUpdateModal isOpen={isModalOpen} closeModal={closeModal} app={app} />
         </Box>
     )
 }
