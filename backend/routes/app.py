@@ -22,6 +22,7 @@ app = Blueprint('app', __name__, url_prefix='/app')
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
+
 @app.route('/<int:app_id>/dashboard', methods=['GET'])
 def dashboard(app_id):
     existing_logs = Log.query.all()
@@ -457,6 +458,95 @@ def manage_domain_settings(app_id):
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 
+
+
+def fetch_logs_from_external_api(app_id):
+    url = 'https://wf.awstest.piolink.net:8443/cgi-bin/logviewer/'
+    headers = {'Cookie': 'PB_LANG=ko; UI=wafwaf'}
+    encoded_string = "eyJhY3Rpb24iOiJzZWxlY3QiLCJmaWx0ZXIiOnsiZGV0YWlsIjp7fSwiYmFzaWMiOnsiYXBwX2lkIjpbIjEiXX0sInBlcmlvZCI6IjI1OTIwMDAifSwibGltaXQiOjEwMCwicGFnZVBhcmFtIjpudWxsfQ="
+
+    # Decode the Base64 string
+    decoded_bytes = base64.urlsafe_b64decode(encoded_string + '=' * (-len(encoded_string) % 4))
+
+    # Decode the bytes to UTF-8 string
+    decoded_string = decoded_bytes.decode('utf-8')
+    # JSON 문자열을 파이썬 객체로 변환
+    decoded_data = json.loads(decoded_string)
+
+    # app_id 업데이트
+    decoded_data['filter']['basic']['app_id'] = [app_id]
+
+    # 다시 JSON 문자열로 변환
+    updated_encoded_string = json.dumps(decoded_data)
+
+    # Encode the UTF-8 string to bytes
+    encoded_bytes = decoded_string.encode('utf-8')
+
+    # Encode the bytes to Base64
+    encoded_string = base64.urlsafe_b64encode(encoded_bytes).decode()
+
+    data = {
+        'log_type': 'security',
+        'param': encoded_string
+    }
+
+    response = requests.post(url, data=data, verify=False, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        app_name = request.args.get('app_name', 'pweb')  # 일단 테스트용
+
+        # 'logs' 키 확인 추가
+        logs_data = data.get('result', {}).get('logs', [])
+
+        # 'rows' 안에 있는 데이터에서 "Application"이 주어진 `app_name`과 일치하는 로그를 추출
+        app_logs = [log for log_data in logs_data for log in log_data.get("rows", []) if log[3] == app_name]
+
+        # Save logs to the database
+        for log_data in app_logs:
+            decoded_url = base64.b64decode(log_data[6]).decode('utf-8')
+            host = base64.b64decode(log_data[7])
+            formatted_log = {
+                'no': log_data[0],
+                'timestamp': log_data[1],  # 수정된 부분
+                'category': log_data[2]['text'],  # 수정된 부분
+                'app_name': log_data[3],
+                'risk_level': log_data[4]['text'],  # 수정된 부분
+                'sig_level': log_data[5]['text'],  # 수정된 부분
+                'host': host,
+                'url': decoded_url,
+                'attacker_ip': log_data[8],
+                'server_ip_port': log_data[9],
+                'country': log_data[10]['text'],  # 수정된 부분
+                'action': log_data[11]['text'],  # 수정된 부분
+                'app_id': app_id
+            }
+            Log.add_log(formatted_log)
+
+        existing_logs = Log.query.all()
+
+        log_s = [
+            {
+                'no': log.no,
+                'timestamp': log.timestamp,
+                'category': log.category,
+                'app_name': log.app_name,
+                'risk_level': log.risk_level,
+                'sig_level': log.sig_level,
+                'host': log.host,
+                'url': log.url,
+                'attacker_ip': log.attacker_ip,
+                'server_ip_port': log.server_ip_port,
+                'country': log.country,
+                'action': log.action,
+                'app_id': log.app_id
+            }
+            for log in existing_logs
+        ]
+
+        response_data = fetch_dashboard_data("data_timeline")
+        if response_data:
+            return jsonify
 
 
 def fetch_logs_from_external_api(app_id):
