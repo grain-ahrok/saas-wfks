@@ -30,6 +30,10 @@ import DetailPolicyWrapper from "../pages/securityDetailSetting/component/Detail
 
 const appUserRoutes: RouteType[] = [
     {
+        state: "signin",
+        element: <SignIn />
+    },
+    {
         path: "/users/signup",
         state: "signup",
         element: <SignUp />
@@ -42,11 +46,6 @@ const appUserRoutes: RouteType[] = [
 ]
 
 const appCustomerRoutes: RouteType[] = [
-    {
-        index: true,
-        element: <DashboardPage />,
-        state: "dashboard"
-    },
     {
         index: true,
         path: "/customers/dashboard",

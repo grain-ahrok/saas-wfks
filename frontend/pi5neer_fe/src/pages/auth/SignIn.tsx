@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import styleConfigs from "../../config/styleConfigs";
+import { setCookie } from "../../utils/cookie";
 
 function SignIn() {
 
@@ -27,14 +28,17 @@ function SignIn() {
 
         await axios.post("/users/signin", {
             companyName: cName,
-            password: pw})
+            password: pw
+            })
             .then((response) => {
                 if (response.status === 200) {
+                    const acessToken = response.data['access_token']
+                    setCookie("acessToken", acessToken);
                     return navigate("/customers/dashboard");
                 }
             })
             .catch((err) => {
-                if(err.response.status === 401) {
+                if (err.response.status === 401) {
                     alert("회사이름과 비밀번호를 다시 확인 해주세요");
                     return;
                 }
@@ -42,14 +46,6 @@ function SignIn() {
             });
     };
 
-
-    const setCookie = (key: string, value: string, daysToExpire: number) => {
-        const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() + daysToExpire);
-      
-        const cookieString = `${key}=${value}; expires=${expirationDate.toUTCString()}; path=/`;
-        document.cookie = cookieString;
-      };
 
     return (
         <Box sx={{ display: "flex", height: "100vh" }}>
@@ -90,7 +86,7 @@ function SignIn() {
                             }}>
                             Login</Button>
                         <Box sx={{ marginTop: "6px", display: "flex", justifyContent: "center", color: "rgba(17, 67, 101, 0.50)" }}>
-                            <a href="./signup">sign up</a>
+                            <a href="/users/signup">sign up</a>
                             <Box>&nbsp;/&nbsp;</Box>
                             <a href="#">forgot my password</a>
                         </Box>

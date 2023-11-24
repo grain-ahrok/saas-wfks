@@ -13,6 +13,7 @@ export type AppType = {
 
 export type DomainType = {
     id?: number
+    table_id? : number
     name: string
     desc?: string
 }
