@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 
 # security_policy.py
 class SecurityPolicy(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     wf_security_policy_id = db.Column(db.Integer)
     request_flood = db.Column(db.Enum('exception', 'detect', 'block'), default='block')
     sql_injection = db.Column(db.Enum('exception', 'detect', 'block'), default='block')

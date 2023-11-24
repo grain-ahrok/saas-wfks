@@ -40,6 +40,7 @@ def login():
             token = generate_token()
 
             if token:
+                session['user_id'] = user.id
                 jwt_token = jwt_generate_token(identity=user.id)
                 return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token}), 200
             else:
@@ -107,6 +108,7 @@ def change_password(user_id):
 @jwt_required()
 def logout():
     response = jsonify({"message": "로그아웃 성공."})
+    session.pop('user_id', None)
     unset_jwt_cookies(response)
     return response, 200
 

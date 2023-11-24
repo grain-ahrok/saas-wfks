@@ -3,7 +3,7 @@ from . import db
 from datetime import datetime
 
 class SpIp(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     security_policy_id = db.Column(db.Integer, db.ForeignKey('security_policy.id'), nullable=False)
     ip_ver = db.Column(db.Enum('ipv4', 'ipv6'))
     ip_addr = db.Column(db.String(40))

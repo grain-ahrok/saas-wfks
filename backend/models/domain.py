@@ -4,7 +4,7 @@ from datetime import datetime
 
 # domain.py
 class Domain(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(256))
     user_application_id = db.Column(db.Integer, db.ForeignKey('user_application.id'), nullable=False)
     desc = db.Column(db.String(256), nullable=True)
@@ -40,7 +40,24 @@ class Domain(db.Model):
     def get_domains_by_app_id(cls, app_id):
         domains = cls.query.filter_by(user_application_id = app_id).all()
         domain_list = [{
-                "id" : item.id,
+                "table_id" : item.id,
                 "name" : item.name,
                 "desc" : item.desc } for item in domains]
         return domain_list
+    @classmethod
+    def update_domain_by_id(cls, domain_id, name=None, desc=None):
+        domain = cls.get_domain_by_id(domain_id)
+
+        if domain:
+            # Update the fields if the new values are provided
+            if name is not None:
+                domain.name = name
+
+            if desc is not None:
+                domain.desc = desc
+
+            # Update the 'updated_at' field
+            domain.updated_at = datetime.utcnow()
+
+            # Commit the changes to the database
+            db.session.commit()
