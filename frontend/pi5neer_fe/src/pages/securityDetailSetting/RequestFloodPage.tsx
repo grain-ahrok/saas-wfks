@@ -1,48 +1,141 @@
 import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
-import { Box } from '@mui/material';
+import { Box, Button, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
+import colorConfigs from '../../config/colorConfigs';
 
 type Props = {
-  name : string,
+  name: string,
 }
 
 const RequestFloodPage = (props: Props) => {
 
   const security_policy_id = 1;
-const url = `/security_policy/${security_policy_id}/request_flood`;
+  const url = `/security_policy/${security_policy_id}/request_flood`;
   
+
   const [status, setStatus] = useState('');
-  
+  const [sessionCnt, setSessionCnt] = useState('');
+  const [proxyCnt, setProxyCnt] = useState('');
+
+  const handleSessionChange = (event: SelectChangeEvent) => {
+    setSessionCnt(event.target.value);
+  };
+  const handleProxyChange = (event: SelectChangeEvent) => {
+    setProxyCnt(event.target.value);
+  };
+
   useEffect(() => {
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
         setStatus(data['result']['status']);
+        setSessionCnt(data['result']['adv_options']['session_request_count']);
+        setProxyCnt(data['result']['adv_options']['proxy_request_count']);
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
       });
   }, [url]);
 
-  function handleValueChange(value: string) {
+
+  function handleStatusChange(value: string) {
     fetch(url, {
-      method : 'put', 
-      body : JSON.stringify({status : value})})
+      method: 'put',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ status: value })
+    })
       .then((response) => response.json())
       .then((data) => {
         if(data['header']['resultMessage'] === 'ok')
-        setStatus(value);
+          setStatus(value);
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
       });
   };
 
+  function updateCnt() {
+    fetch(url + '/adv_options', {
+      method: 'put',
+      body: JSON.stringify({ 
+        proxy_request_count: proxyCnt, 
+        session_request_count: sessionCnt,
+        proxy_time_unit: "second",
+        session_time_unit: "second",
+        session_user_define_time: 3000,
+       })
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error('요청 중 오류 발생:', error);
+      });
+  };
 
   return (
     <Box>
-      <Box>
-        <ActiveStatusBox name={props.name} status={status} onValueChange={handleValueChange} />
+      <Box >
+        <ActiveStatusBox name={props.name} status={status} onValueChange={handleStatusChange} />
+        <Box display="flex" sx={{ alignItems: "center", margin: "20px" }}>
+          <Typography width="15%" sx={{ fontWeight: "600", fontSize: "17px" }}>세션 요청 횟수</Typography>
+          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <Select
+              displayEmpty
+              value={sessionCnt}
+              label="Age"
+              onChange={handleSessionChange}>
+              <MenuItem value={10}>10회</MenuItem>
+              <MenuItem value={50}>50회</MenuItem>
+              <MenuItem value={100}>100회</MenuItem>
+              <MenuItem value={500}>500회</MenuItem>
+              <MenuItem value={1000}>1000회</MenuItem>
+            </Select>
+          </FormControl>
+          <Typography width="20%">/ 5분</Typography>
+        </Box>
+
+        <Box display="flex" sx={{ alignItems: "center", margin: "20px" }}>
+          <Typography width="15%" sx={{ fontWeight: "600", fontSize: "17px" }}>프록시 요청 횟수</Typography>
+          <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <Select
+              value={proxyCnt}
+              label="Age"
+              onChange={handleProxyChange}>
+              <MenuItem value={100}>100회</MenuItem>
+              <MenuItem value={500}>500회</MenuItem>
+              <MenuItem value={1000}>1000회</MenuItem>
+              <MenuItem value={5000}>5000회</MenuItem>
+              <MenuItem value={10000}>10000회</MenuItem>
+            </Select>
+          </FormControl>
+          <Typography width="20%">/ 5분</Typography>
+        </Box>
+      </Box>
+
+      <Box sx={{
+        position: 'fixed',
+        float: "right",
+        bottom: '40px',
+        right: '40px',
+      }}>
+        <Button
+          sx={{
+            minWidth: "180px",
+            color: colorConfigs.button.white,
+            backgroundColor: colorConfigs.button.blue,
+            border: 1,
+            borderColor: colorConfigs.button.blue,
+            borderRadius: "40px",
+            paddingX: "32px",
+            margin: "4px",
+            "&: hover": {
+              color: colorConfigs.button.blue
+            }
+          }}
+          onClick={updateCnt}
+        >적용하기</Button>
       </Box>
     </Box>
   )

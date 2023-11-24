@@ -6,5 +6,5 @@ export enum activeStatus {
 export enum securityStatus {
     block = "block",
     detect = "detect",
-    excpetion = "excpetion"
+    excpetion = "exception"
 }
