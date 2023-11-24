@@ -17,7 +17,9 @@ from datetime import datetime, timedelta
 from flask_jwt_extended import jwt_required
 from sqlalchemy.orm import joinedload
 app = Blueprint('app', __name__, url_prefix='/app')
-# app.before_request(jwt_required())
+
+#app.before_request(jwt_required())
+
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
 @app.route('/<int:app_id>/dashboard', methods=['GET'])
@@ -30,6 +32,9 @@ def dashboard(app_id):
             return jsonify(response_data), 200
 
         return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+    else:
+        # Fetch logs from the external API if no existing logs are present
+        return fetch_logs_from_external_api(app_id)
     
 
 def fetch_dashboard_data(app_id):
@@ -287,185 +292,125 @@ def security_logs(app_id):
         else:
             return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
 
-@app.route('/<int:app_id>/domain-list/test', methods=['GET', 'PUT', 'POST','DELETE'])
-def test_domain_setting(app_id) :
-    if request.method == 'GET' :
-        return jsonify([{ 
-				"id": 1,
-				"ip" : "172.31.0.194",
-				"port" : 443,
-                "status": "enable",
-                "domain": "naver1456.com",
-                        "server_name" : "서버이름",
-                        "domain_list" : [
-                            {
-							'name': 'ac.kr', 
-							'id': 1, 
-							'desc': ''
-						    },
-                            {
-							'name': 'ac.kr', 
-							'id': 1, 
-							'desc': ''
-						    },
-				        ]
-		            }, { 
-				"id": 2,
-				"ip" : "172.31.0.195",
-				"port" : 443,
-                "status": "enable",
-                "domain": "naver1456.com",
-                        "server_name" : "서버이름",
-                        "domain_list" : [
-                            {
-							'name': 'ac.kr', 
-							'id': 1, 
-							'desc': ''
-						    },
-                            {
-							'name': 'ac.kr', 
-							'id': 1, 
-							'desc': ''
-						    },
-				        ]
-		            }
-                    ]), 200
 
 
-# @app.route('/<int:app_id>/domain-list', methods=['GET', 'PUT', 'POST','DELETE'])
-# def manage_domain_settings(app_id):
-#     url = f"https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/general/domain_list"
-#     url2 = f"https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/general/apply_ip_list"
-#     web_firewall_ip = "43.200.213.102"
-#     web_firewall_port = 8443  # 포트 정보
-#     token = generate_token()
-#     headers = {'Authorization': 'token ' + token}
-
-#     if request.method == 'GET':
-#         # user_id = session['user_id']
-#         user_app = UserApplication.get_app_by_user_id(user_id=77)
-#         apps = [{
-#                 "id" : item.id, 
-#                 "ip" : item.ip_addr, 
-#                 "port" : item.port, 
-#                 "status" : item.status, 
-#                 "server_name" : item.sever_name,
-#                 "domain_list" : Domain.get_domains_by_app_id(item.id),
-#             } for item in user_app]
-#         return json.dumps(apps, indent=2)
-    
-
-#     elif request.method == 'PUT':
-#         data = request.json
-        
-#         if "apps" in data and data["apps"]:
-#             app_data = data["apps"][0]  # Assuming there's only one item in "apps" list
-
-#             # Extracting information from the nested dictionary
-#             app_info = {
-#                 "id": app_data.get("id"),
-#                 "ip": app_data.get("ip"),
-#                 "port": app_data.get("port"),
-#                 "status": app_data.get("status"),
-#                 "domain": app_data.get("domain"),
-#                 "server_name": app_data.get("server_name"),
-#             }
-
-#             # Extracting information from the nested list of dictionaries
-#             domain_list = []
-#             for domain_data in app_data.get("domain_list", []):
-#                 domain_info = {
-#                     "name": domain_data.get("name"),
-#                     "id": domain_data.get("id"),
-#                     "desc": domain_data.get("desc", ""),  # Assuming "desc" might not always be present
-#                 }
-#                 domain_list.append(domain_info)
-#                 response = make_api_request(domain_url, method='POST', data=domain_info)
-#             # Combining all extracted information
-#             result_data = {
-#                 "app_info": app_info,
-#                 "domain_list": domain_list
-#             }
-#         else:
-#             result_data = {}
+@app.route('/<int:app_id>/domain-list', methods=['GET', 'PUT', 'POST','DELETE'])
+def manage_domain_settings(app_id):
+    domain_url = f"https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/general/domain_list"
+    server_list_url = f'https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/load_balance/server_list'
+    web_firewall_ip = "43.200.213.102"
+    web_firewall_port = 8443  # 포트 정보
+    token = generate_token()
+    headers = {'Authorization': 'token ' + token}
+    user_id = session.get('user_id')
+    try:
+        if request.method == 'GET':
+            #user_id = session.get('user_id')
             
-#         domain_id = data.get("domain")
-#         domain = Domain.get_domain_by_id(domain_id)
-#         if response.status_code == 200:
-#             if domain:
-#                 domain.update(
-#                     name=data.get("domain"),
-#                 )
-#                 ip_lists = data.get('ip_list')
-#                 app_data = UserApplication.get_app_by_id(app_id)
-                
-#                 for ip_list in ip_lists:
-#                     client_ip, mask_bits = ip_list.get('ip').split("/")
-#                     mask_bits = int(mask_bits)
-#                     ip_data = [
-#                         {
-#                             "id": request.args.get('id'),
-#                             "status": "enable",
-#                             "version": ip_list.get('version'),
-#                             "client_ip": client_ip,
-#                             "client_mask": mask_bits,
-#                             "ip": app_data.ip_addr,
-#                             "port": ip_list.get('port'),
-#                             "desc": ""
-#                         }
-#                     ]
-#                     response = make_api_request(url, method='POST', data=ip_data)
+            user_app = UserApplication.get_app_by_user_id(user_id=user_id)
+            apps = [
+                {
+                    "id": item.id,
+                    "ip": item.ip_addr,
+                    "port": item.port,
+                    "status": item.status,
+                    "server_name": item.server_name,
+                    "domain_list" : Domain.get_domains_by_app_id(item.id),
+                } for item in user_app
+            ]
+            
+            response = make_api_request(domain_url, method='GET', headers=headers)
+            data = response.json()
+            
+            for domain in apps[0]['domain_list']:
+                if domain['name'] == data[0]["domain"]:
+                    domain['id'] = data[0]["id"]
+            
+            print(apps)
+            return jsonify(apps), 200
+
+        elif request.method == 'PUT':
+            app_data = request.json
+            server_name = app_data.get("servername")
+            # Extracting information from the nested dictionary
+            app_info = {
+                "id": app_data.get("id"),
+                "server_ip": app_data.get("ip"),
+                "server_port": app_data.get("port"),
+                "status": app_data.get("status"),
+                "version":app_data.get("version"),
+                "desc":app_data.get("servername")
+            }
+
+            # Extracting information from the nested list of dictionaries
+            domain_list = []
+            for domain_data in app_data.get("domain_list", []):
+                domain_info = {
+                    "domain": domain_data.get("domain"),
+                    "id": domain_data.get("id"),
+                    "desc": domain_data.get("desc", ""),  # Assuming "desc" might not always be present
+                }
+                domain_list.append(domain_info)
+                response = make_api_request(domain_url, method='PUT', data=domain_info, headers=headers)
+                if response.status_code == 200:
+                    Domain.update_domain_by_id(domain_data.get("table_id"), name=domain_data.get("domain"), desc=domain_data.get("desc", ""))
+                else:
+                    return {"Failed to domain_list."},500   
+            server_list_url = f'https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/load_balance/server_list'
+            response = make_api_request(server_list_url, method='PUT', headers=headers,data=app_info)
+            if response.status_code == 200:
+                app_data = {"ip_ver":app_data.get("version"),"ip_addr":app_data.get("ip"),"port":app_data.get("port"),"status":app_data.get("status"),"server_name":server_name}
+                UserApplication.update_app_by_id(Domain.user_application_id,app_data)
+                return response.json(),200
+            else:
+                return {"Failed to server_list."},500
                     
-#                 add_host_entry(web_firewall_ip,data.get("domain"),web_firewall_port)
-                
-#             else:
-#                 return jsonify({"error": f"Domain with id {domain_id} not found."}), 404
-#         return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
 
- 
     
-#     elif request.method == 'POST':
-#         data = request.json
-#         status = data.get("status")
-#         domain_list = data.get("domain_list")
-        
-#         domains = [item.get("domain") for item in domain_list]
-#         app_table = UserApplication.get_app_by_wf_app_id(app_id)
-#         print(app_table.id)
+        elif request.method == 'POST':
+            data = request.json
+            status = data.get("status")
+            domain_list = data.get("domain_list")
+            port = data.get("port")
+            domains = [item.get("domain") for item in domain_list]
+            descs = [item.get("desc") for item in domain_list]
+            app_database = UserApplication.get_app_by_wf_app_id(app_id)
 
-#         for domain in domains:
-#             data = {
-#                 "status": status,
-#                 "domain": domain,
-#                 "desc": ""
-#             }
-#             response = make_api_request(domain_url, method='POST', headers=headers,data=data)
+            if app_database:
+                security_policy_id = app_database.security_policy_id
+                server_list_data = [{"status": status, "version": data.get('version'), "server_name": data.get("servername"), "server_ip": data.get("ip"), "server_port": str(data.get('port')),  "desc": ""}]
+                server_list_response = make_api_request(server_list_url,method="POST", headers=headers, data=server_list_data)
+                if server_list_response.status_code == 200:
+                    protocol = "https" if isinstance(port, list) and 443 in port else "http"
+         
+                    app_data = {"wf_app_id":app_id,"security_policy_id":security_policy_id,"user_id":user_id,"protocol":protocol,"ip_ver":data.get("version"),"ip_addr":data.get("ip"),"port":data.get("port"),"server_name":data.get("servername"),"status":status}
+                    
+                    user_application = UserApplication.create(**app_data)
+                    
+                    for domain,desc in zip(domains,descs):
+                        data = {
+                            "status": status,
+                            "domain": domain,
+                            "desc": desc
+                        }
+                        response = make_api_request(domain_url, method='POST', headers=headers,data=data)
+                        
+                        if response.status_code == 200:
+                            new_domain = Domain.create(
+                                name=domain,
+                                user_application_id=user_application.id,
+                                updated_at=datetime.utcnow(),
+                                desc=desc,
+                            )
+                        else:
+                            return {'error : domain_url response failure'},500
+                else:        
+                    return jsonify({"error": "server_list_response."}), 500# Server List
+            else:
+                return {"Error : app_database"}, 500
             
-#             if response.status_code == 200:
-#                 new_domain = Domain.create(
-#                     name=domain,
-#                     user_application_id=app_table.id,
-#                     updated_at=datetime.utcnow()
-#                 )
-
-#         # Server List
-#         server_list_url = f'https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/load_balance/server_list'
-#         server_list_data = [{"status": "enable", "version": data.get('version'), "server_name": data.get("servername"), "server_ip": data.get("ip"), "server_port": data.get('port'),  "desc": ""}]
-#         server_list_response = make_api_request(server_list_url,method="POST", headers=headers, data=server_list_data)
-#         if server_list_response.status_code == 200:
-#             return server_list_response.json()
-#         else:        
-#             return jsonify({"error": "server_list_response."}), 500
-
-#     elif request.method == 'DELETE':
-#         data = request.json
-#         id = data.get("id")
-#         data = [{"id": id}]
-#         response = make_api_request(url, method='DELETE', data=data)
-#         if response.status_code == 200:
-#             return response.json()  
-#         else:
-#             return jsonify({"error": "도메인 삭제에 실패하셨습니다.."}), 500
+            
+            
 
         elif request.method == 'DELETE':
             data = request.json
@@ -498,23 +443,110 @@ def test_domain_setting(app_id) :
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
     #add_host_entry(web_firewall_ip,data.get("domain"),web_firewall_port)
 
-# def add_host_entry(web_firewall_ip, domain, web_firewall_port=None):
-#     try:
-#         # hosts 파일 경로
-#         hosts_path = r'C:\\windows\\system32\\drivers\\etc\\hosts'
+def add_host_entry(web_firewall_ip, domain, web_firewall_port=None):
+    try:
+        # hosts 파일 경로
+        hosts_path = r'C:\\windows\\system32\\drivers\\etc\\hosts'
 
-#         # 추가할 엔트리
-#         if web_firewall_port:
-#             new_entry = f'\n{web_firewall_ip}:{web_firewall_port} {domain}'
-#         else:
-#             new_entry = f'\n{web_firewall_ip} {domain}'
+        # 추가할 엔트리
+        if web_firewall_port:
+            new_entry = f'\n{web_firewall_ip}:{web_firewall_port} {domain}'
+        else:
+            new_entry = f'\n{web_firewall_ip} {domain}'
 
-#         # hosts 파일 열기 (append 모드)
-#         with open(hosts_path, 'a') as hosts_file:
-#             hosts_file.write(new_entry)
+        # hosts 파일 열기 (append 모드)
+        with open(hosts_path, 'a') as hosts_file:
+            hosts_file.write(new_entry)
 
-#         print(f'Successfully added entry: {web_firewall_ip}:{web_firewall_port} {domain} to hosts file.')
-#     except Exception as e:
-#         print(f'Error adding entry to hosts file: {str(e)}')
+        print(f'Successfully added entry: {web_firewall_ip}:{web_firewall_port} {domain} to hosts file.')
+    except Exception as e:
+        print(f'Error adding entry to hosts file: {str(e)}')
 
 
+def fetch_logs_from_external_api(app_id):
+    url = 'https://wf.awstest.piolink.net:8443/cgi-bin/logviewer/'
+    headers = {'Cookie': 'PB_LANG=ko; UI=wafwaf'}
+    encoded_string = "eyJhY3Rpb24iOiJzZWxlY3QiLCJmaWx0ZXIiOnsiZGV0YWlsIjp7fSwiYmFzaWMiOnsiYXBwX2lkIjpbIjEiXX0sInBlcmlvZCI6IjI1OTIwMDAifSwibGltaXQiOjEwMCwicGFnZVBhcmFtIjpudWxsfQ="
+
+    # Decode the Base64 string
+    decoded_bytes = base64.urlsafe_b64decode(encoded_string + '=' * (-len(encoded_string) % 4))
+
+    # Decode the bytes to UTF-8 string
+    decoded_string = decoded_bytes.decode('utf-8')
+    # JSON 문자열을 파이썬 객체로 변환
+    decoded_data = json.loads(decoded_string)
+
+    # app_id 업데이트
+    decoded_data['filter']['basic']['app_id'] = [app_id]
+
+    # 다시 JSON 문자열로 변환
+    updated_encoded_string = json.dumps(decoded_data)
+
+    # Encode the UTF-8 string to bytes
+    encoded_bytes = decoded_string.encode('utf-8')
+
+    # Encode the bytes to Base64
+    encoded_string = base64.urlsafe_b64encode(encoded_bytes).decode()
+
+    data = {
+        'log_type': 'security',
+        'param': encoded_string
+    }
+
+    response = requests.post(url, data=data, verify=False, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        app_name = request.args.get('app_name', 'pweb')  # 일단 테스트용
+
+        # 'logs' 키 확인 추가
+        logs_data = data.get('result', {}).get('logs', [])
+
+        # 'rows' 안에 있는 데이터에서 "Application"이 주어진 `app_name`과 일치하는 로그를 추출
+        app_logs = [log for log_data in logs_data for log in log_data.get("rows", []) if log[3] == app_name]
+
+        # Save logs to the database
+        for log_data in app_logs:
+            decoded_url = base64.b64decode(log_data[6]).decode('utf-8')
+            host = base64.b64decode(log_data[7])
+            formatted_log = {
+                'no': log_data[0],
+                'timestamp': log_data[1],  # 수정된 부분
+                'category': log_data[2]['text'],  # 수정된 부분
+                'app_name': log_data[3],
+                'risk_level': log_data[4]['text'],  # 수정된 부분
+                'sig_level': log_data[5]['text'],  # 수정된 부분
+                'host': host,
+                'url': decoded_url,
+                'attacker_ip': log_data[8],
+                'server_ip_port': log_data[9],
+                'country': log_data[10]['text'],  # 수정된 부분
+                'action': log_data[11]['text'],  # 수정된 부분
+                'app_id': app_id
+            }
+            Log.add_log(formatted_log)
+
+        existing_logs = Log.query.all()
+
+        log_s = [
+            {
+                'no': log.no,
+                'timestamp': log.timestamp,
+                'category': log.category,
+                'app_name': log.app_name,
+                'risk_level': log.risk_level,
+                'sig_level': log.sig_level,
+                'host': log.host,
+                'url': log.url,
+                'attacker_ip': log.attacker_ip,
+                'server_ip_port': log.server_ip_port,
+                'country': log.country,
+                'action': log.action,
+                'app_id': log.app_id
+            }
+            for log in existing_logs
+        ]
+
+        response_data = fetch_dashboard_data("data_timeline")
+        if response_data:
+            return jsonify
