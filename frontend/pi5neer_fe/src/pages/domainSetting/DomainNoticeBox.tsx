@@ -3,6 +3,7 @@ import React from 'react'
 import colorConfigs from '../../config/colorConfigs'
 
 const DomainNoticeBox = () => {
+    // TODO : 멘트 수정
     return (
         <Box sx={{
             backgroundColor: colorConfigs.noticeBoxBg,
