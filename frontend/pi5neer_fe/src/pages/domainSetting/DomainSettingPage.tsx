@@ -14,7 +14,7 @@ const DomainSettingPage = () => {
 
   const [appList, setData] = useState([]);
   useEffect(() => {
-    const url = '/app/' + 1 + '/domain-list';
+    const url = '/app/' + 1 + '/domain-list/test';
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
