@@ -4,7 +4,9 @@ from utils import bcrypt
 from flask_jwt_extended import jwt_required
 
 Pi5neer = Blueprint('admin', __name__, url_prefix='/Pi5neer')
-Pi5neer.before_request(jwt_required())
+@Pi5neer.before_request
+def before_request():
+    jwt_required()  # Call jwt_required directly within the before_request function
 # 관리자 로그인 API
 @Pi5neer.route('/signin', methods=['POST'])
 def admin_login():

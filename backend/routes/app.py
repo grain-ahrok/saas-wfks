@@ -18,7 +18,9 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.orm import joinedload
 app = Blueprint('app', __name__, url_prefix='/app')
 
-app.before_request(jwt_required())
+@app.before_request
+def before_request():
+    jwt_required()  # Call jwt_required directly within the before_request function
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 

@@ -11,7 +11,11 @@ import base64
 from flask_jwt_extended import jwt_required
 
 security_policy_ = Blueprint('security_policy', __name__, url_prefix='/security_policy')
-security_policy_.before_request(jwt_required())
+
+@security_policy_.before_request
+def before_request():
+    jwt_required()  # Call jwt_required directly within the before_request function
+    
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 policy_names = ["sql_injection","buffer_overflow","request_flood","evasion","cookie_protection","directory_listing","download","url_regex","xss","shellcode","upload","access_control","credential_stuffing"]
 @security_policy_.route('/<int:security_policy_id>/<policy_name>', methods=['GET', 'POST', 'PUT', 'DELETE'])
