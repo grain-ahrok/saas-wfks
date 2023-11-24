@@ -3,6 +3,7 @@ import ActiveStatusBox from './component/ActiveStatusBox'
 import { useEffect, useState } from 'react';
 import SignatureListBox from './component/SignatureListBox';
 import { SignatureType } from '../../models/SignatureType';
+import { getCookie } from '../../utils/cookie';
 
 type Props = {
   name: string,
@@ -11,14 +12,16 @@ type Props = {
 
 const SqlInjectionPage = (props: Props) => {
 
-  const security_policy_id = 3;
+  const security_policy_id = getCookie("security_policy_id");
   const url = `/security_policy/${security_policy_id}/sql_injection`;
-
+  const token = getCookie("access_token");
   const [status, setStatus] = useState('');
   const [sigList, setData] = useState<SignatureType[]>([]);
  
   useEffect(() => {
-    fetch(url)
+    fetch(url, {
+      headers : {"Authorization": `Bearer ${token}`},
+    })
       .then((response) => response.json())
       .then((data) => {
         setStatus(data['result']['status']);
@@ -33,7 +36,7 @@ const SqlInjectionPage = (props: Props) => {
     function handleValueChange(value: string) {
       fetch(url, {
         method : 'put', 
-        headers: {'Content-Type': 'application/json'},
+        headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
         body : JSON.stringify({status : value})})
         .then((response) => response.json())
         .then((data) => {

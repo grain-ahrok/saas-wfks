@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"
-import axios from "axios";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import styleConfigs from "../../config/styleConfigs";
-import { setCookie } from "../../utils/cookie";
+import { getCookie, setCookie } from "../../utils/cookie";
+import { UserType } from "../../models/UserType";
 
 function SignIn() {
 
@@ -26,24 +26,28 @@ function SignIn() {
             return;
         }
 
-        await axios.post("/users/signin", {
+        fetch('/users/signin', { method: 'post',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
             companyName: cName,
-            password: pw
-            })
-            .then((response) => {
-                if (response.status === 200) {
-                    const acessToken = response.data['access_token']
-                    setCookie("acessToken", acessToken);
-                    return navigate("/customers/dashboard");
-                }
-            })
-            .catch((err) => {
-                if (err.response.status === 401) {
-                    alert("회사이름과 비밀번호를 다시 확인 해주세요");
-                    return;
-                }
-                alert("에러가 발생했습니다. 관리자에게 문의해주세요\n" + err);
-            });
+            password: pw})
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            const user : UserType = data;
+            console.log(user.access_token);
+            setCookie("access_token", user.access_token);
+            setCookie("user_id", user.id.toString());
+            setCookie("security_policy_id", user.security_policy_id.toString());
+            // setCookie("wf_app_id", user.app_id.toString());
+            return navigate("/customers/dashboard");
+        })
+        .catch((error) => {
+            if(error) {
+                alert("회사 이름과 비밀번호를 다시 확인해주세요")
+            }
+            // alert("에러가 발생했습니다. 관리자에게 문의해주세요\n" + error);
+        });
     };
 
 

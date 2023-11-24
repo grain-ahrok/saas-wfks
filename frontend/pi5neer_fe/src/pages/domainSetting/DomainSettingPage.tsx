@@ -4,6 +4,7 @@ import DomainItem from './DomainItem'
 import DomainNoticeBox from './DomainNoticeBox'
 import colorConfigs from '../../config/colorConfigs'
 import DomainCreateModal from './DomainCreateModal'
+import { getCookie } from '../../utils/cookie'
 
 
 const DomainSettingPage = () => {
@@ -11,11 +12,16 @@ const DomainSettingPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-
   const [appList, setData] = useState([]);
+
+  const app_id = getCookie("wf_app_id");
+  const token = getCookie("access_token");
+  const url = '/app/' + app_id + '/domain-list/test';
   useEffect(() => {
-    const url = '/app/' + 1 + '/domain-list/test';
-    fetch(url)
+    
+    fetch(url, {
+      headers : {"Authorization": `Bearer ${token}`},
+    })
       .then((response) => response.json())
       .then((data) => {
         setData(data);

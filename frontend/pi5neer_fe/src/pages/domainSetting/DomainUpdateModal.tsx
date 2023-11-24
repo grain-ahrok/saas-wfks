@@ -1,4 +1,4 @@
-import { Box, Button, Divider, FormControl, FormControlLabel, FormLabel, IconButton, Radio, RadioGroup, Switch, TextField, Typography } from '@mui/material'
+import { Box, Button, Divider, FormControlLabel, IconButton, Radio, RadioGroup, Switch, TextField, Typography } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 import ModalWrapper from '../../components/layout/ModalWrapper'
 import colorConfigs from '../../config/colorConfigs'
@@ -6,6 +6,7 @@ import DomainNoticeBox from './DomainNoticeBox'
 import { AppType, DomainType, protocolEnum } from '../../models/DomainType'
 import { activeStatus } from '../../enums/StatusEnum'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import { getCookie } from '../../utils/cookie'
 
 
 type Props = {
@@ -27,9 +28,11 @@ const DomainUpdateModal = (props: Props) => {
     setProtocol(event.target.value);
   };
 
+  const app_id = getCookie("wf_app_id");
+  const token = getCookie("access_token");
   function updateDomain() {
-    const url = '/app/' + 1 + '/domain-list';
-
+    
+    const url = '/app/' + app_id + '/domain-list';
 
     let jsonData : AppType = {
       id: props.app.id,
@@ -42,7 +45,9 @@ const DomainUpdateModal = (props: Props) => {
     }
 
 
-  fetch(url, { method: 'put', body: JSON.stringify(jsonData) })
+  fetch(url, { method: 'put', 
+    headers : {"Authorization": `Bearer ${token}`},
+    body: JSON.stringify(jsonData) })
     .then((response) => response.json())
     .then((data) => {
       if (data.header.isSuccessful !== 'true') {
@@ -56,8 +61,10 @@ const DomainUpdateModal = (props: Props) => {
   }
 
   function deleteDomain() {
-    const url = '/app/' + 1 + '/domain-list';
-    fetch(url, { method: 'delete', body: JSON.stringify({ id: props.app.id }) })
+    const url = '/app/' + app_id + '/domain-list';
+    fetch(url, { method: 'delete', 
+      headers : {"Authorization": `Bearer ${token}`},
+      body: JSON.stringify({ id: props.app.id }) })
       .then((response) => response.json())
       .then((data) => {
         if (data.header.isSuccessful !== 'true') {

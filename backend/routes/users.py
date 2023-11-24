@@ -11,8 +11,17 @@ from flask_jwt_extended import jwt_required, get_jwt_identity,create_access_toke
 users = Blueprint('users', __name__, url_prefix='/users')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
-def jwt_generate_token(identity):
-    return create_access_token(identity=identity)
+def jwt_generate_token(identity, level):
+    # identity: 사용자 식별자 (일반적으로 사용자의 ID)
+    # level: 사용자의 권한 레벨
+
+    # 토큰에 포함할 추가적인 정보를 dictionary로 정의
+    additional_claims = {"level": level}
+
+    # create_access_token 함수를 사용하여 JWT 토큰 생성
+    jwt_token = create_access_token(identity=identity, additional_claims=additional_claims)
+
+    return jwt_token
 
 @users.route('/signup', methods=['POST'])
 def register():

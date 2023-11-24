@@ -13,6 +13,7 @@ import TextField from '@mui/material/TextField';
 
 import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
 import { Dictionary } from '@reduxjs/toolkit';
+import { getCookie } from '../../utils/cookie';
 
 
 type Props = {}
@@ -80,7 +81,8 @@ const BlockedIpPage = (props: Props) => {
     } 
 
     //get 부분 완료
-    const url = '/security_policy/' + 1 + '/block_ip';
+    const security_policy_id = getCookie("security_policy_id");
+    const url = '/security_policy/' + security_policy_id + '/block_ip';
     fetch(url)
       .then((response) => response.json())
       .then((data) => { 

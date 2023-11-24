@@ -6,6 +6,7 @@ import { DomainType } from '../../models/DomainType'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { activeStatus } from '../../enums/StatusEnum'
 import DomainNoticeBox from './DomainNoticeBox'
+import { getCookie } from '../../utils/cookie'
 
 type Props = {
   isOpen: boolean,
@@ -19,9 +20,11 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
   const [port, setPort] = useState('');
   const [protocol, setProtocol] = useState('');
   const [domainListName, setDomainName] = useState<DomainType[]>([{name : ''}]);
-
+  
+  const app_id = getCookie("wf_app_id");
+  const token = getCookie("access_token");
   function createDomain() {
-    const url = '/app/' + 1 + '/domain-list';
+    const url = '/app/' + app_id + '/domain-list';
 
     let jsonData = {
       ip: ip,
@@ -32,7 +35,9 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
       server_name: serverName
     }
 
-  fetch(url, { method: 'post', body: JSON.stringify(jsonData) })
+  fetch(url, { method: 'post', 
+    headers : {"Authorization": `Bearer ${token}`},
+    body: JSON.stringify(jsonData) })
     .then((response) => response.json())
     .then((data) => {
       if (data.header.isSuccessful !== 'true') {

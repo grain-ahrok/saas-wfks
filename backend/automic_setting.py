@@ -122,7 +122,7 @@ def get_existing_priorities(url, headers):
 def create_security_policy(data, token):
     security_policy_url = "https://wf.awstest.piolink.net:8443/api/v3/security_policy"
     headers = {'Authorization': 'token ' + token}
-    post_data = {"name": data.get('companyName'),"status": "enable","create_type": "vendor_policy","vendor_policy": "standard","vendor_policy_block_status": "enable","sync_id": 1}
+    post_data = {"name": data.get('companyName'),"status": "enable","create_type": "vendor_policy","vendor_policy": "standard","vendor_policy_block_status": "disable","sync_id": 4}
     response = make_api_request(security_policy_url, "POST", headers, post_data)
     if response:
         if response.status_code == 200:
@@ -150,26 +150,26 @@ def configure_security_policies(data, headers, token):
     security_policy_id = get_security_policy_id(data.get('companyName'),token)
     if security_policy_id:
         print(f"Security policy ID: {security_policy_id}")
+        status = 'block'
+        # filename = './json/security_policy_name.json'
+        # with open(filename, 'r') as json_file:
+        #     policy_data_extractors = json.load(json_file)
 
-        filename = './json/security_policy_name.json'
-        with open(filename, 'r') as json_file:
-            policy_data_extractors = json.load(json_file)
-
-        for policy_name, setting_names in policy_data_extractors.items():
-            status = 'block'
+        # for policy_name, setting_names in policy_data_extractors.items():
+        
             
-            if isinstance(setting_names, list):
-                for setting_name in setting_names:
+        #     if isinstance(setting_names, list):
+        #         for setting_name in setting_names:
                     
-                    policy_url = f"https://wf.awstest.piolink.net:8443/api/v3/security_policy/{security_policy_id}/{policy_name}"
-                    response = make_api_request(policy_url, "GET", headers)
-                    security_policy_json = response.json()
-                    update_security_policy_settings(policy_url, headers, security_policy_json, setting_name, status)
-            else:
-                policy_url = f"https://wf.awstest.piolink.net:8443/api/v3/security_policy/{security_policy_id}/{policy_name}/{setting_names}"
-                response = make_api_request(policy_url, "GET", headers)
-                security_policy_json = response.json()
-                update_security_policy_settings(policy_url, headers, security_policy_json, setting_names, status)
+        #             policy_url = f"https://wf.awstest.piolink.net:8443/api/v3/security_policy/{security_policy_id}/{policy_name}"
+        #             response = make_api_request(policy_url, "GET", headers)
+        #             security_policy_json = response.json()
+        #             update_security_policy_settings(policy_url, headers, security_policy_json, setting_name, status)
+        #     else:
+        #         policy_url = f"https://wf.awstest.piolink.net:8443/api/v3/security_policy/{security_policy_id}/{policy_name}/{setting_names}"
+        #         response = make_api_request(policy_url, "GET", headers)
+        #         security_policy_json = response.json()
+        #         update_security_policy_settings(policy_url, headers, security_policy_json, setting_names, status)
         
         security_policy_data = {"wf_security_policy_id":security_policy_id,"request_flood":status,"sql_injection":status,"url_regex":status,"xss":status,"directory_listing":status,"shellcode":status,"download":status,"uploadfile":status,"access_control":status,"evasion":status,"credential_stuffing":status,"cookie_protection":status,"buffer_overflow":status}
         security_policy = SecurityPolicy.create(**security_policy_data)
@@ -289,3 +289,4 @@ def automic_setting(data,userId):
             domain = Domain.create(**domain_data)
     except Exception as e:
         print(f"An error occurred: {e}")
+

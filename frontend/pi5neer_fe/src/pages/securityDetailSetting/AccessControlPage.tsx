@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
 import SignatureListBox from './component/SignatureListBox';
+import { getCookie } from '../../utils/cookie';
 
 type Props = {
   name: string,
@@ -9,14 +10,17 @@ type Props = {
 
 const AccessControlPage = (props: Props) => {
 
-  const security_policy_id = 1;
+  const security_policy_id = getCookie("security_policy_id");
   const url = `/security_policy/${security_policy_id}/access_control`;
+  const token = getCookie("access_token");
 
   const [status, setStatus] = useState('');
   const [sigList, setData] = useState([]);
 
   useEffect(() => {
-    fetch(url)
+    fetch(url, {
+      headers : {"Authorization": `Bearer ${token}`},
+    })
       .then((response) => response.json())
       .then((data) => {
         setStatus(data['result']['status']);
@@ -25,18 +29,22 @@ const AccessControlPage = (props: Props) => {
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
       });
-  }, [url]);
+  }, [url, token]);
 
 
   function handleValueChange(value: string) {
     fetch(url, {
-      method : 'put', 
-      headers: {'Content-Type': 'application/json'},
-      body : JSON.stringify({status : value})})
+      method: 'put',
+      headers: {
+        'Content-Type': 'application/json',
+        "Authorization": `Bearer ${token}`
+      },
+      body: JSON.stringify({ status: value })
+    })
       .then((response) => response.json())
       .then((data) => {
-        if(data['header']['resultMessage'] === 'ok')
-        setStatus(value);
+        if (data['header']['resultMessage'] === 'ok')
+          setStatus(value);
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);

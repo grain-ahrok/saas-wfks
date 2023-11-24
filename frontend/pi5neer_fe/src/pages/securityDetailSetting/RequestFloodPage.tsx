@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
 import { Box, Button, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 import colorConfigs from '../../config/colorConfigs';
+import { getCookie } from '../../utils/cookie';
 
 type Props = {
   name: string,
@@ -9,9 +10,9 @@ type Props = {
 
 const RequestFloodPage = (props: Props) => {
 
-  const security_policy_id = 1;
+  const security_policy_id = getCookie("security_policy_id");
   const url = `/security_policy/${security_policy_id}/request_flood`;
-  
+  const token = getCookie("access_token");
 
   const [status, setStatus] = useState('');
   const [sessionCnt, setSessionCnt] = useState('');
@@ -25,7 +26,9 @@ const RequestFloodPage = (props: Props) => {
   };
 
   useEffect(() => {
-    fetch(url)
+    fetch(url, {
+      headers : {"Authorization": `Bearer ${token}`},
+    })
       .then((response) => response.json())
       .then((data) => {
         setStatus(data['result']['status']);
@@ -41,7 +44,7 @@ const RequestFloodPage = (props: Props) => {
   function handleStatusChange(value: string) {
     fetch(url, {
       method: 'put',
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
       body: JSON.stringify({ status: value })
     })
       .then((response) => response.json())
@@ -56,6 +59,7 @@ const RequestFloodPage = (props: Props) => {
 
   function updateCnt() {
     fetch(url + '/adv_options', {
+      headers : {"Authorization": `Bearer ${token}`},
       method: 'put',
       body: JSON.stringify({ 
         proxy_request_count: proxyCnt, 

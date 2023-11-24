@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
 import SignatureListBox from './component/SignatureListBox';
+import { getCookie } from '../../utils/cookie';
 
 type Props = {
   name: string,
@@ -9,15 +10,17 @@ type Props = {
 
 const XssPage = (props: Props) => {
 
-  const security_policy_id = 3;
+  const security_policy_id = getCookie("security_policy_id");
   const url = `/security_policy/${security_policy_id}/xss`;
 
   const [status, setStatus] = useState('');
   const [sigList, setData] = useState([]);
-  
+  const token = getCookie("access_token");
 
   useEffect(() => {
-    fetch(url)
+    fetch(url, {
+      headers : {"Authorization": `Bearer ${token}`},
+    })
       .then((response) => response.json())
       .then((data) => {
         setStatus(data['result']['status']);
@@ -32,7 +35,7 @@ const XssPage = (props: Props) => {
   function handleValueChange(value: string) {
     fetch(url, {
       method : 'put', 
-      headers: {'Content-Type': 'application/json'},
+      headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
       body : JSON.stringify({status : value})})
       .then((response) => response.json())
       .then((data) => {
