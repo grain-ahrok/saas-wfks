@@ -12,13 +12,13 @@ const DomainSettingPage = () => {
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const [domainList, setData] = useState([]);
+  const [appList, setData] = useState([]);
   useEffect(() => {
-    const url = '/app/' + 1 + '/domain-list';
+    const url = '/app/' + 1 + '/domain-list/test';
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        setData(data['result']);
+        setData(data);
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
@@ -49,9 +49,11 @@ const DomainSettingPage = () => {
           <DomainCreateModal isOpen={isModalOpen} closeModal={closeModal}/>
       </Box>
       <DomainNoticeBox></DomainNoticeBox>
-      {domainList.map((domain, index) => (
-        <DomainItem domain={domain}/>
+      <Box sx={{display : 'flex', flexWrap : 'wrap'}}>
+      {appList.map((app) => (
+        <DomainItem app={app}/>
       ))}
+      </Box>
     </Box>
   )
 }

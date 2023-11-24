@@ -200,7 +200,7 @@ def create_user_application(data, headers, security_policy_id, protocol, port, i
             protocol, 
             port, 
             ip_version,
-            ip_address, 
+            "172.31.0.194", 
             domain_parsed
         )
         
@@ -283,9 +283,9 @@ def automic_setting(data,userId):
             print_result("Rule List", rule_list_response)
             
             #database create
-            app_data = {"wf_app_id":app_id,"security_policy_id":security_policy_table_id,"user_id":userId,"protocol":protocol,"ip_ver":ip_version,"ip_addr":ip_address,"port":port}
+            app_data = {"wf_app_id":app_id,"security_policy_id":security_policy_table_id,"user_id":userId,"protocol":protocol,"ip_ver":ip_version,"ip_addr":ip_address,"port":port,"server_name":companyName,"status":"enable"}
             user_application = UserApplication.create(**app_data)
-            domain_data = {"name":companyName,"user_application_id":user_application.id}
+            domain_data = {"name":ip_address,"user_application_id":user_application.id,"desc":companyName}
             domain = Domain.create(**domain_data)
     except Exception as e:
         print(f"An error occurred: {e}")

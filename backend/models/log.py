@@ -1,7 +1,7 @@
 from . import db
 from datetime import datetime
 class Log(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     no = db.Column(db.Integer)  # 추가: No.
     timestamp = db.Column(db.DateTime, index=True)
     category = db.Column(db.String(50))  # 추가: 분류

@@ -1,7 +1,7 @@
 import React from 'react'
 import { RouteType } from '../../routes/config'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../redux/store'
+import { RootState } from '../../utils/store'
 import { ListItemButton, Typography } from '@mui/material'
 import { Link } from 'react-router-dom'
 import colorConfigs from '../../config/colorConfigs'

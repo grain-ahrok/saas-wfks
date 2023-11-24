@@ -5,6 +5,8 @@ import { Route } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
 import MainLayout from "../components/layout/MainLayout";
 import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
+import { getCookie } from "../utils/cookie";
+import SignIn from "../pages/auth/SignIn";
 
 const generateRoute = (): ReactNode => {
 
@@ -16,32 +18,34 @@ const generateRoute = (): ReactNode => {
         users.map((route, index) => (
             <Route path={route.path} element={route.element} />
         )),
-        <Route path="/" element={<MainLayout />}>
-            {customers.map((route, index) => (
-                route.index ? (
-                    <Route index path={route.path} element={
-                        <PageWrapper state={route.state}>
-                            {route.element}
-                        </PageWrapper>} />
-                ) : (
-                    <Route path={route.path} element={
-                        <PageWrapper state={route.child ? undefined : route.state}>
-                            {route.element}
-                        </PageWrapper>
-                    } key={index}>
-                        {
-                            route.child && route.child.map((route, index) => (
-                                <Route index path={route.path} element={
-                                    <PageWrapper state={route.state}>
-                                        {route.element}
-                                    </PageWrapper>} />
-                            )
-                            )
-                        }
-                    </Route>
-                )
-            ))}</Route>,
-        <Route path="/" element={<MainLayout />}>
+        getCookie("acessToken") ?
+            <Route element={<MainLayout />}>
+                {customers.map((route, index) => (
+                    route.index ? (
+                        <Route index path={route.path} element={
+                            <PageWrapper state={route.state}>
+                                {route.element}
+                            </PageWrapper>} />
+                    ) : (
+                        <Route path={route.path} element={
+                            <PageWrapper state={route.child ? undefined : route.state}>
+                                {route.element}
+                            </PageWrapper>
+                        } key={index}>
+                            {
+                                route.child && route.child.map((route, index) => (
+                                    <Route index path={route.path} element={
+                                        <PageWrapper state={route.state}>
+                                            {route.element}
+                                        </PageWrapper>} />
+                                )
+                                )
+                            }
+                        </Route>
+                    )
+                ))}</Route>
+            : <Route path='/users/signup' element={<SignIn />} />,
+        getCookie("acessToken") ? <Route element={<MainLayout />}>
             {policyDetails.map((route, index) => (
                 <Route path={route.path} element={
                     <PageWrapper>
@@ -52,7 +56,7 @@ const generateRoute = (): ReactNode => {
                 }></Route>
             ))}
         </Route>
-
+            : <Route path='/users/signup' element={<SignIn />} />
     ]
 }
 export const routes: ReactNode = generateRoute(); 

@@ -8,7 +8,7 @@ from flask_mail import Message
 from flask import current_app
 
 class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     companyName = db.Column(db.String(32))
     email = db.Column(db.String(32), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)

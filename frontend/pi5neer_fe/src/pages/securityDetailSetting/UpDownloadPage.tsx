@@ -31,6 +31,7 @@ const UpDownloadPage = (props: Props) => {
   function handleValueChange(value: string) {
     fetch(url, {
       method : 'put', 
+      headers: {'Content-Type': 'application/json'},
       body : JSON.stringify({status : value})})
       .then((response) => response.json())
       .then((data) => {

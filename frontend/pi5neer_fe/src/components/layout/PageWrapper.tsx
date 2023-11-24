@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { setAppState } from '../../redux/features/appSateSlice';
+import { setAppState } from '../../utils/features/appSateSlice';
 
 type Props = {
     state?: string,

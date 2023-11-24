@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify,session
 from models.user import User
 from models import *
+from models.user_application import UserApplication
 from utils import *
 import urllib3
 import automic_setting
 from flask_jwt_extended import jwt_required, get_jwt_identity,create_access_token,unset_jwt_cookies
+
 
 users = Blueprint('users', __name__, url_prefix='/users')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
@@ -40,8 +42,15 @@ def login():
             token = generate_token()
 
             if token:
-                jwt_token = jwt_generate_token(identity=user.id)
-                return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token}), 200
+                session['user_id'] = user.id
+                user_apps = UserApplication.get_app_by_user_id(user.id)
+                user_app_ids = []
+                level = user.level
+                for user_app in user_apps:
+                    user_app_ids.append(user_app.wf_app_id)
+                    security_policy_id = user_app.security_policy_id
+                jwt_token = jwt_generate_token(identity=user.id, level=user.level)
+                return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_list":user_app_ids,"security_policy_id":security_policy_id,"level":level}), 200
             else:
                 return jsonify({"message": "Login failed. External server error."}), 401
         except Exception as e:
@@ -107,6 +116,7 @@ def change_password(user_id):
 @jwt_required()
 def logout():
     response = jsonify({"message": "로그아웃 성공."})
+    session.pop('user_id', None)
     unset_jwt_cookies(response)
     return response, 200
 
@@ -139,4 +149,14 @@ def forgot_password(user_id):
 @jwt_required()
 def protected():
     current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+    user = User.query.get(current_user)
+    if user:
+        level = user.level
+        if level == 1:
+            return jsonify(logged_in_as=current_user, user_type='user'), 200
+        elif level == 2:
+            return jsonify(logged_in_as=current_user, user_type='admin'), 200
+        else:
+            return jsonify({'message': 'Invalid user level.'}), 403
+    else:
+        return jsonify({'message': 'User not found.'}), 404

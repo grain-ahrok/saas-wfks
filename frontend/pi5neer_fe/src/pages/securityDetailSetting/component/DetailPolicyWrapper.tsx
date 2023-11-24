@@ -2,8 +2,8 @@ import React, { ReactNode, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Box, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { RootState } from '../../../redux/store';
-import { setAppState } from '../../../redux/features/appSateSlice';
+import { RootState } from '../../../utils/store';
+import { setAppState } from '../../../utils/features/appSateSlice';
 import appRoutes from '../../../routes/appRoutes';
 import colorConfigs from '../../../config/colorConfigs';
 
