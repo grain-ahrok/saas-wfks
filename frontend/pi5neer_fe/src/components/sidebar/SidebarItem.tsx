@@ -3,7 +3,7 @@ import { RouteType } from '../../routes/config'
 import { ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 import colorConfigs from '../../config/colorConfigs';
-import { RootState } from '../../redux/store';
+import { RootState } from '../../utils/store';
 import { useSelector } from 'react-redux';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 

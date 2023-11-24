@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { RouteType } from '../../routes/config'
 import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import colorConfigs from '../../config/colorConfigs'
-import { RootState } from '../../redux/store'
+import { RootState } from '../../utils/store'
 import { useSelector } from 'react-redux'
 import SidebarInsideItem from './SidebarInsideItem'
 
