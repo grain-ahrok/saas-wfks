@@ -6,7 +6,6 @@ import urllib3
 from models.domain import Domain,datetime
 from models.log import Log
 from models.user_application import UserApplication
-from models.security_policy import SecurityPolicy
 from models.domain import Domain
 import base64
 from models import *
