@@ -68,6 +68,10 @@ class UserApplication(db.Model):
     
     @classmethod
     def get_app_by_user_id(cls, user_id) : 
+        return cls.query.filter_by(user_id=user_id).first()
+    
+    @classmethod
+    def get_apps_by_user_id(cls, user_id) : 
         return cls.query.filter_by(user_id=user_id).all()
     
 

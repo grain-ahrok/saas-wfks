@@ -3,10 +3,11 @@ import React, { ChangeEvent, useState } from 'react'
 import ModalWrapper from '../../components/layout/ModalWrapper'
 import colorConfigs from '../../config/colorConfigs'
 import DomainNoticeBox from './DomainNoticeBox'
-import { AppType, DomainType, protocolEnum } from '../../models/DomainType'
+import { AppType, DomainType, ipVerEnum, protocolEnum } from '../../models/DomainType'
 import { activeStatus } from '../../enums/StatusEnum'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { getCookie } from '../../utils/cookie'
+import { useNavigate } from 'react-router-dom'
 
 
 type Props = {
@@ -20,12 +21,14 @@ const DomainUpdateModal = (props: Props) => {
   const [serverName, setServerName] = useState(props.app.server_name);
   const [ip, setIP] = useState(props.app.ip);
   const [port, setPort] = useState(props.app.port);
-  const [protocol, setProtocol] = useState(props.app.protocol?.toString());
+  const [version, setVersion] = useState(props.app.version?.toString());
   const [domainListName, setDomainName] = useState<DomainType[]>(props.app.domain_list);
   const [status, setStatus] = useState(props.app.status === activeStatus.enable ? true : false)
 
+  const navigate = useNavigate();
+
   const handleChange = (event : ChangeEvent<HTMLInputElement>) => {
-    setProtocol(event.target.value);
+    setVersion(event.target.value);
   };
 
   const app_id = getCookie("wf_app_id");
@@ -34,26 +37,31 @@ const DomainUpdateModal = (props: Props) => {
     
     const url = '/app/' + app_id + '/domain-list';
 
-    let jsonData : AppType = {
+    let jsonData  = {
       id: props.app.id,
-      ip: ip,
+      ip : ip,
       port: port,
-      protocol : protocolEnum.http,
+      version: version,
       status: status ? activeStatus.enable : activeStatus.disable,
+      servername: serverName,
       domain_list: domainListName,
-      server_name: serverName
     }
 
 
   fetch(url, { method: 'put', 
-    headers : {"Authorization": `Bearer ${token}`},
+    headers : {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify(jsonData) })
     .then((response) => response.json())
     .then((data) => {
-      if (data.header.isSuccessful !== 'true') {
-        alert("다시 시도해주세요");
+      console.log(data['header'])
+      if (data['header']['isSuccessful'] !== true) {
+        alert("다시 시도해주세요"); 
+      } else {
+        return navigate('/customers/domain-settings');
       }
-      window.location.reload();
     })
     .catch((error) => {
       console.error('요청 중 오류 발생:', error);
@@ -78,9 +86,9 @@ const DomainUpdateModal = (props: Props) => {
 
 
   const addInput = () => {
-    if(domainListName.every((item) => item.name !== '') && domainListName.length <= 5 ) {
+    if(domainListName.every((item) => item.domain !== '') && domainListName.length <= 5 ) {
       const newDomain = {
-        name : "",
+        domain : "",
         desc : ""
       }
       setDomainName([...domainListName, newDomain]);
@@ -96,7 +104,7 @@ const DomainUpdateModal = (props: Props) => {
 
   const handleInputChange = (index : number, value : string) => {
     const newInputValues = [...domainListName];
-    newInputValues[index].name = value
+    newInputValues[index].domain = value
     setDomainName(newInputValues);
   };
 
@@ -107,7 +115,7 @@ const DomainUpdateModal = (props: Props) => {
         fullWidth
         size='small'
         key={index}
-        value={item.name}
+        value={item.domain}
         onChange={(e) => handleInputChange(index, e.target.value)}
       />
       <IconButton
@@ -147,12 +155,12 @@ const DomainUpdateModal = (props: Props) => {
           <Box width="80%" >
             <RadioGroup
               row
-              aria-label="protocol"
-              name="protocol"
-              value={protocol}
+              aria-label="version"
+              name="version"
+              value={version}
               onChange={handleChange}>
-              <FormControlLabel value="http" control={<Radio />} label="HTTP" />
-              <FormControlLabel value="https" control={<Radio />} label="HTTPS" />
+              <FormControlLabel value="ipv4" control={<Radio />} label="ipv4" />
+              <FormControlLabel value="ipv6" control={<Radio />} label="ipv6" />
             </RadioGroup>
           </Box>
         </Box>

@@ -39,7 +39,8 @@ function SignIn() {
             setCookie("access_token", user.access_token);
             setCookie("user_id", user.id.toString());
             setCookie("security_policy_id", user.security_policy_id.toString());
-            // setCookie("wf_app_id", user.app_id.toString());
+            setCookie("wf_app_id", user.app_id.toString());
+            console.log(getCookie("access_token"));
             return navigate("/customers/dashboard");
         })
         .catch((error) => {

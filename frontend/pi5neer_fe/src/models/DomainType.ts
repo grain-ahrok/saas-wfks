@@ -4,7 +4,7 @@ export type AppType = {
     id: number
     ip: string
     protocol? : protocolEnum
-    ip_ver? : ipVerEnum
+    version? : ipVerEnum
     port?: number
     status: activeStatus
     server_name: string
@@ -14,7 +14,7 @@ export type AppType = {
 export type DomainType = {
     id?: number
     table_id? : number
-    name: string
+    domain: string
     desc?: string
 }
 

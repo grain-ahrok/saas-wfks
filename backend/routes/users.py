@@ -52,14 +52,15 @@ def login():
 
             if token:
                 session['user_id'] = user.id
-                user_apps = UserApplication.get_app_by_user_id(user.id)
-                user_app_ids = []
+                user_app = UserApplication.get_app_by_user_id(user.id)
+
                 level = user.level
-                for user_app in user_apps:
-                    user_app_ids.append(user_app.wf_app_id)
-                    security_policy_id = user_app.security_policy_id
+
+                user_app_id = user_app.wf_app_id
+
+                security_policy_id = user_app.security_policy_id
                 jwt_token = jwt_generate_token(identity=user.id, level=user.level)
-                return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_list":user_app_ids,"security_policy_id":security_policy_id,"level":level}), 200
+                return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_id":user_app_id,"security_policy_id":security_policy_id,"level":level}), 200
             else:
                 return jsonify({"message": "Login failed. External server error."}), 401
         except Exception as e:

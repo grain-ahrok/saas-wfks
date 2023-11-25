@@ -18,9 +18,7 @@ from flask_jwt_extended import jwt_required
 from sqlalchemy.orm import joinedload
 app = Blueprint('app', __name__, url_prefix='/app')
 
-@app.before_request
-def before_request():
-    jwt_required()  # Call jwt_required directly within the before_request function
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
@@ -160,7 +158,7 @@ def security_logs(app_id):
         start_idx = (page - 1) * limit
         end_idx = start_idx + limit
 
-        # 현재 페이지에 해당하는 로그만 추출
+        # 현재 페이지에 해당하는 로그만 추출o
         paginated_logs = filtered_logs[start_idx:end_idx]
 
         
@@ -294,7 +292,8 @@ def security_logs(app_id):
             }), 200
         else:
             return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
-            
+
+
 @app.route('/<int:app_id>/domain-list', methods=['GET', 'PUT', 'POST','DELETE'])
 def manage_domain_settings(app_id):
     domain_url = f"https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/general/domain_list"
@@ -303,12 +302,11 @@ def manage_domain_settings(app_id):
     token = generate_token()
     headers = {'Authorization': 'token ' + token}
     user_id = session.get('user_id')
-    
+
     try:
         if request.method == 'GET':
-            #user_id = session.get('user_id')
             
-            user_app = UserApplication.get_app_by_user_id(user_id=user_id)
+            user_app = UserApplication.get_apps_by_user_id(user_id=user_id)
             print("user_app is ->:",user_app)
             
             apps = [
@@ -329,7 +327,7 @@ def manage_domain_settings(app_id):
                 data = response.json()
                 
                 for domain in apps[0]['domain_list']:
-                    if domain['name'] == data[0]["domain"]:
+                    if domain['domain'] == data[0]["domain"]:
                         domain['id'] = data[0]["id"]
                 
                 print("user_app is ->:",user_app)
@@ -340,6 +338,7 @@ def manage_domain_settings(app_id):
         elif request.method == 'PUT':
             app_data = request.json
             server_name = app_data.get("servername")
+
             # Extracting information from the nested dictionary
             app_info = {
                 "id": app_data.get("id"),
@@ -417,7 +416,6 @@ def manage_domain_settings(app_id):
                                 updated_at=datetime.utcnow(),
                                 desc=desc,
                             )
-                            add_host_entry(web_firewall_ip, new_domain.name)
                         else:
                             return {'error : domain_url response failure'},500
                 else:        

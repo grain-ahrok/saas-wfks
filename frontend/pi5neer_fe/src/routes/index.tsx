@@ -18,7 +18,7 @@ const generateRoute = (): ReactNode => {
         users.map((route, index) => (
             <Route path={route.path} element={route.element} />
         )),
-        getCookie("acessToken") ?
+        getCookie("access_token") ?
             <Route element={<MainLayout />}>
                 {customers.map((route, index) => (
                     route.index ? (
@@ -45,7 +45,7 @@ const generateRoute = (): ReactNode => {
                     )
                 ))}</Route>
             : <Route path='/users/signup' element={<SignIn />} />,
-        getCookie("acessToken") ? <Route element={<MainLayout />}>
+        getCookie("access_token") ? <Route element={<MainLayout />}>
             {policyDetails.map((route, index) => (
                 <Route path={route.path} element={
                     <PageWrapper>

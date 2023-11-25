@@ -41,7 +41,7 @@ class Domain(db.Model):
         domains = cls.query.filter_by(user_application_id = app_id).all()
         domain_list = [{
                 "table_id" : item.id,
-                "name" : item.name,
+                "domain" : item.name,
                 "desc" : item.desc } for item in domains]
         return domain_list
     @classmethod

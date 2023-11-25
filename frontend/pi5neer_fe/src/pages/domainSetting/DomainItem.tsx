@@ -52,7 +52,7 @@ const DomainItem = ({ app }: Props) => {
                         {index === 0
                             ? <Typography sx={{ width: "130px", fontWeight : "600" }}>도메인 주소</Typography>
                             : <Typography sx={{ width: "130px" }} />}
-                        <Typography>{item.name}</Typography>
+                        <Typography>{item.domain}</Typography>
                     </Box>
                 ))}
                 <Box display="flex" sx={{paddingY : "6px"}} >

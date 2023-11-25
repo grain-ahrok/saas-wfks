@@ -7,6 +7,8 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { activeStatus } from '../../enums/StatusEnum'
 import DomainNoticeBox from './DomainNoticeBox'
 import { getCookie } from '../../utils/cookie'
+import { useNavigate } from 'react-router-dom'
+import { authHeaders } from '../../utils/headers'
 
 type Props = {
   isOpen: boolean,
@@ -15,14 +17,15 @@ type Props = {
 
 const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
 
+  const navigate = useNavigate();
   const [serverName, setServerName] = useState('');
   const [ip, setIP] = useState('');
   const [port, setPort] = useState('');
   const [protocol, setProtocol] = useState('');
-  const [domainListName, setDomainName] = useState<DomainType[]>([{name : ''}]);
+  const [domainListName, setDomainName] = useState<DomainType[]>([{domain : ''}]);
   
   const app_id = getCookie("wf_app_id");
-  const token = getCookie("access_token");
+
   function createDomain() {
     const url = '/app/' + app_id + '/domain-list';
 
@@ -35,19 +38,24 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
       server_name: serverName
     }
 
-  fetch(url, { method: 'post', 
-    headers : {"Authorization": `Bearer ${token}`},
-    body: JSON.stringify(jsonData) })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.header.isSuccessful !== 'true') {
-        alert("다시 시도해주세요");
-      }
-      window.location.reload();
+    fetch(url, {
+      method: 'post',
+      headers : authHeaders,
+      body: JSON.stringify(jsonData)
     })
-    .catch((error) => {
-      console.error('요청 중 오류 발생:', error);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        if (data['header']['isSuccessful'] !== true) {
+          alert("다시 시도해주세요");
+        } else {
+          closeModal();
+          navigate("/customers/dashboard");
+        }
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.error('요청 중 오류 발생:', error);
+      });
   }
 
 
@@ -57,9 +65,9 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
 
 
   const addInput = () => {
-    if(domainListName.every((item) => item.name !== '') && domainListName.length <= 5 ) {
+    if(domainListName.every((item) => item.domain !== '') && domainListName.length <= 5 ) {
       const newDomain = {
-        name : "",
+        domain : "",
         desc : ""
       }
       setDomainName([...domainListName, newDomain]);
@@ -75,7 +83,7 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
 
   const handleInputChange = (index : number, value : string) => {
     const newInputValues = [...domainListName];
-    newInputValues[index].name = value
+    newInputValues[index].domain = value
     setDomainName(newInputValues);
   };
 
@@ -86,7 +94,7 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
         fullWidth
         size='small'
         key={index}
-        value={item.name}
+        value={item.domain}
         onChange={(e) => handleInputChange(index, e.target.value)}
       />
       <IconButton

@@ -16,11 +16,13 @@ const DomainSettingPage = () => {
 
   const app_id = getCookie("wf_app_id");
   const token = getCookie("access_token");
-  const url = '/app/' + app_id + '/domain-list/test';
+  const url = '/app/' + app_id + '/domain-list';
   useEffect(() => {
     
     fetch(url, {
-      headers : {"Authorization": `Bearer ${token}`},
+      headers : {"Authorization": `Bearer ${token}`, 
+      "Content-Type": "application/json"
+    },
     })
       .then((response) => response.json())
       .then((data) => {

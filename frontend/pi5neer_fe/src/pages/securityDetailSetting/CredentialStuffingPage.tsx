@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
 import { Box } from '@mui/material';
 import { getCookie } from '../../utils/cookie';
+import { authHeaders } from '../../utils/headers';
 
 type Props = {
   name : string,
@@ -15,9 +16,7 @@ const CredentialStuffingPage = (props: Props) => {
     const [status, setStatus] = useState('');
   
     useEffect(() => {
-      fetch(url,{
-        headers : {"Authorization": `Bearer ${token}`},
-      })
+      fetch(url, {headers : authHeaders})
         .then((response) => response.json())
         .then((data) => {
           setStatus(data['result']['status']);

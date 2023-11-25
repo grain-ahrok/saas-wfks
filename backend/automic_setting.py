@@ -285,8 +285,10 @@ def automic_setting(data,userId):
             #database create
             app_data = {"wf_app_id":app_id,"security_policy_id":security_policy_table_id,"user_id":userId,"protocol":protocol,"ip_ver":ip_version,"ip_addr":ip_address,"port":port,"server_name":companyName,"status":"enable"}
             user_application = UserApplication.create(**app_data)
-            domain_data = {"name":ip_address,"user_application_id":user_application.id,"desc":companyName}
+            domain_data = {"name":domain_parsed,"user_application_id":user_application.id,"desc":companyName}
             domain = Domain.create(**domain_data)
     except Exception as e:
         print(f"An error occurred: {e}")
+
+        
 

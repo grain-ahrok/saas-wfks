@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
 import SignatureListBox from './component/SignatureListBox';
 import { getCookie } from '../../utils/cookie';
+import { authHeaders } from '../../utils/headers';
 
 type Props = {
   name : string,
@@ -11,14 +12,14 @@ type Props = {
 const UpDownloadPage = (props: Props) => {
 
   const security_policy_id = getCookie("security_policy_id");
-  const url = `/security_policy/${security_policy_id}/updownload`;
-  const token = getCookie("access_token");
+  const url = `/security_policy/${security_policy_id}/up_download`;
+
   const [status, setStatus] = useState('');
   const [sigList, setData] = useState([]);
 
   useEffect(() => {
     fetch(url, {
-      headers : {"Authorization": `Bearer ${token}`},
+      headers : authHeaders,
     })
       .then((response) => response.json())
       .then((data) => {
@@ -34,7 +35,7 @@ const UpDownloadPage = (props: Props) => {
   function handleValueChange(value: string) {
     fetch(url, {
       method : 'put', 
-      headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
+      headers: authHeaders,
       body : JSON.stringify({status : value})})
       .then((response) => response.json())
       .then((data) => {
