@@ -3,6 +3,7 @@ import ActiveStatusBox from './component/ActiveStatusBox';
 import { Box, Button, FormControl, MenuItem, Select, SelectChangeEvent, Typography } from '@mui/material';
 import colorConfigs from '../../config/colorConfigs';
 import { getCookie } from '../../utils/cookie';
+import { authHeaders } from '../../utils/headers';
 
 type Props = {
   name: string,
@@ -12,7 +13,6 @@ const RequestFloodPage = (props: Props) => {
 
   const security_policy_id = getCookie("security_policy_id");
   const url = `/security_policy/${security_policy_id}/request_flood`;
-  const token = getCookie("access_token");
 
   const [status, setStatus] = useState('');
   const [sessionCnt, setSessionCnt] = useState('');
@@ -27,7 +27,7 @@ const RequestFloodPage = (props: Props) => {
 
   useEffect(() => {
     fetch(url, {
-      headers : {"Authorization": `Bearer ${token}`},
+      headers : authHeaders,
     })
       .then((response) => response.json())
       .then((data) => {
@@ -44,7 +44,7 @@ const RequestFloodPage = (props: Props) => {
   function handleStatusChange(value: string) {
     fetch(url, {
       method: 'put',
-      headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
+      headers: authHeaders,
       body: JSON.stringify({ status: value })
     })
       .then((response) => response.json())
@@ -59,7 +59,7 @@ const RequestFloodPage = (props: Props) => {
 
   function updateCnt() {
     fetch(url + '/adv_options', {
-      headers : {"Authorization": `Bearer ${token}`},
+      headers : authHeaders,
       method: 'put',
       body: JSON.stringify({ 
         proxy_request_count: proxyCnt, 
@@ -90,7 +90,7 @@ const RequestFloodPage = (props: Props) => {
               value={sessionCnt}
               label="Age"
               onChange={handleSessionChange}>
-              <MenuItem value={10}>10회</MenuItem>
+              <MenuItem defaultChecked value={10}>10회</MenuItem>
               <MenuItem value={50}>50회</MenuItem>
               <MenuItem value={100}>100회</MenuItem>
               <MenuItem value={500}>500회</MenuItem>
@@ -107,7 +107,7 @@ const RequestFloodPage = (props: Props) => {
               value={proxyCnt}
               label="Age"
               onChange={handleProxyChange}>
-              <MenuItem value={100}>100회</MenuItem>
+              <MenuItem defaultChecked value={100}>100회</MenuItem>
               <MenuItem value={500}>500회</MenuItem>
               <MenuItem value={1000}>1000회</MenuItem>
               <MenuItem value={5000}>5000회</MenuItem>

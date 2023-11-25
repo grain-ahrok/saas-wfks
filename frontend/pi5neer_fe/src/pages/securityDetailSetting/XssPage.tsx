@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
 import SignatureListBox from './component/SignatureListBox';
 import { getCookie } from '../../utils/cookie';
+import { authHeaders } from '../../utils/headers';
 
 type Props = {
   name: string,
@@ -15,11 +16,10 @@ const XssPage = (props: Props) => {
 
   const [status, setStatus] = useState('');
   const [sigList, setData] = useState([]);
-  const token = getCookie("access_token");
 
   useEffect(() => {
     fetch(url, {
-      headers : {"Authorization": `Bearer ${token}`},
+      headers : authHeaders,
     })
       .then((response) => response.json())
       .then((data) => {
@@ -35,7 +35,7 @@ const XssPage = (props: Props) => {
   function handleValueChange(value: string) {
     fetch(url, {
       method : 'put', 
-      headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
+      headers: authHeaders,
       body : JSON.stringify({status : value})})
       .then((response) => response.json())
       .then((data) => {

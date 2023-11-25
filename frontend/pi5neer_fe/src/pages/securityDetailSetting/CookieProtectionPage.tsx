@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import ActiveStatusBox from './component/ActiveStatusBox';
 import { Box } from '@mui/material';
 import { getCookie } from '../../utils/cookie';
+import { authHeaders } from '../../utils/headers';
 
 type Props = {
   name : string,
@@ -11,13 +12,11 @@ const CookieProtectionPage = (props: Props) => {
 
   const security_policy_id = getCookie("security_policy_id");
   const url = `/security_policy/${security_policy_id}/cookie_protection`;
-  const token = getCookie("access_token");
+  
   const [status, setStatus] = useState('');
 
   useEffect(() => {
-    fetch(url, {
-      headers : {"Authorization": `Bearer ${token}`},
-    })
+    fetch(url, {headers : authHeaders})
       .then((response) => response.json())
       .then((data) => {
         setStatus(data['result']['status']);
@@ -31,7 +30,7 @@ const CookieProtectionPage = (props: Props) => {
   function handleValueChange(value: string) {
     fetch(url, {
       method : 'put', 
-      headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
+      headers: authHeaders,
       body : JSON.stringify({status : value})})
       .then((response) => response.json())
       .then((data) => {

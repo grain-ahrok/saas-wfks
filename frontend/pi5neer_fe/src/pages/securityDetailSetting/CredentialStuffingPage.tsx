@@ -12,7 +12,7 @@ const CredentialStuffingPage = (props: Props) => {
 
     const security_policy_id = getCookie("security_policy_id");
     const url = `/security_policy/${security_policy_id}/credential_stuffing`;
-    const token = getCookie("access_token");
+    
     const [status, setStatus] = useState('');
   
     useEffect(() => {
@@ -29,7 +29,7 @@ const CredentialStuffingPage = (props: Props) => {
     function handleValueChange(value: string) {
       fetch(url, {
         method : 'put', 
-        headers: {'Content-Type': 'application/json', "Authorization": `Bearer ${token}`},
+        headers: authHeaders,
         body : JSON.stringify({status : value})})
         .then((response) => response.json())
         .then((data) => {
