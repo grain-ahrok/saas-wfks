@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 import requests
 from utils import make_api_request,generate_token
-from flask_jwt_extended import jwt_required
+
 
 security_policy_ = Blueprint('security_policy', __name__, url_prefix='/security_policy')
 base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
@@ -15,6 +15,7 @@ def createHeader() :
 # def before_request():
 #     jwt_required()  # Call jwt_required directly within the before_request function
 
+policy_names = ["buffer_overflow","request_flood","evasion","cookie_protection","credential_stuffing"]
 
 @security_policy_.route('/<int:security_policy_id>/exception_url_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def exception_url(security_policy_id):

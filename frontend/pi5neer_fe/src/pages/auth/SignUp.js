@@ -58,7 +58,11 @@ function SignUp() {
             }
           })
           .catch((err) => {
-            alert("에러가 발생했습니다. 관리자에게 문의해주세요\n" + err);
+            if(err.response.status === 400) {
+                alert("기존에 가입된 회사이름, 도메인 또는 이메일이 존재합니다.")
+            } else {
+                alert("에러가 발생했습니다. 관리자에게 문의해주세요\n");
+            }
           });
       };
 

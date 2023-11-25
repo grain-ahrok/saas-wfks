@@ -129,6 +129,7 @@ def create_security_policy(data, token):
             print("Security policy created successfully.")
         else:
             print(f"Failed to create security policy. Status code: {response.status_code}, Response content: {response.content}")
+            raise Exception("보안 정책 생성 실패")
 
 def get_security_policy_id(company_name, token):
     get_security_policy_url = "https://wf.awstest.piolink.net:8443/api/v3/security_policy?depth=1"
@@ -142,9 +143,10 @@ def get_security_policy_id(company_name, token):
             return next((item["id"] for item in security_policy_data["security_policy_list"] if item["name"] == company_name), None)
         else:
             print(f"Failed to get security policy. Status code: {response.status_code}, Response content: {response.content}")
-
+            raise Exception("보안 정책 불러오기 실패")
     return None
 
+### 보안 정책 설정
 def configure_security_policies(data, headers, token):
     create_security_policy(data, token)
     security_policy_id = get_security_policy_id(data.get('companyName'),token)
@@ -211,6 +213,8 @@ def create_user_application(data, headers, security_policy_id, protocol, port, i
             print('Application created successfully.')
         else:
             print(f"Failed to create user application. Status code: {response.status_code}, Response content: {response.content}")
+            raise Exception("애플리게이션 생성 실패")
+
 
 def get_created_app_id(headers, company_name):
     try:
@@ -224,6 +228,7 @@ def get_created_app_id(headers, company_name):
             print(f"Application created successfully. App_id: {app_id}")
         else:
             print("Failed to retrieve app_id.")
+            raise Exception("애플리게이션 불러오기 실패")
 
         return app_id
 
@@ -235,7 +240,7 @@ def get_created_app_id(headers, company_name):
 def automic_setting(data,userId):
     try:
         # 데이터 관련 정보들 변수에 저장
-        protocol = "https" if "https" in data["domain_address"] else "http"
+        protocol = "https" if data["domain_address"].startswith('https') == "https" else "http"
         port = 443 if protocol == "https" else 80
         ip_version = determine_ip_version(data["IP_address"])
         parsed_url = urlparse(data["domain_address"])

@@ -9,7 +9,7 @@ from flask import current_app
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    companyName = db.Column(db.String(32))
+    companyName = db.Column(db.String(32), unique=True)
     email = db.Column(db.String(32), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     membership = db.Column(db.Enum('basic', 'premium'),default="basic")

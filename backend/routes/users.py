@@ -1,4 +1,6 @@
 from flask import Blueprint, request, jsonify,session
+from response.headers import create_response
+from models.domain import Domain
 from models.security_policy import SecurityPolicy
 from models.user import User
 from models import *
@@ -6,6 +8,7 @@ from models.user_application import UserApplication
 from utils import *
 import urllib3
 import automic_setting
+from urllib.parse import urlparse
 from flask_jwt_extended import jwt_required, get_jwt_identity,create_access_token,unset_jwt_cookies
 
 
@@ -26,17 +29,27 @@ def jwt_generate_token(identity, level):
 
 @users.route('/signup', methods=['POST'])
 def register():
-    data = request.get_json()
-    user_data = {
-        "companyName":data.get('companyName'),
-        "email":data.get('email'),
-        "password":data.get('password'),
-        "membership":data.get('membership')
-    }
-    user = User.create(**user_data)
-    automic_setting.automic_setting(data,user.id)
-    
-    return jsonify({"message": "User registered successfully.", "user_id": user.id}), 201
+    try : 
+        data = request.get_json()
+        user_data = {
+            "companyName":data.get('companyName'),
+            "email":data.get('email'),
+            "password":data.get('password'),
+            "membership":data.get('membership')
+        }
+        user = User.create(**user_data)
+
+        parsed_url = urlparse(data["domain_address"])
+        domain_parsed = parsed_url.netloc.split(".")[-2] + "." + parsed_url.netloc.split(".")[-1]
+        if Domain.check_domain_by_name(domain_parsed) :
+            raise Exception("")
+        
+        automic_setting.automic_setting(data, user.id)
+        
+        return jsonify({"message": "User registered successfully.", "user_id": user.id}), 201
+    except Exception as e :
+        print(e)
+        return create_response(success=False, message="기존에 가입된 회사이름, 도메인 또는 이메일이 존재합니다.", status_code=400)
     
 @users.route('/signin', methods=['POST'])
 def login():

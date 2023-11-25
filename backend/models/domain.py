@@ -5,7 +5,7 @@ from datetime import datetime
 # domain.py
 class Domain(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(256))
+    name = db.Column(db.String(256), unique=True)
     user_application_id = db.Column(db.Integer, db.ForeignKey('user_application.id'), nullable=False)
     desc = db.Column(db.String(256), nullable=True)
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -61,3 +61,8 @@ class Domain(db.Model):
 
             # Commit the changes to the database
             db.session.commit()
+    
+    @classmethod
+    def check_domain_by_name(cls, new_name):
+        existing_domain = Domain.query.filter_by(name=new_name).first()
+        return existing_domain is not None
