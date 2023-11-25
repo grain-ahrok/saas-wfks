@@ -4,7 +4,7 @@ from routes.users import users
 from routes.app import app as route_app
 from routes.admin import Pi5neer
 from routes.security_policy.security_policy import security_policy_
-from routes.security_policy.get_detail import security_policy_detail_
+from routes.security_policy.detail_setting import security_policy_detail_
 from flask_cors import CORS
 from models import db, bcrypt
 from models import *  

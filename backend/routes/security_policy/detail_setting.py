@@ -1,6 +1,8 @@
-from flask import Flask
+from flask import Flask, jsonify, request
 import json
 from flask import Blueprint
+import requests
+import urllib3
 from automic_setting import generate_token, make_api_request
 from response.dto.security_policy_dto import SecurityPolicyDto
 from response.headers import create_response
@@ -12,9 +14,12 @@ base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
 def createHeader() :
     return {'Authorization': 'token ' + generate_token()}
 
-
-## 정책 상세 괸리 - 시그니처 기반
-## 정책 상세 관리 - SQL injection
+"""
+정책 상세 관리 - 시그니처 기반
+"""
+"""
+GET SQL injection
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/sql_injection', methods=['GET'])
 def get_policy_sql_injection(security_policy_id) : 
     try : 
@@ -25,8 +30,9 @@ def get_policy_sql_injection(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
     
-
-## 정책 상세 관리 - url_regex
+"""
+GET url 정규식 검사
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/url_regex', methods=['GET'])
 def get_policy_url_regex(security_policy_id) : 
     try : 
@@ -37,8 +43,9 @@ def get_policy_url_regex(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 
-
-## 정책 상세 관리 - xss
+"""
+GET xss
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/xss', methods=['GET'])
 def get_policy_xss(security_policy_id) : 
     try : 
@@ -49,8 +56,9 @@ def get_policy_xss(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 
-
-## 정책 상세 관리 - directory_listing
+"""
+GET 디렉토리 리스팅
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/directory_listing', methods=['GET'])
 def get_policy_directory_listing(security_policy_id) : 
     try : 
@@ -61,8 +69,9 @@ def get_policy_directory_listing(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
     
-
-## 정책 상세 관리 - shellcode
+"""
+GET 쉘코드
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/shellcode', methods=['GET'])
 def get_policy_shellcode(security_policy_id) : 
     try : 
@@ -73,8 +82,9 @@ def get_policy_shellcode(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
     
-
-## 정책 상세 관리 - access_control
+"""
+GET access_control
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/access_control', methods=['GET'])
 def get_policy_access_control(security_policy_id) : 
     try : 
@@ -85,8 +95,9 @@ def get_policy_access_control(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 
-
-## GET securilty-policty up-down load
+"""
+GET 파일 업/다운로드
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/up_download', methods=['GET'])
 def get_policy_updownload(security_policy_id) : 
     try : 
@@ -100,9 +111,12 @@ def get_policy_updownload(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
     
-
-## 정책 상세 괸리 - 옵션 기반
-## 정책 상세 관리 - evasion
+"""
+정책 상세 관리 - 옵션 기반
+"""
+"""
+GET 과다 요청 제어
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/request_flood', methods=['GET'])
 def get_policy_request_flood(security_policy_id) : 
     try : 
@@ -113,8 +127,9 @@ def get_policy_request_flood(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 
-
-## 정책 상세 관리 - evasion
+"""
+GET 검사 회피
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/evasion', methods=['GET'])
 def get_policy_evasion(security_policy_id) : 
     try : 
@@ -125,8 +140,9 @@ def get_policy_evasion(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 
-
-## 정책 상세 관리 - credential_stuffing
+"""
+GET 크리덴셜 스터프
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/credential_stuffing', methods=['GET'])
 def get_policy_credential_stuffing(security_policy_id) : 
     try : 
@@ -137,9 +153,10 @@ def get_policy_credential_stuffing(security_policy_id) :
         return create_response(data=spDto.__dict__)
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
-    
 
-## 정책 상세 관리 - cookie_protection
+"""
+GET 쿠키 보호
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/cookie_protection', methods=['GET'])
 def get_policy_cookie_protection(security_policy_id) : 
     try : 
@@ -150,8 +167,9 @@ def get_policy_cookie_protection(security_policy_id) :
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 
-
-## 정책 상세 관리 - buffer_overflow
+"""
+GET 버퍼 오버 플로우
+"""
 @security_policy_detail_.route('/<int:security_policy_id>/buffer_overflow', methods=['GET'])
 def get_policy_buffer_overflow(security_policy_id) : 
     try : 
@@ -161,4 +179,106 @@ def get_policy_buffer_overflow(security_policy_id) :
         return create_response(data=spDto.__dict__)
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
+
+
+
+"""
+정책 상세 설정 상태 변경
+"""
+"""
+PUT 파일 업/다운로드 상태 수정
+"""
+@security_policy_detail_.route('/<int:security_policy_id>/up_download', methods=['PUT'])
+def update_policy_up_download(security_policy_id) : 
+    data = request.json
+    status, sig_list = data.get('status'), data.get('sig_list')
+
+    url_upload = f'{base_url}/security_policy/{security_policy_id}/upload'
+    url_download = f'{base_url}/security_policy/{security_policy_id}/up_download'
+    update_upload = [{"id": item["id"], "status": status} for item in sig_list if item["id"].startswith("1111")]
+    update_download = [{"id": item["id"], "status": status} for item in sig_list if item["id"].startswith("1112")]
+
+    make_api_request(url_upload, method='PUT', headers=createHeader(), data=update_upload)
+    make_api_request(url_download, method='PUT', headers=createHeader(), data=update_download)
+    return create_response()
+
+"""
+PUT 과다 요청 제어 옵션 횟수 수정
+"""
+@security_policy_detail_.route('/<int:security_policy_id>/request_flood/adv_options', methods=['PUT'])
+def update_policy_request_flood_option(security_policy_id) :
+    data = request.json
+    url = f'{base_url}/security_policy/{security_policy_id}/request_flood/adv_options'
+    make_api_request(url, method='PUT', headers=createHeader(), data=data)
+    return create_response()
+
+"""
+PUT 상태 변경
+TODO : front 에서 sig_list 받아와서 상태 처리하는 시간 빨라지도록
+"""
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
+policy_names = ["buffer_overflow","request_flood","evasion","cookie_protection","credential_stuffing"]
+@security_policy_detail_.route('/<int:security_policy_id>/<policy_name>', methods=['PUT'])
+def get_policy_details(security_policy_id, policy_name):
+
+    url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}'
+    filename = './json/security_policy_name.json'
     
+    with open(filename, 'r') as json_file:
+        policy_data_extractors = json.load(json_file)
+    
+    setting_names = policy_data_extractors[policy_name]
+    token = generate_token()
+    headers = {'Authorization': 'token ' + token}
+
+    try:
+
+        if request.method == 'PUT':
+
+            data = request.json
+            status = data.get('status')
+
+            if isinstance(setting_names, list):
+                for setting_name in setting_names:
+                    ex_url = f'{url}/{setting_name}'
+                    response = make_api_request(ex_url, "GET", headers)
+                    security_policy_json = response.json()
+
+                    if policy_name == 'credential_stuffing':
+                        security_policy_json['action'] = status
+                        response = make_api_request(ex_url, method='PUT', headers=headers, data=security_policy_json)
+                    else:
+                        if setting_name == "adv_options":
+                            keys_to_include = ["session_user_define_time", "proxy_request_count", "session_request_count", "proxy_user_define_time"]
+                            updated_data = {key: int(request.args.get(key)) for key in keys_to_include if request.args.get(key) is not None}
+                            updated_data.update({key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)})
+                            response = make_api_request(ex_url, method='PUT', headers=headers, data=updated_data)
+                        else:
+                            updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)}
+                            response = make_api_request(ex_url, method='PUT', headers=headers, data=updated_data)
+            else:
+                ex_url = f'{url}/{setting_names}'
+                response = make_api_request(ex_url, "GET", headers)
+                security_policy_json = response.json()
+
+                if setting_names == 'sig_list':
+                    updated_data = [{"id": item.get("id"), "status": status, "block_id": item.get("block_id")} for item in security_policy_json]
+                    response = make_api_request(ex_url, method='PUT', headers=headers, data=updated_data)
+                elif isinstance(security_policy_json, dict):
+                    updated_data = {key: status for key, value in security_policy_json.items() if key.endswith("_status") and isinstance(value, str)}
+                    response = make_api_request(ex_url, method='PUT', headers=headers, data=updated_data)
+
+            # sp = SecurityPolicy.update_security_policy_by_wf_id(security_policy_id, policy_name=status)
+            return response.json()
+
+    except requests.exceptions.RequestException as e:
+        # API 요청 중에 오류가 발생한 경우 처리
+        error_message = f"API 요청 중 오류 발생: {str(e)}"
+        print(f"Error: {error_message}")
+        return jsonify({'error': error_message}), 500
+
+    except Exception as e:
+        # 기타 예외가 발생한 경우 처리
+        error_message = f"알 수 없는 오류 발생: {str(e)}"
+        print(f"Error: {error_message}")
+        return jsonify({'error': error_message}), 500

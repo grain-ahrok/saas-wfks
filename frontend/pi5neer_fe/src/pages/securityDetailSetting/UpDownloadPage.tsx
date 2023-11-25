@@ -36,7 +36,7 @@ const UpDownloadPage = (props: Props) => {
     fetch(url, {
       method : 'put', 
       headers: authHeaders,
-      body : JSON.stringify({status : value})})
+      body : JSON.stringify({status : value, sig_list : sigList})})
       .then((response) => response.json())
       .then((data) => {
         if(data['header']['resultMessage'] === 'ok')

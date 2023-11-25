@@ -62,18 +62,15 @@ const RequestFloodPage = (props: Props) => {
       headers : authHeaders,
       method: 'put',
       body: JSON.stringify({ 
-        proxy_request_count: proxyCnt, 
-        session_request_count: sessionCnt,
+        session_user_define_time: 3000,
+        proxy_user_define_time: 3000,
         proxy_time_unit: "second",
         session_time_unit: "second",
-        session_user_define_time: 3000,
        })
     })
       .then((response) => response.json())
-      .then((data) => {
-        window.location.reload();
-      })
       .catch((error) => {
+        alert('오류가 발생했습니다. 관리자에게 문의해 주세요')
         console.error('요청 중 오류 발생:', error);
       });
   };
