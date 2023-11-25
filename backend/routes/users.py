@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify,session
+from models.security_policy import SecurityPolicy
 from models.user import User
 from models import *
 from models.user_application import UserApplication
@@ -47,22 +48,16 @@ def login():
 
     if user and bcrypt.check_password_hash(user.password, password):
         try:
-            #토큰 생성
-            token = generate_token()
+            session['user_id'] = user.id
+            user_app = UserApplication.get_app_by_user_id(user.id)
+            sp = SecurityPolicy.get_security_policy_by_id(user_app.security_policy_id)
+            level = user.level
 
-            if token:
-                session['user_id'] = user.id
-                user_app = UserApplication.get_app_by_user_id(user.id)
+            user_app_id = user_app.wf_app_id
+            security_policy_id = sp.wf_security_policy_id
+            jwt_token = jwt_generate_token(identity=user.id, level=user.level)
+            return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_id":user_app_id,"security_policy_id":security_policy_id,"level":level}), 200
 
-                level = user.level
-
-                user_app_id = user_app.wf_app_id
-
-                security_policy_id = user_app.security_policy_id
-                jwt_token = jwt_generate_token(identity=user.id, level=user.level)
-                return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_id":user_app_id,"security_policy_id":security_policy_id,"level":level}), 200
-            else:
-                return jsonify({"message": "Login failed. External server error."}), 401
         except Exception as e:
                 # 예외 처리: 원격 서버와의 통신에 문제가 있을 경우
             return jsonify({"message": f"Login failed. {str(e)}"}), 401

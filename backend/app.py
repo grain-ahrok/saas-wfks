@@ -38,8 +38,9 @@ mail=Mail(app) # forgot pw 관련
 app.register_blueprint(users)
 app.register_blueprint(route_app)
 app.register_blueprint(Pi5neer)
-app.register_blueprint(security_policy_)
 app.register_blueprint(security_policy_detail_)
+app.register_blueprint(security_policy_)
+
 
 # Configure CORS    
 CORS(app, origins='http://127.0.0.1:3000', supports_credentials=True)
