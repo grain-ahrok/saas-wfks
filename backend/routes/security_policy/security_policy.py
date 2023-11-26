@@ -105,45 +105,47 @@ def exception_ip_list(security_policy_id):
         if request.method == 'GET':
             url = f'{base_url}/security_policy/{security_policy_id}/sql_injection/exception_ip_list'
             response = make_api_request(url, method='GET', headers=headers)
-            return response.json()
+            return create_response(data=response.json())
 
         elif request.method == 'POST':
             data = request.json
-            for policy_name in policy_names:
-                url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/exception_ip_list'
-                post_data = [
+            post_data = [
                         {
                             "status": "enable",
-                            "version": data.get('version'),
-                            "client_ip": data.get('client_ip'),
-                            "server_ip": data.get('server_ip'),
-                            "desc": data.get('desc')
-                        }
+                            "version": item.get('version'),
+                            "client_ip": item.get('client_ip'),
+                            "server_ip": '172.31.0.194',
+                            "desc": item.get('desc')
+                        } for item in data
                 ]
+            for policy_name in policy_names:
+                url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/exception_ip_list'
+                
                 response = make_api_request(url, method='POST', data=post_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
         elif request.method == 'PUT':
             data = request.json
+            put_data = [
+                    {
+                        "id": item.get('id'),
+                        "status": "enable",
+                        "version": item.get('version'),
+                        "client_ip": item.get('client_ip'),
+                        "client_mask": item.get('client_mask'),
+                        "server_ip": '172.31.0.194',
+                        "server_mask": '32',
+                        "desc": item.get('desc')
+                    } for item in data
+                ]
             for policy_name in policy_names:
                 url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/exception_ip_list'
-                put_data = [
-                    {
-                        "id": request.args.get('id'),
-                        "status": "enable",
-                        "version": data.get('version'),
-                        "client_ip": data.get('client_ip'),
-                        "client_mask": data.get('client_mask'),
-                        "server_ip": data.get('server_ip'),
-                        "server_mask": data.get('server_mask'),
-                        "desc": data.get('desc')
-                    }
-                ]
+               
                 response = make_api_request(url, method='PUT', data=put_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
         elif request.method == 'DELETE':
-            data = request.json()
+            data = request.json
             delete_data = [{'id': item.get('id')} for item in data]
 
             for policy_name in policy_names:
@@ -231,40 +233,42 @@ def apply_ip_list(security_policy_id):
         if request.method == 'GET':
             url = f'{base_url}/security_policy/{security_policy_id}/sql_injection/apply_ip_list'
             response = make_api_request(url, method='GET', headers=headers)
-            return response.json()
+            return create_response(data=response.json())
 
         elif request.method == 'POST':
             data = request.json
-            for policy_name in policy_names:
-                url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/apply_ip_list'
-                post_data = [
+            post_data = [
                         {
                             "status": "enable",
-                            "version": data.get('version'),
-                            "client_ip": data.get('client_ip'),
-                            "server_ip": data.get('server_ip'),
-                            "desc": data.get('desc')
-                        }
-                ]
+                            "version": item.get('version'),
+                            "client_ip": item.get('client_ip'),
+                            "server_ip": '172.31.0.194',
+                            "desc": item.get('desc')
+                        } for item in data
+                ] 
+            for policy_name in policy_names:
+                url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/apply_ip_list'
+                
                 response = make_api_request(url, method='POST', data=post_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
         elif request.method == 'PUT':
             data = request.json
+            put_data = [
+                    {
+                        "id": item.get('id'),
+                        "status": "enable",
+                        "version": item.get('version'),
+                        "client_ip": item.get('client_ip'),
+                        "client_mask": item.get('client_mask'),
+                        "server_ip": '172.31.0.194',
+                        "server_mask": '32',
+                        "desc": item.get('desc')
+                    } for item in data
+                ]
             for policy_name in policy_names:
                 url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/apply_ip_list'
-                put_data = [
-                    {
-                        "id": request.args.get('id'),
-                        "status": "enable",
-                        "version": data.get('version'),
-                        "client_ip": data.get('client_ip'),
-                        "client_mask": data.get('client_mask'),
-                        "server_ip": data.get('server_ip'),
-                        "server_mask": data.get('server_mask'),
-                        "desc": data.get('desc')
-                    }
-                ]
+                
                 response = make_api_request(url, method='PUT', data=put_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()

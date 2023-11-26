@@ -26,7 +26,7 @@ type Props = {}
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 100 },
   { field: 'url', headerName: '적용 URL', width: 350 },
-  { field: 'desc', headerName: '적용사유', width: 500 },
+  { field: 'desc', headerName: '적용 사유', width: 500 },
 ];
 
 
