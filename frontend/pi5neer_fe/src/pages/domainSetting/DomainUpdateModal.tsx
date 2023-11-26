@@ -201,7 +201,11 @@ const DomainUpdateModal = (props: Props) => {
             borderColor: colorConfigs.button.red,
             borderRadius: "40px",
             paddingX: "32px",
-            margin: "4px"
+            margin: "4px",
+            "&: hover": {
+              color: colorConfigs.button.white,
+              background: colorConfigs.button.red,
+            }
           }}
             onClick={deleteDomain}>삭제하기</Button>
 
