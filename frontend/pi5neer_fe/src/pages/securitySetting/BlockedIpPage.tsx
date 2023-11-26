@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { getCookie } from '../../utils/cookie';
 import colorConfigs from '../../config/colorConfigs';
 import BlockIpCreateModal from './component/BlockIpCreateModal';
@@ -52,8 +52,6 @@ const BlockedIpPage = (props: Props) => {
 
   const handleSelectionModelChange = (selectionModel: number[]) => {
     const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
-
-  // 선택된 행의 ID가 존재하면 해당 행을 찾습니다.
     const selectedRowData = selectedId
       ? blockIpList.find((row) => row.id === selectedId) || null
       : undefined;
@@ -63,13 +61,11 @@ const BlockedIpPage = (props: Props) => {
 
   return (
     <Box paddingRight="50px" paddingLeft="10px" >
-
-      
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography fontSize="18px" fontWeight="bold">차단 IP 목록 </Typography>
         <Button sx={{
           color: colorConfigs.button.blue,
-          backgroundColor: colorConfigs.button.white,
+        backgroundColor: colorConfigs.button.white,
           border: 1,
           borderColor: colorConfigs.button.blue,
           borderRadius: "40px",
@@ -81,10 +77,8 @@ const BlockedIpPage = (props: Props) => {
         </Button>
       </Box>
       
-
       <br></br>
       <Box style={{ height: "400", width: "100%" }}>
-
         <DataGrid
           rows={blockIpList}
           columns={columns}
@@ -92,7 +86,6 @@ const BlockedIpPage = (props: Props) => {
           onRowSelectionModelChange={(selectionModel) => handleSelectionModelChange(selectionModel.map(Number))}
         />
       </Box>
-
 
       <br></br>
       <BlockIpCreateModal isOpen={isCreateModalOpen} closeModal={closeCreateModal}></BlockIpCreateModal>

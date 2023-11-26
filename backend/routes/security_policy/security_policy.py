@@ -18,7 +18,21 @@ def createHeader() :
 # def before_request():
 #     jwt_required()  # Call jwt_required directly within the before_request function
 
-policy_names = ["buffer_overflow","request_flood","evasion","cookie_protection","credential_stuffing"]
+
+
+policy_names = ["sql_injection",
+"buffer_overflow",
+"request_flood",
+"evasion",
+"cookie_protection",
+"directory_listing",
+"download",
+"url_regex",
+"xss",
+"shellcode",
+"upload",
+"access_control",
+"credential_stuffing"]
 
 @security_policy_.route('/<int:security_policy_id>/exception_url_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def exception_url(security_policy_id):
@@ -27,9 +41,9 @@ def exception_url(security_policy_id):
 
     try:
         if request.method == 'GET':
-            url = f'{base_url}/security_policy/{security_policy_id}/sql_injection/exception_url_list'
+            url = f'{base_url}/security_policy/{security_policy_id}/buffer_overflow/exception_url_list'
             response = make_api_request(url, method='GET', headers=headers)
-            return response.json()
+            return create_response(data=response.json())
 
         elif request.method == 'POST':
             data = request.json
@@ -45,6 +59,7 @@ def exception_url(security_policy_id):
                 response = make_api_request(url, method='POST', data=post_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
+        
         elif request.method == 'PUT':
             data = request.json
             for policy_name in policy_names:
@@ -52,20 +67,22 @@ def exception_url(security_policy_id):
                 put_data = [
                     {
                         "status": "enable",
-                        "id": request.args.get('id'),
-                        "url": data.get('url'),
-                        "desc": data.get('desc')
-                    }
+                        "id": item.get('id'),
+                        "url": item.get('url'),
+                        "desc": item.get('desc')
+                    } for item in data
                 ]
+                print(put_data)
                 response = make_api_request(url, method='PUT', data=put_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
+        
         elif request.method == 'DELETE':
-            data = request.json()
+            data = request.json
+            delete_data = [{'id': item.get('id')} for item in data]
             for policy_name in policy_names:
+
                 url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/exception_url_list'
-                ids = data.get('ids', [])  
-                delete_data = [{'id': id} for id in ids]
                 response = make_api_request(url, method='DELETE', data=delete_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
@@ -127,10 +144,10 @@ def exception_ip_list(security_policy_id):
             return response.json()
         elif request.method == 'DELETE':
             data = request.json()
+            delete_data = [{'id': item.get('id')} for item in data]
+
             for policy_name in policy_names:
-                url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/exception_ip_list'
-                ids = data.get('ids', [])  
-                delete_data = [{'id': id} for id in ids]
+                url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/exception_ip_list'                
                 response = make_api_request(url, method='DELETE', data=delete_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
@@ -176,7 +193,7 @@ def apply_url_list(security_policy_id):
                 put_data = [
                     {
                         "status": "enable",
-                        "id": request.args.get('id'),
+                        "id": data.get('id'),
                         "url": data.get('url'),
                         "desc": data.get('desc')
                     }
@@ -184,6 +201,7 @@ def apply_url_list(security_policy_id):
                 response = make_api_request(url, method='PUT', data=put_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
+    
         elif request.method == 'DELETE':
             data = request.json()
             for policy_name in policy_names:
@@ -250,13 +268,16 @@ def apply_ip_list(security_policy_id):
                 response = make_api_request(url, method='PUT', data=put_data, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
+        
         elif request.method == 'DELETE':
-            data = request.json()
+            data = request.json
+            print(data)
+            id_list = [{"id": item.get('id')} for item in data]
+            print(id_list)
+
             for policy_name in policy_names:
                 url = f'{base_url}/security_policy/{security_policy_id}/{policy_name}/apply_ip_list'
-                ids = data.get('ids', [])  
-                delete_data = [{'id': id} for id in ids]
-                response = make_api_request(url, method='DELETE', data=delete_data, headers=headers)
+                response = make_api_request(url, method='DELETE', data=id_list, headers=headers)
                 print(f"Policy: {policy_name}, Success: {response.content}")
             return response.json()
     except requests.exceptions.RequestException as e:
@@ -343,7 +364,6 @@ def delete_block_ip_filter(security_policy_id) :
         url = f'{base_url}/security_policy/{security_policy_id}/request_user_define_filter/filter_list/1/inspection_list'
         data = request.json
         id_list = [{"id": item.get('id')} for item in data]
-        print (id_list )
         response = make_api_request(url, method='DELETE', data=id_list, headers=createHeader())
         return response.json()
     except Exception as e:

@@ -90,22 +90,6 @@ const BlockIpCreateModal = (props: Props) => {
             onChange={(e) => setDesc(e.target.value)}
           />
           <Box display="flex" justifyContent="flex-end">
-            {/* {deletebutton && <Button sx={{
-              color: colorConfigs.button.red,
-              border: 1,
-              borderColor: colorConfigs.button.red,
-              borderRadius: "40px",
-              paddingX: "32px",
-              margin: "4px",
-              width: "130px",
-              "&: hover": {
-                color: colorConfigs.button.white,
-                background: colorConfigs.button.red,
-              }
-            }} onClick={() => delete_button()} >
-              삭제하기
-            </Button>
-            } */}
             <Button sx={{
               color: colorConfigs.button.white,
               backgroundColor: colorConfigs.button.blue,
