@@ -1,133 +1,143 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SendIcon from '@mui/icons-material/Send';
-import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import Divider from '@mui/material-next/Divider';
-import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { DataGrid, GridColDef} from '@mui/x-data-grid';
+import { Grid, CircularProgress } from '@mui/material';
+import { getCookie } from '../../utils/cookie';
+import { IoIosRefresh } from 'react-icons/io';
 
-import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
-import { Dictionary } from '@reduxjs/toolkit';
+type Props = {};
 
-type Props = {}
-let rows = [
-  {
-    id : 0,
-    time : '2023.10.17 23:00:01',
-    detected_request : '2137',
-    ip : '1.3.5.7',
-    url : '/watswonBlog',
-    threat_level: '높음',
-    category:'SQL Injecdtion',
-    state :'차단'
-  }
-];
-
-interface securitylog  {
-  time : string,
-  detected_request : string,
-  ip : string,
-  url : string,
-  threat_level : string,
-  category : string,
-  state : string
+interface SecurityLog {
+  id: number;
+  timestamp: string;
+  total_duplicates: string;
+  host: string;
+  attacker_ip: string;
+  server_ip_port: string;
+  url: string;
+  risk_level: string;
+  category: string;
+  action: string;
 }
 
+const app_id = getCookie('wf_app_id');
+const token = getCookie('token');
+const app_name = getCookie('app_name');
 
 const columns: GridColDef[] = [
-  { field: 'time', headerName: '시간', width: 200 , align:'left'},
-  { field: 'detected_request', headerName: '감지된 요청 수', width: 170, align:'left' },
-  { field: 'ip', headerName: 'IP 주소', width: 200 , align:'left'},
-  { field: 'url', headerName: 'URL', width: 250 , align:'left'},
-  { field: 'threat_level', headerName: '공격 위험 수준', width: 200, align:'left' },
-  { field: 'category', headerName: '분류', width: 150 , align:'left'},
-  { field: 'state', headerName: '처리 상태', width: 180 , align:'left'},
-
+  { field: 'timestamp', headerName: '시간', width: 250, align: 'left' },
+  { field: 'total_duplicates', headerName: '감지된 요청 수', width: 170, align: 'left' },
+  { field: 'host', headerName: '도메인', width: 170, align: 'left' },
+  { field: 'attacker_ip', headerName: '공격자 IP', width: 200, align: 'left' },
+  { field: 'server_ip_port', headerName: '서버 IP/PORT', width: 200, align: 'left' },
+  { field: 'url', headerName: 'URL', width: 250, align: 'left' },
+  { field: 'risk_level', headerName: '공격 위험 수준', width: 200, align: 'left' },
+  { field: 'category', headerName: '분류', width: 150, align: 'left' },
+  { field: 'action', headerName: '처리 상태', width: 180, align: 'left' },
 ];
 
-
-const text_style = {
-  fontSize: '20px',
-  fontWeight: 'bold'
-};
-
-const text_style2 = {
-  fontSize: '20px',
-}
-
 const SecurityLogPage = (props: Props) => {
-  
-  const [age, setAge] = React.useState('');
+  const [loading, setLoading] = useState(true);
+  const [securityLogs, setSecurityLogs] = useState<SecurityLog[]>([]);
+  const [menuItems, setMenuItems] = useState<string[]>([]);
+  const app_id = getCookie('wf_app_id');
+  const [selectedHost, setSelectedHost] = useState<number | string>(0);
 
-  const handleChange = (event: SelectChangeEvent) => {
-  setAge(event.target.value as string);
+  const fetchDataFromBackend = async () => {
+    try {
+      const response = await fetch(`/app/${app_id}/logs?app_name=${app_name}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+
+      setSecurityLogs(data.database_logs);
+
+      // Assuming the data structure is { "hosts": [...] }
+      const hosts = data.hosts || [];
+      setMenuItems(['----------[선택]----------', ...hosts]);
+    } catch (error) {
+      console.error('Error fetching data from backend:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDataFromBackend();
+  }, [app_id]);
+
+  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setSelectedHost(Number(event.target.value));
+  };
+
+  const handleRefreshLogs = async () => {
+    try {
+      const response = await fetch(`/app/${app_id}/logs/refresh?app_name=${app_name}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        console.log('Logs refreshed successfully!');
+        // Fetch data again after refreshing
+        await fetchDataFromBackend();
+      } else {
+        console.error('Failed to refresh logs.');
+      }
+    } catch (error) {
+      console.error('Error during refresh:', error);
+    }
+  };
+
+  const text_style = {
+    fontSize: '20px',
+    fontWeight: 'bold',
+  };
+
+  const text_style2 = {
+    fontSize: '20px',
   };
 
   return (
     <Box>
       <Grid container spacing={2} marginBottom={2} alignItems="center">
-        
-          <Typography variant="body1" style={Object.assign({marginLeft: '20px'}, text_style)}>
-           도메인 : 
-          </Typography>
-
-          <Grid item>
-          <FormControl style={{ width: '200px' }}>
-             <InputLabel id="domain-label">Domain</InputLabel>
-             <Select
-               labelId="domain-label"
-               id="domain-select"
-               value={age}
-               label="Domain"
-               onChange={handleChange}
-             >
-               <MenuItem value={10}>www.watson.com</MenuItem>
-               <MenuItem value={20}>www.hacking.co.kr</MenuItem>
-               <MenuItem value={30}>www.client.site.com</MenuItem>
-             </Select>
-             </FormControl>
-         </Grid>
-         
-         <Grid item style = {{marginLeft: 'auto'}}> 
-          <Button variant="outlined" style ={{margin: '10px'}}>
-            <Typography style={text_style2}>
-              Filters 
-            </Typography>
+        <Typography variant="body1" style={{ marginLeft: '20px', fontSize: '20px', fontWeight: 'bold' }}>
+          로그 :
+        </Typography>
+        <Grid item style={{ marginLeft: 'auto' }}>
+          <Button
+            variant="outlined"
+            style={{ margin: '10px' }}
+            startIcon={<IoIosRefresh />}
+            onClick={handleRefreshLogs}
+          >
+            <Typography style={text_style2}>Refresh Logs</Typography>
           </Button>
-          <Button variant="outlined" style ={{margin: '10px'}}>
-            <Typography style={text_style2}>
-              Export 
-            </Typography>
-          </Button>
-         </Grid>
+        </Grid>
       </Grid>
-
       <Box>
-        <Grid>
+        {loading ? (
+          <CircularProgress style={{ margin: '20px' }} />
+        ) : (
           <div style={{ height: 700, width: '100%' }}>
             <DataGrid
-              rows={rows}
+              rows={securityLogs}
               columns={columns}
-              initialState={{
-                pagination: {
-                  paginationModel: { page: 0, pageSize: 5 },
-                },
-              }}
+              getRowId={(row) => row.no.toString()} // assuming 'no' is the unique identifier
               pageSizeOptions={[5, 10]}
             />
           </div>
-        </Grid>
+        )}
       </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default SecurityLogPage
+export default SecurityLogPage;

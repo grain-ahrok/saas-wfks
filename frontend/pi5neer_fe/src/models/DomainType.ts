@@ -3,8 +3,9 @@ import { activeStatus } from "../enums/StatusEnum"
 export type AppType = {
     id: number
     ip: string
+    server_id: number
     protocol? : protocolEnum
-    version? : ipVerEnum
+    version? : string
     port?: number
     status: activeStatus
     server_name: string
@@ -13,6 +14,7 @@ export type AppType = {
 
 export type DomainType = {
     id?: number
+    app_id? : number
     table_id? : number
     domain: string
     desc?: string

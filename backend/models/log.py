@@ -14,7 +14,7 @@ class Log(db.Model):
     server_ip_port = db.Column(db.String(50))  # 추가: 서버 IP/PORT
     country = db.Column(db.String(50))  # 추가: 국가
     action = db.Column(db.String(50))  # 추가: 대응
-    total_duplicates = db.Column(db.Integer, default=0)  # 추가: 중복된 로그 개수
+    total_duplicates = db.Column(db.Integer, default=1)  # 추가: 중복된 로그 개수
     
     app_id = db.Column(db.Integer)
     
@@ -29,7 +29,7 @@ class Log(db.Model):
             url=log_data['url'],
             country=log_data['country'],
             category=log_data['category'],
-            app_id = log_data['app_id']
+            app_id=log_data['app_id']
         ).first()
 
         if existing_log:
@@ -51,21 +51,28 @@ class Log(db.Model):
                 server_ip_port=log_data['server_ip_port'],
                 country=log_data['country'],
                 action=log_data['action'],
-                app_id = log_data['app_id']
+                app_id=log_data['app_id']
             )
             db.session.add(new_log)
             db.session.commit()
+
 
     @classmethod
     def get_logs(cls, app_name, page=1, limit=10):
         paginated_logs = cls.query.filter_by(app_name=app_name).paginate(page, limit, False)
         return paginated_logs.items
-
+    @classmethod
+    def delete_logs_id(cls, app_id):
+        cls.query.filter_by(app_id=app_id).delete()
+        db.session.commit()
     @classmethod
     def delete_logs(cls, app_name):
         cls.query.filter_by(app_name=app_name).delete()
         db.session.commit()
-        
+    @classmethod
+    def get_app_by_logs(cls, app_id) : 
+        return cls.query.filter_by(app_id=app_id).all()
+
     def serialize(self):
         return {
             'no': self.no,

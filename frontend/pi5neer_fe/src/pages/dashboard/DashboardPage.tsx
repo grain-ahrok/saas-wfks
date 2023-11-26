@@ -1,85 +1,108 @@
-import { Box, Typography, colors } from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import styleConfigs from '../../config/styleConfigs'
-import { CartesianGrid, Legend, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
-import AttackCntByNameBox from './component/AttackCntByNameBox'
-import AttackCntByTimeBox from './component/AttackCntByTimeBox'
-import { AttackType } from '../../models/AttackType'
-import TrafficCtnBox from './component/TrafficCtnBox'
+import React, { useEffect, useState } from 'react';
+import { Box, CircularProgress } from '@mui/material';
+import AttackCntByNameBox from './component/AttackCntByNameBox';
+import AttackCntByTimeBox from './component/AttackCntByTimeBox';
+import TrafficCtnBox from './component/TrafficCtnBox';
+import { getCookie } from '../../utils/cookie';
+import Grid from '@mui/material/Grid';
+import { IoIosRefresh } from "react-icons/io";
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 
-type Props = {}
+export type AttackType = {
+  name?: string;
+  count?: number;
+  value?: number;
+  interval?: string;
+};
+const app_id = getCookie('wf_app_id');
+const app_name = getCookie('app_name');
+const token = getCookie("access_token");
 
-const DashboardPage = (props: Props) => {
+const DashboardPage = () => {
+  const url = `/app/${app_id}/dashboard?app_name=${app_name}`;
+  const [loading, setLoading] = useState(false);
+  const [trafficList, setTrafficList] = useState<AttackType[]>([]);
+  const [attackByTimeList, setAttackByTimeList] = useState<AttackType[]>([]);
+  const [attackByNameList, setAttackByNameList] = useState<AttackType[]>([]);
 
-  const app_id = 1;
-  const url = `/app/${app_id}/dashboard`;
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
 
-  const [tarfficList, setTrafficList] = useState<AttackType[]>([{
-    "count": 249,
-    "interval": "2023-11-18 04:25:15 - 2023-11-18 04:40:15"
-  },
-  {
-    "count": 0,
-    "interval": "2023-11-18 04:40:15 - 2023-11-18 04:55:15"
-  },
-  {
-    "count": 0,
-    "interval": "2023-11-18 04:55:15 - 2023-11-18 05:10:15"
-  },
-  {
-    "count": 0,
-    "interval": "2023-11-18 05:10:15 - 2023-11-18 05:25:15"
-  }]);
-  const [attackByNameList, setAttackByNameList] = useState<AttackType[]>([{ name: 'URL정규식', value: 61 },
-  { name: '다운로드', value: 24 },
-  { name: '업로드', value: 124 },
-  { name: '웹공격프로그램', value: 40 },
-  { name: '웹공격프로그램', value: 40 },
-  { name: '웹공격프로그램', value: 40 }]);
-
-  const [attackByTimeList, setAttackByTimeList] = useState<AttackType[]>([
-    {
-      "count": 249,
-      "interval": "2023-11-18 04:25:15 - 2023-11-18 04:40:15"
-    },
-    {
-      "count": 0,
-      "interval": "2023-11-18 04:40:15 - 2023-11-18 04:55:15"
-    },
-    {
-      "count": 0,
-      "interval": "2023-11-18 04:55:15 - 2023-11-18 05:10:15"
-    },
-    {
-      "count": 0,
-      "interval": "2023-11-18 05:10:15 - 2023-11-18 05:25:15"
-    }
-  ]);
-
-  useEffect(() => {
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
+      if (response.ok) {
+        const data = await response.json();
         setTrafficList(data['tarffic']);
         setAttackByTimeList(data['detect_attack']);
-        setAttackByNameList(data['attack_name']);
-      })
-      .catch((error) => {
-        console.error('요청 중 오류 발생:', error);
-      });
+        setAttackByNameList(
+          Object.entries(data['attack_name']).map(([name, value]) => ({
+            name,
+            value: value as number,
+          }))
+        );
+      } else {
+        console.error('Failed to fetch data:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error during fetch:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [url]);
 
+  const handleRefreshLogs = () => {
+    fetchData();
+  };
+
+  const text_style2 = {
+    fontSize: '20px',
+  };
 
   return (
     <Box>
-      {/* 트래픽 통계 */}
-      <TrafficCtnBox data={tarfficList}></TrafficCtnBox>
-      <Box display="flex">
-        <AttackCntByTimeBox data={attackByTimeList}></AttackCntByTimeBox>
-        <AttackCntByNameBox data={attackByNameList}></AttackCntByNameBox>
-      </Box>
-    </Box>
-  )
-}
+      <Grid container>
+        <Grid item style={{ marginLeft: 'auto' }}>
+          <Button
+            variant="outlined"
+            style={{ margin: '10px' }}
+            startIcon={<IoIosRefresh />}
+            onClick={handleRefreshLogs}
+          >
+            <Typography style={text_style2}>
+              Refresh Logs
+            </Typography>
+          </Button>
+        </Grid>
+      </Grid>
 
-export default DashboardPage
+      {/* Display loading indicator if data is being fetched */}
+      {loading && <CircularProgress style={{ margin: '20px' }} />}
+
+      {/* Display data if not loading */}
+      {!loading && (
+        <>
+          {/* Traffic Statistics */}
+          <TrafficCtnBox data={trafficList} />
+
+          {/* Attack Count by Time and Attack Count by Name */}
+          <Box display="flex">
+            <AttackCntByTimeBox data={attackByTimeList} />
+            <AttackCntByNameBox data={attackByNameList} />
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+};
+
+export default DashboardPage;

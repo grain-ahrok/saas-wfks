@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, TextField, Typography, CircularProgress } from "@mui/material";
 import styleConfigs from "../../config/styleConfigs";
 import { getCookie, setCookie } from "../../utils/cookie";
 import { UserType } from "../../models/UserType";
 
 function SignIn() {
-
     const navigate = useNavigate();
 
     const [cName, setCName] = useState("");
     const [pw, setPW] = useState("");
+    const [loading, setLoading] = useState(false); // New state for loading
 
     const signInAxios = async (e: any) => {
         e.preventDefault();
@@ -26,31 +26,39 @@ function SignIn() {
             return;
         }
 
-        fetch('/users/signin', { method: 'post',
-            headers: {'Content-Type': 'application/json'},
+        // Set loading to true when starting the request
+        setLoading(true);
+
+        fetch('/users/signin', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-            companyName: cName,
-            password: pw})
+                companyName: cName,
+                password: pw
+            })
         })
         .then((response) => response.json())
         .then((data) => {
-            const user : UserType = data;
+            const user: UserType = data;
             console.log(user.access_token);
             setCookie("access_token", user.access_token);
             setCookie("user_id", user.id.toString());
             setCookie("security_policy_id", user.security_policy_id.toString());
             setCookie("wf_app_id", user.app_id.toString());
+            setCookie("app_name", user.app_name.toString());
             console.log(getCookie("access_token"));
-            return navigate("/customers/dashboard");
+            navigate("/customers/dashboard");
         })
         .catch((error) => {
-            if(error) {
+            if (error) {
                 alert("회사 이름과 비밀번호를 다시 확인해주세요")
             }
-            // alert("에러가 발생했습니다. 관리자에게 문의해주세요\n" + error);
+        })
+        .finally(() => {
+            // Set loading to false when the request is complete
+            setLoading(false);
         });
     };
-
 
     return (
         <Box sx={{ display: "flex", height: "100vh" }}>
@@ -88,8 +96,11 @@ function SignIn() {
                                 background: "#18A0FB",
                                 color: "white",
                                 border: "1px solid #18A0FB"
-                            }}>
-                            Login</Button>
+                            }}
+                            disabled={loading} // Disable the button when loading
+                        >
+                            {loading ? <CircularProgress size={24} /> : "Login"}
+                        </Button>
                         <Box sx={{ marginTop: "6px", display: "flex", justifyContent: "center", color: "rgba(17, 67, 101, 0.50)" }}>
                             <a href="/users/signup">sign up</a>
                             <Box>&nbsp;/&nbsp;</Box>
@@ -101,4 +112,5 @@ function SignIn() {
         </Box>
     );
 }
+
 export default SignIn;

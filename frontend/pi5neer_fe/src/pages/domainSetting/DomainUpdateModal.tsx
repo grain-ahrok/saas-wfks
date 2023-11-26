@@ -27,18 +27,20 @@ const DomainUpdateModal = (props: Props) => {
 
   const navigate = useNavigate();
 
-  const handleChange = (event : ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setVersion(event.target.value);
   };
 
   const app_id = getCookie("wf_app_id");
-  const token = getCookie("access_token");
+  const token = getCookie("access_token");  
+  const user_id = getCookie("user_id");
   function updateDomain() {
     
-    const url = '/app/' + app_id + '/domain-list';
+    const url = '/app/' + app_id + '/domain-list?user_id=' + user_id;
 
     let jsonData  = {
       id: props.app.id,
+      server_id: props.app.server_id,
       ip : ip,
       port: port,
       version: version,
@@ -60,7 +62,7 @@ const DomainUpdateModal = (props: Props) => {
       if (data['header']['isSuccessful'] !== true) {
         alert("다시 시도해주세요"); 
       } else {
-        return navigate('/customers/domain-settings');
+        window.location.reload()
       }
     })
     .catch((error) => {
@@ -69,10 +71,24 @@ const DomainUpdateModal = (props: Props) => {
   }
 
   function deleteDomain() {
-    const url = '/app/' + app_id + '/domain-list';
+    const url = '/app/' + app_id + '/domain-list?user_id=' + user_id;
+
+    let jsonData  = {
+      id: props.app.id,
+      server_id:props.app.server_id,
+      ip : ip,
+      port: port,
+      version: version,
+      status: status ? activeStatus.enable : activeStatus.disable,
+      servername: serverName,
+      domain_list: domainListName,
+    }
+
     fetch(url, { method: 'delete', 
-      headers : {"Authorization": `Bearer ${token}`},
-      body: JSON.stringify({ id: props.app.id }) })
+      headers : {"Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"},
+      
+      body: JSON.stringify(jsonData) })
       .then((response) => response.json())
       .then((data) => {
         if (data.header.isSuccessful !== 'true') {
@@ -151,17 +167,18 @@ const DomainUpdateModal = (props: Props) => {
         </Box>
 
         <Box display="flex" padding="4px">
-          <Typography width="20%">프로토콜</Typography>
+          <Typography width="20%">IP verion</Typography>
           <Box width="80%" >
-            <RadioGroup
-              row
-              aria-label="version"
-              name="version"
-              value={version}
-              onChange={handleChange}>
-              <FormControlLabel value="ipv4" control={<Radio />} label="ipv4" />
-              <FormControlLabel value="ipv6" control={<Radio />} label="ipv6" />
-            </RadioGroup>
+          <RadioGroup
+        row
+        aria-label="version"
+        name="version"
+        value={version}
+        onChange={handleChange}
+      >
+        <FormControlLabel value="ipv4" control={<Radio checked={version === "ipv4"} />} label="IPv4" />
+        <FormControlLabel value="ipv6" control={<Radio checked={version === "ipv6"} />} label="IPv6" />
+      </RadioGroup>
           </Box>
         </Box>
 
