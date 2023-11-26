@@ -92,9 +92,7 @@ const BlockedIpPage = (props: Props) => {
           onRowSelectionModelChange={(selectionModel) => handleSelectionModelChange(selectionModel.map(Number))}
         />
       </Box>
-      <Box>
-        {selectedItem?.ip } {selectedItem?.subnetmask}
-      </Box>
+
 
       <br></br>
       <BlockIpCreateModal isOpen={isCreateModalOpen} closeModal={closeCreateModal}></BlockIpCreateModal>
