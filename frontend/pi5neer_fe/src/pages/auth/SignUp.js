@@ -1,70 +1,58 @@
 import styles from './Auth.module.css';
-import { useState } from "react"; 
-import { useNavigate } from "react-router-dom"
-import axios from "axios";
+import { useState } from 'react'; 
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function SignUp() {
-
     const navigate = useNavigate();
 
-    const [cName, setCName] = useState("");
-    const [email, setEmail] = useState("");
-    const [pw, setPW] = useState("");
-    const [doAddr, setDoAddr] = useState("");
-    const [ipAddr, setIpAddr] = useState("");
+    const [cName, setCName] = useState('');
+    const [email, setEmail] = useState('');
+    const [pw, setPW] = useState('');
+    const [doAddr, setDoAddr] = useState('');
+    const [ipAddr, setIpAddr] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const signUpAxios = async (e) => {
         e.preventDefault();
 
         const cn_reg = /^[ㄱ-ㅎ가-힣a-zA-Z0-9]+$/;
         const email_reg = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-        const pw_reg = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,15}$/;
-        const do_reg = /^(((http(s?)):\/\/)?)([0-9a-zA-Z-]+\.)+[a-zA-Z]{2,6}(:[0-9]+)?(\/\S*)?/;
-        const ip_reg = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)|(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]).){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+        const pw_reg = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,15}$/;
+        const do_reg = /^(http:\/\/|https:\/\/)?([0-9a-zA-Z-]+\.)+[a-zA-Z]+(\/\S*)?/;
+        const ip_reg = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
-        if( !cn_reg.test(cName) ) {
-            alert("회사 이름을 확인해주세요.");
-            return false;
-        }
-        if( !email_reg.test(email) ) {
-            alert("이메일 확인해주세요.");
-            return false;
-        }
-        if( !pw_reg.test(pw) ) {
-            alert("비밀번호는 영문 숫자 특수기호 조합 8자리 이상입니다.");
-            return false;
-        }
-        if( !do_reg.test(doAddr) ) {
-            alert("도메인 주소를 확인해주세요");
-            return false;
-        }
-        if( !ip_reg.test(ipAddr) ) {
-            alert("IP 주소를 확인해주세요");
+        if (!cn_reg.test(cName) || !email_reg.test(email) || !pw_reg.test(pw) || !do_reg.test(doAddr) || !ip_reg.test(ipAddr)) {
+            alert('입력값을 확인해주세요.');
             return false;
         }
 
-        await axios.post("/users/signup", {
-            companyName : cName,
-            email : email,
-            password : pw,
-            domain_address : doAddr,
-            IP_address : ipAddr,
-            membership : 'basic'
-          })
-          .then((response) => {
-            if ((response.status = 201)) {
-                alert("회원가입 되셨습니다. 로그인 해 주세요");
-              return navigate("/users/signin");
+        setLoading(true);
+
+        try {
+            const response = await axios.post('/users/signup', {
+                companyName: cName,
+                email: email,
+                password: pw,
+                domain_address: doAddr,
+                IP_address: ipAddr,
+                membership: 'basic',
+            });
+
+            if (response.status === 201) {
+                alert('회원가입 되셨습니다. 로그인 해 주세요');
+                navigate('/users/signin');
             }
-          })
-          .catch((err) => {
-            if(err.response.status === 400) {
-                alert("기존에 가입된 회사이름, 도메인 또는 이메일이 존재합니다.")
+        } catch (err) {
+            if (err.response && err.response.status === 400) {
+                alert('기존에 가입된 회사이름, 도메인 또는 이메일이 존재합니다.');
             } else {
-                alert("에러가 발생했습니다. 관리자에게 문의해주세요\n");
+                alert('에러가 발생했습니다. 관리자에게 문의해주세요\n');
             }
-          });
-      };
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className={styles.Screen}>
@@ -78,14 +66,41 @@ function SignUp() {
                     <div className={styles.InputPadding}>
                         <h2>Sign up for a free account</h2>
                         <form onSubmit={signUpAxios}> 
-                            <input className={styles.InputField} onChange={(e) => setCName(e.target.value)} placeholder="Input Company Name"></input>
-                            <input className={styles.InputField} onChange={(e) => setEmail(e.target.value)} id="email" placeholder="Email address"></input>
-                            <input className={styles.InputField} onChange={(e) => setPW(e.target.value)}  id="pw" placeholder="Input Password" type="password"></input>
-                            <input className={styles.InputField} onChange={(e) => setDoAddr(e.target.value)} id="doAddr" placeholder="Domain address"></input>
-                            <input className={styles.InputField} onChange={(e) => setIpAddr(e.target.value)} id="ipAddr"placeholder="IP address"></input>
-                            <button className={styles.LoginBtn} type="submit">Register</button>
+                            <input
+                                className={styles.InputField}
+                                onChange={(e) => setCName(e.target.value)}
+                                placeholder="Input Company Name"
+                            />
+                            <input
+                                className={styles.InputField}
+                                onChange={(e) => setEmail(e.target.value)}
+                                id="email"
+                                placeholder="Email address"
+                            />
+                            <input
+                                className={styles.InputField}
+                                onChange={(e) => setPW(e.target.value)}
+                                id="pw"
+                                placeholder="Input Password"
+                                type="password"
+                            />
+                            <input
+                                className={styles.InputField}
+                                onChange={(e) => setDoAddr(e.target.value)}
+                                id="doAddr"
+                                placeholder="Domain address"
+                            />
+                            <input
+                                className={styles.InputField}
+                                onChange={(e) => setIpAddr(e.target.value)}
+                                id="ipAddr"
+                                placeholder="IP address"
+                            />
+                            <button className={styles.LoginBtn} type="submit" disabled={loading}>
+                                {loading ? 'Registering...' : 'Register'}
+                            </button>
                         </form>
-                        <div className={styles.NavigateBtn} >
+                        <div className={styles.NavigateBtn}>
                             <a href="/users/signin">sign in</a>
                         </div>
                     </div>
@@ -94,5 +109,5 @@ function SignUp() {
         </div>
     );
 }
-  export default SignUp;
-  
+
+export default SignUp;

@@ -130,7 +130,7 @@ const ExceptionIpPage = (props: Props) => {
 
   return (
     <Box>
-      <Grid>
+      {/* <Grid>
         <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
           <Box>
             적용 IP 목록
@@ -230,7 +230,7 @@ const ExceptionIpPage = (props: Props) => {
             checkboxSelection
           />
         </div>
-      </Grid>
+      </Grid> */}
     </Box>
   );
 }

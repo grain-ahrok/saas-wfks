@@ -22,12 +22,12 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
   const [ip, setIP] = useState('');
   const [port, setPort] = useState('');
   const [protocol, setProtocol] = useState('');
-  const [domainListName, setDomainName] = useState<DomainType[]>([{domain : ''}]);
+  const [domainListName, setDomainName] = useState<DomainType[]>([{domain : '', desc : ''}]);
   
   const app_id = getCookie("wf_app_id");
-
+  const user_id = getCookie("user_id");
   function createDomain() {
-    const url = '/app/' + app_id + '/domain-list';
+    const url = '/app/' + app_id + '/domain-list?user_id='+user_id;
 
     let jsonData = {
       ip: ip,
@@ -49,7 +49,7 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
           alert("다시 시도해주세요");
         } else {
           closeModal();
-          navigate("/customers/dashboard");
+          navigate("/customers/domain-settings");
         }
         window.location.reload();
       })
@@ -130,7 +130,7 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
         </Box>
 
         <Box display="flex" padding="4px">
-          <Typography width="20%">프로토콜</Typography>
+          <Typography width="20%">IP 버전</Typography>
           <Box width="80%" >
             <RadioGroup
               row

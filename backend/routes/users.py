@@ -61,7 +61,6 @@ def login():
 
     if user and bcrypt.check_password_hash(user.password, password):
         try:
-            session['user_id'] = user.id
             user_app = UserApplication.get_app_by_user_id(user.id)
             sp = SecurityPolicy.get_security_policy_by_id(user_app.security_policy_id)
             level = user.level
@@ -69,7 +68,7 @@ def login():
             user_app_id = user_app.wf_app_id
             security_policy_id = sp.wf_security_policy_id
             jwt_token = jwt_generate_token(identity=user.id, level=user.level)
-            return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_id":user_app_id,"security_policy_id":security_policy_id,"level":level}), 200
+            return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_id":user_app_id,"security_policy_id":security_policy_id,"level":level,"app_name":companyName}), 200
 
         except Exception as e:
                 # 예외 처리: 원격 서버와의 통신에 문제가 있을 경우
@@ -163,18 +162,3 @@ def forgot_password(user_id):
     else:
         return jsonify({"message": "User not found."}), 404
     
-@users.route('/protected', methods=['GET'])
-@jwt_required()
-def protected():
-    current_user = get_jwt_identity()
-    user = User.query.get(current_user)
-    if user:
-        level = user.level
-        if level == 1:
-            return jsonify(logged_in_as=current_user, user_type='user'), 200
-        elif level == 2:
-            return jsonify(logged_in_as=current_user, user_type='admin'), 200
-        else:
-            return jsonify({'message': 'Invalid user level.'}), 403
-    else:
-        return jsonify({'message': 'User not found.'}), 404
