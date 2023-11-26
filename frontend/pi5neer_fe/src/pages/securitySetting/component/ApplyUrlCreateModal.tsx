@@ -24,11 +24,12 @@ const style = {
     m: '2rem'
   };
 
-const ExcepUrlCreateModal = (props: Props) => {
+const ApplyUrlCreateModal = (props: Props) => {
 
     const security_policy_id = getCookie("security_policy_id");
-    const url = '/security_policy/' + security_policy_id + '/exception_url_list';
+    const url = '/security_policy/' + security_policy_id + '/apply_url_list';
 
+    const navigate = useNavigate();
     const [expUrl, setUrl] = useState('');
     const [desc, setDesc] = useState('');
 
@@ -95,4 +96,4 @@ const ExcepUrlCreateModal = (props: Props) => {
     )
 }
 
-export default ExcepUrlCreateModal
+export default ApplyUrlCreateModal

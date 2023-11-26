@@ -17,6 +17,8 @@ import { URLType } from '../../models/URLType';
 import colorConfigs from '../../config/colorConfigs';
 import ExcepUrlCreateModal from './component/ExcepUrlCreateModal';
 import ExcepUrlUpdateModal from './component/ExcepUrlUpdateModal';
+import ApplyUrlCreateModal from './component/ApplyUrlCreateModal';
+import ApplyUrlUpdateModal from './component/ApplyUrlUpdateModal';
 
 
 type Props = {}
@@ -32,23 +34,34 @@ const columns: GridColDef[] = [
 const ExceptionUrlPage = (props: Props) => {
 
   const [exceptionUrlList, setExceptionUrlList] = useState<URLType[]>([]);
+  const [applyUrlList, setApplyUrlList] = useState<URLType[]>([]);
 
   const [selectedExpItem, setSelectedExpItem] = useState<URLType | undefined>();
 
   const [isExpCreateModalOpen, setIsExpCreateModalOpen] = useState(false);
   const openExpCreateModal = () => setIsExpCreateModalOpen(true);
-  const closeCreateModal = () => setIsExpCreateModalOpen(false);
+  const closeExpCreateModal = () => setIsExpCreateModalOpen(false);
 
   const [isExpUpdateModalOpen, setIsExpUpdateModalOpen] = useState(false);
   const openExpUpdateModal = () => setIsExpUpdateModalOpen(true);
-  const closeUpdateModal = () => setIsExpUpdateModalOpen(false);
+  const closeExpUpdateModal = () => setIsExpUpdateModalOpen(false);
 
+  const [selectedApplyItem, setSelectedApplyItem] = useState<URLType | undefined>();
+
+  const [isApplyCreateModalOpen, setIsApplyCreateModalOpen] = useState(false);
+  const openApplyCreateModal = () => setIsApplyCreateModalOpen(true);
+  const closeApplyCreateModal = () => setIsApplyCreateModalOpen(false);
+
+  const [isApplyUpdateModalOpen, setIsApplyUpdateModalOpen] = useState(false);
+  const openApplyUpdateModal = () => setIsApplyUpdateModalOpen(true);
+  const closeApplyUpdateModal = () => setIsApplyUpdateModalOpen(false);
   
 
   const security_policy_id = getCookie("security_policy_id");
-  const url = '/security_policy/' + security_policy_id + '/exception_url_list';
+  const urlExcp = '/security_policy/' + security_policy_id + '/exception_url_list';
+  const urlApply = '/security_policy/' + security_policy_id + '/apply_url_list';
 
-  const handleSelectionModelChange = (selectionModel: number[]) => {
+  const handleSelectedExpChange = (selectionModel: number[]) => {
     const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
     const selectedRowData = selectedId
       ? exceptionUrlList.find((row) => row.id === selectedId) || null
@@ -57,8 +70,32 @@ const ExceptionUrlPage = (props: Props) => {
       openExpUpdateModal()
   };
 
+
+  const handleSelectedApplyChange = (selectionModel: number[]) => {
+    const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
+    const selectedRowData = selectedId
+      ? applyUrlList.find((row) => row.id === selectedId) || null
+      : undefined;
+      selectedRowData && setSelectedApplyItem(selectedRowData);
+      openApplyUpdateModal()
+  };
+
   useEffect(() => {
-    fetch(url)
+
+    fetch(urlApply)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data['header']['isSuccessful'] === true) {
+          setApplyUrlList(data['result'])
+        }
+      })
+      .catch((error) => {
+        console.error('요청 중 오류 발생:', error);
+      });
+
+    setTimeout(() => {}, 4000);
+  
+    fetch(urlExcp)
       .then((response) => response.json())
       .then((data) => {
         if (data['header']['isSuccessful'] === true) {
@@ -68,14 +105,14 @@ const ExceptionUrlPage = (props: Props) => {
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
       });
-  }, [url]);
+  }, [urlExcp, urlApply]);
 
 
   return (
     <Box paddingRight="50px" paddingLeft="10px" >
-      {/* <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
-        <Typography fontSize="18px" fontWeight="bold">적용 URL 목록 : 보안 정책이 적용되는 URL을 나타냅니다.</Typography>
-        <Button sx={{
+       <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
+          <Typography fontSize="18px" fontWeight="bold">적용 URL 목록 </Typography>
+          <Button sx={{
             color: colorConfigs.button.blue,
             backgroundColor: colorConfigs.button.white,
             border: 1,
@@ -83,21 +120,22 @@ const ExceptionUrlPage = (props: Props) => {
             borderRadius: "40px",
             paddingX: "32px",
             margin: "4px",
-          }}>
-            차단IP 추가하기
+          }}
+            onClick={openApplyCreateModal}>
+            적용 URL 추가하기
           </Button>
-      </Box>
-      <br></br>
-      <div style={{ height: 400, width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          pageSizeOptions={[5, 10]}
+        </Box>
 
-          onRowClick={handleOpen}
-        />
-      </div>
-      <br></br> */}
+        <Box style={{ height: 400, width: '100%' }}>
+          <DataGrid
+            rows={applyUrlList}
+            columns={columns}
+            pageSizeOptions={[5, 10]}
+            onRowSelectionModelChange={(selectionModel) => handleSelectedApplyChange(selectionModel.map(Number))}
+            />
+        </Box>
+      <ApplyUrlCreateModal isOpen={isApplyCreateModalOpen} closeModal={closeApplyCreateModal}></ApplyUrlCreateModal>
+      <ApplyUrlUpdateModal isOpen={isApplyUpdateModalOpen} closeModal={closeApplyUpdateModal} excepUrl={selectedApplyItem}></ApplyUrlUpdateModal>
 
         <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
           <Typography fontSize="18px" fontWeight="bold">예외 URL 목록 </Typography>
@@ -111,7 +149,7 @@ const ExceptionUrlPage = (props: Props) => {
             margin: "4px",
           }}
             onClick={openExpCreateModal}>
-            차단IP 추가하기
+            예외 URL 추가하기
           </Button>
         </Box>
 
@@ -120,11 +158,11 @@ const ExceptionUrlPage = (props: Props) => {
             rows={exceptionUrlList}
             columns={columns}
             pageSizeOptions={[5, 10]}
-            onRowSelectionModelChange={(selectionModel) => handleSelectionModelChange(selectionModel.map(Number))}
+            onRowSelectionModelChange={(selectionModel) => handleSelectedExpChange(selectionModel.map(Number))}
             />
         </Box>
-      <ExcepUrlCreateModal isOpen={isExpCreateModalOpen} closeModal={closeCreateModal}></ExcepUrlCreateModal>
-      <ExcepUrlUpdateModal isOpen={isExpUpdateModalOpen} closeModal={closeUpdateModal} excepUrl={selectedExpItem}></ExcepUrlUpdateModal>
+      <ExcepUrlCreateModal isOpen={isExpCreateModalOpen} closeModal={closeExpCreateModal}></ExcepUrlCreateModal>
+      <ExcepUrlUpdateModal isOpen={isExpUpdateModalOpen} closeModal={closeExpUpdateModal} excepUrl={selectedExpItem}></ExcepUrlUpdateModal>
     </Box>
     
   );

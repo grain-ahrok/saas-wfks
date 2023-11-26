@@ -26,7 +26,7 @@ const style = {
   m: '2rem'
 };
 
-const ExcepUrlUpdateModal = (props: Props) => {
+const ApplyUrlUpdateModal = (props: Props) => {
 
   const navigate = useNavigate();
   const [expUrl, setUrl] = useState(props.excepUrl?.url);
@@ -38,7 +38,7 @@ const ExcepUrlUpdateModal = (props: Props) => {
   }, [props.excepUrl]);
 
   const security_policy_id = getCookie("security_policy_id");
-  const url = '/security_policy/' + security_policy_id + '/exception_url_list';
+  const url = '/security_policy/' + security_policy_id + '/apply_url_list';
 
   const updateExcpUrl = function () {
     fetch(url, {
@@ -52,7 +52,7 @@ const ExcepUrlUpdateModal = (props: Props) => {
     }).then((response) => response.json())
       .then((data) => {
         if (data['header']['isSuccessful'] !== true) {
-          alert("중복된 URL이 있는지 확인해 주세요")
+          alert("중복된 URL이 없는지 확인해 주세요")
         } else {
           window.location.reload();
         }
@@ -141,4 +141,4 @@ const ExcepUrlUpdateModal = (props: Props) => {
   )
 }
 
-export default ExcepUrlUpdateModal
+export default ApplyUrlUpdateModal
