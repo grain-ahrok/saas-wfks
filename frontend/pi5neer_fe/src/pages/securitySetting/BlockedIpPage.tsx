@@ -1,215 +1,107 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SendIcon from '@mui/icons-material/Send';
-import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import Divider from '@mui/material-next/Divider';
-import TextField from '@mui/material/TextField';
-
-
-import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
-import { Dictionary } from '@reduxjs/toolkit';
+import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { getCookie } from '../../utils/cookie';
+import colorConfigs from '../../config/colorConfigs';
+import BlockIpCreateModal from './component/BlockIpCreateModal';
+import { BlockIpType } from '../../models/BlockIpType';
+import BlockIpUpdateModal from './component/BlockIpUpdateModal';
 
 
 type Props = {}
-let rows = [
-  {id : '0' , block_ip : '0', subnet_mask : '0', reason : 'test' } //line for test
-];
-
-interface exceptionip  {
-  id : string,
-  block_ip : string,
-  subnet_mask : string,
-  reason : string
-}
-
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 100 },
-  { field: 'block_ip', headerName: '차단 네트워크 IP', width: 350 },
-  { field: 'subnet_mask', headerName: '서브넷 마스크', width: 350 },
-  { field: 'reason', headerName: '차단 사유', width: 500 },
+  { field: 'ip', headerName: '차단 네트워크 IP', width: 350 },
+  { field: 'subnetmask', headerName: '서브넷 마스크', width: 350 },
+  { field: 'desc', headerName: '차단 사유', width: 500 },
 ];
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 1000,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  m:'2rem'
-};
-
-
 
 const BlockedIpPage = (props: Props) => {
 
-    const [deletebutton, setdeletebutton] = useState(false);
+  const [blockIpList, setBlockIpList] = useState<BlockIpType[]>([]);
+  const [selectedItem, setSelectedItem] = useState<BlockIpType | undefined>();
 
-    const ipref = useRef('0');
-    const subnetref = useRef('0');
-    const reasonref = useRef('0');
-
-    let now_id = -1;
-    const [open, setOpen] = React.useState(false);
-
-    const handleOpen = function(params : GridRowParams) {
-      const rowData:exceptionip = params.row as exceptionip;
-      now_id = Number(rowData.id);
-      console.log(rowData);
-      setdeletebutton(true);
-      setOpen(true);
-    }
-    const handleOpenbutton = () => {
-      now_id = -1;
-      setdeletebutton(false);
-      setOpen(true);
-    }
-    const handleClose = function() {
-      now_id = 0;
-      setOpen(false);
-      console.log(now_id);
-    } 
-
-    //get 부분 완료
-    const security_policy_id = getCookie("security_policy_id");
-    const url = '/security_policy/' + security_policy_id + '/block_ip';
+  const security_policy_id = getCookie("security_policy_id");
+  const url = '/security_policy/' + security_policy_id + '/block_ip_filter/ip_list';
+  
+  useEffect(() => {
     fetch(url)
       .then((response) => response.json())
-      .then((data) => { 
-        rows = data['result'];
+      .then((data) => {
+        console.log(data)
+        if (data['header']['isSuccessful'] === true) {
+          setBlockIpList(data['result']);
+        }
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
       });
+  }, [url]); 
 
-    //POST(Add) 부분, PUT(수정) 부분
-    const send_button = function() {
 
-      const formdata = new FormData();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const openCreateModal = () => setIsCreateModalOpen(true);
+  const closeCreateModal = () => setIsCreateModalOpen(false);
 
-      
-      formdata.append("network_ip",ipref.current);
-      formdata.append("subnet_mask",subnetref.current);
-      formdata.append("reason",reasonref.current);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const openUpdateModal = () => setIsUpdateModalOpen(true);
+  const closeUpdateModal = () => setIsUpdateModalOpen(false);
 
-      if(now_id == -1){
+  const handleSelectionModelChange = (selectionModel: number[]) => {
+    const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
 
-        const response = fetch(url,{
-          method: 'POST',
-          body:formdata
-        })
-        alert("POST(Add) response is : " + response);
-      }
-      else {
-        formdata.append("request_id",now_id.toString());
-        const response = fetch(url,{
-          method: 'PUT',
-          body:formdata
-      })
-        alert("PUT(edit) response is : " + response);
-      }
-    }
-    //DELETE(delete) 부분
-    const delete_button = function() {
-      const response = fetch(url,{
-        method: 'DELETE'
-      })
-      alert(response)
-    }
-    
+  // 선택된 행의 ID가 존재하면 해당 행을 찾습니다.
+    const selectedRowData = selectedId
+      ? blockIpList.find((row) => row.id === selectedId) || null
+      : undefined;
+      selectedRowData && setSelectedItem(selectedRowData);
+      openUpdateModal()
+  };
 
   return (
-    <Box>
-      <Grid>
-        <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
-          <Box>
-            거부 IP 목록
-          </Box>
-          <Stack direction='row' spacing={3}>
-            <Button variant="contained" endIcon={<SendIcon />} onClick={handleOpenbutton}>
-              ADD
-            </Button>
+    <Box paddingRight="50px" paddingLeft="10px" >
 
-            
-          </Stack>
-        </Grid>
-        <br></br>
-        <div style={{ height: 400, width: '100%' }}>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 5 },
-              },
-            }}
-            pageSizeOptions={[5, 10]}
-            
-            onRowClick={handleOpen}
-          />
-        </div>
-      </Grid>
+      
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography fontSize="18px" fontWeight="bold">차단 IP 목록 </Typography>
+        <Button sx={{
+          color: colorConfigs.button.blue,
+          backgroundColor: colorConfigs.button.white,
+          border: 1,
+          borderColor: colorConfigs.button.blue,
+          borderRadius: "40px",
+          paddingX: "32px",
+          margin: "4px",
+        }}
+          onClick={openCreateModal}>
+          차단IP 추가하기
+        </Button>
+      </Box>
+      
+
       <br></br>
+      <Box style={{ height: "400", width: "100%" }}>
 
-      <Modal
-              open={open}
-              onClose={handleClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-      >
-        <Stack sx={style} spacing = {3}>  
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            security INFO
-          </Typography>
-          <Divider />
-            <TextField
-              required
-              id="outlined-required"
-              label="block_ip"
-              defaultValue="127.0.0.01"
-              inputRef={ipref}
-            />
-            <TextField
-              required
-              id="outlined-required"
-              label="subnet_mask"
-              defaultValue="255.255.255.0"
-              inputRef={subnetref}
-            />
-            <TextField
-              required
-              id="outlined-required"
-              label="Reason"
-              defaultValue="Just"
-              inputRef={reasonref}
-            />
-            <Box display="flex" justifyContent="space-between">
-                {deletebutton && <Button variant="contained" endIcon={<DeleteIcon />} onClick={() => delete_button()} >
-                Delete this policy
-                </Button>
-                }
-              <Button variant="contained" endIcon={<SendIcon />} onClick={() => send_button()}>
-              Send
-              </Button>
-            </Box>
-          </Stack>
-        </Modal>
+        <DataGrid
+          rows={blockIpList}
+          columns={columns}
+          pageSizeOptions={[5, 10]}
+          onRowSelectionModelChange={(selectionModel) => handleSelectionModelChange(selectionModel.map(Number))}
+        />
+      </Box>
+      <Box>
+        {selectedItem?.ip } {selectedItem?.subnetmask}
+      </Box>
+
+      <br></br>
+      <BlockIpCreateModal isOpen={isCreateModalOpen} closeModal={closeCreateModal}></BlockIpCreateModal>
+      <BlockIpUpdateModal isOpen={isUpdateModalOpen} closeModal={closeUpdateModal} blockIp={selectedItem}></BlockIpUpdateModal>
     </Box>
   );
 }
-
-
-
 
 
 export default BlockedIpPage

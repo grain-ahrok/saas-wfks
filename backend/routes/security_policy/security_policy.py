@@ -300,14 +300,16 @@ def create_block_ip_filter(security_policy_id) :
     try : 
         url = f'{base_url}/security_policy/{security_policy_id}/request_user_define_filter/filter_list/1/inspection_list'
         data = request.json
-        post_data = {
-            "id": 1,
+
+        post_data = [{
             "data_type" : "ip",
-            "value": data.get('ip') + "/" + data.get('subnetmask'),
-            "condition": "include",
-        }
-        make_api_request(url, method='POST', data=post_data, headers=createHeader())
-        return create_response()
+            "variable": "def",
+            "value": data.get('ip') + "/" + str(data.get('subnetmask')),
+            "condition": "include"
+        }]
+        response = make_api_request(url, method='POST', data=post_data, headers=createHeader())
+        print(response)
+        return response.json()
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
     
@@ -320,14 +322,14 @@ def update_block_ip_filter(security_policy_id) :
     try :
         url = f'{base_url}/security_policy/{security_policy_id}/request_user_define_filter/filter_list/1/inspection_list'
         data = request.json
-        post_data = {
+        post_data = [{
             "id": data.get('id'),
             "data_type" : "ip",
             "value": data.get('ip') + "/" + data.get('subnetmask'),
             "condition": "include",
-        }
-        make_api_request(url, method='PUT', data=post_data, headers=createHeader())
-        return create_response()
+        }]
+        response = make_api_request(url, method='PUT', data=post_data, headers=createHeader())
+        return response.json()
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 
@@ -342,8 +344,8 @@ def delete_block_ip_filter(security_policy_id) :
         data = request.json
         id_list = [{"id": item.get('id')} for item in data]
         print (id_list )
-        make_api_request(url, method='DELETE', data=id_list, headers=createHeader())
-        return create_response()
+        response = make_api_request(url, method='DELETE', data=id_list, headers=createHeader())
+        return response.json()
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
 

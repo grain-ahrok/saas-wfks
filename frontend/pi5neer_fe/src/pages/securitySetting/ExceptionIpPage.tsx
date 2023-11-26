@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -11,15 +11,11 @@ import Divider from '@mui/material-next/Divider';
 import TextField from '@mui/material/TextField';
 
 
-import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
-import { Dictionary } from '@reduxjs/toolkit';
+import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { getCookie } from '../../utils/cookie';
 
 
 type Props = {}
-let rows = [
-  {id : '0' , ip : '0', subnet_mask : '0', reason : 'test' } //line for test
-];
 
 interface exceptionip  {
   id : string,
@@ -27,7 +23,6 @@ interface exceptionip  {
   subnet_mask : string,
   reason : string
 }
-
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 100 },
@@ -54,10 +49,13 @@ const style = {
 const ExceptionIpPage = (props: Props) => {
 
     const [deletebutton, setdeletebutton] = useState(false);
+    const [expIpList, setExpIpList] = useState([]);
+    const [expApplyList, setApplyList] = useState([]);
 
-    const ipref = useRef('0');
-    const subnetref = useRef('0');
-    const reasonref = useRef('0');
+
+    const ipref = useRef('');
+    const subnetref = useRef('');
+    const reasonref = useRef('');
 
     let now_id = -1;
     const [open, setOpen] = React.useState(false);
@@ -86,7 +84,8 @@ const ExceptionIpPage = (props: Props) => {
     fetch(url)
       .then((response) => response.json())
       .then((data) => { 
-        rows = data['result'];
+        if(data['result']['isSuccessful'] === 'ok')
+        setExpIpList(data['result']);
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
@@ -94,16 +93,13 @@ const ExceptionIpPage = (props: Props) => {
 
     //POST(Add) 부분, PUT(수정) 부분
     const send_button = function() {
-
       const formdata = new FormData();
 
-      
       formdata.append("network_ip",ipref.current);
       formdata.append("subnet_mask",subnetref.current);
       formdata.append("reason",reasonref.current);
 
-      if(now_id == -1){
-
+      if(now_id === -1){
         const response = fetch(url,{
           method: 'POST',
           body:formdata
@@ -146,7 +142,7 @@ const ExceptionIpPage = (props: Props) => {
         <br></br>
         <div style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={rows}
+            rows={expIpList}
             columns={columns}
             initialState={{
               pagination: {
@@ -219,7 +215,7 @@ const ExceptionIpPage = (props: Props) => {
         <br></br>
         <div style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={rows}
+            rows={expApplyList}
             columns={columns}
             initialState={{
               pagination: {
