@@ -23,8 +23,8 @@ class SecurityPolicy(db.Model):
     updated_at = db.Column(db.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow)
      # SecurityPolicy 모델과 UserApplication 모델 간의 관계 (다대일)
     applications = db.relationship('UserApplication', backref=db.backref('security_policy', lazy=True))
-    urls = db.relationship('SpUrl', backref='security_policy', lazy=True)
-    ips = db.relationship('SpIp', backref='security_policy', lazy=True)
+    # urls = db.relationship('SpUrl', backref='security_policy', lazy=True)
+    # ips = db.relationship('SpIp', backref='security_policy', lazy=True)
     @classmethod
     def create(cls, **kwargs):
         try:
