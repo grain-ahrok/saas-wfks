@@ -5,7 +5,6 @@ import { Route } from "react-router-dom";
 import PageWrapper from "../components/layout/PageWrapper";
 import MainLayout from "../components/layout/MainLayout";
 import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
-import { getCookie } from "../utils/cookie";
 import SignIn from "../pages/auth/SignIn";
 
 const generateRoute = (): ReactNode => {

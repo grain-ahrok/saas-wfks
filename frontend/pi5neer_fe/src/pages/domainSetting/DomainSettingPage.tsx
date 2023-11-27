@@ -29,6 +29,7 @@ const DomainSettingPage = () => {
     })
       .then((response) => response.json())
       .then((data) => {
+        
         setAppList(data);
       })
       .catch((error) => {
@@ -68,7 +69,7 @@ const DomainSettingPage = () => {
       <CircularProgress sx={{ margin: '20px' }} />
     ) : (
       <Box sx={{ display: 'flex', flexWrap: 'wrap' }}>
-        {appList.map((app) => (
+        {appList && appList.map((app) => (
           <DomainItem  app={app} />
         ))}
       </Box>
