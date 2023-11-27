@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session, url_for
+from flask import Blueprint, request, jsonify, session
 from response.headers import create_response
 from models.domain import Domain
 from models.security_policy import SecurityPolicy
@@ -69,9 +69,8 @@ def login():
             user_app_id = user_app.wf_app_id
             security_policy_id = sp.wf_security_policy_id
             jwt_token = jwt_generate_token(identity=user.id, level=user.level)
-            redirect_url = url_for('app.domain-list', app_id=user_app_id)
             
-            return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_id": user_app_id, "security_policy_id": security_policy_id, "level": level, "redirect_url": redirect_url}), 200
+            return jsonify({"id": user.id, "message": "Login successful.", "access_token": jwt_token, "app_id": user_app_id, "security_policy_id": security_policy_id, "level": level}), 200
             
             
         except Exception as e:
