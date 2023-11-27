@@ -1,15 +1,15 @@
 from flask import Blueprint, jsonify, request
 import requests
-from utils import make_api_request,generate_token
-
+from utils import make_api_request,basic_auth
+from flask_jwt_extended import jwt_required
 
 security_policy_ = Blueprint('security_policy', __name__, url_prefix='/security_policy')
 base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
-token = generate_token()
-headers = {'Authorization': 'token ' + generate_token()}
+
+headers = basic_auth()
 
 def createHeader() :
-    return {'Authorization': 'token ' + generate_token()}
+    return basic_auth()
 
 # @security_policy_.before_request
 # def before_request():
@@ -18,10 +18,10 @@ def createHeader() :
 policy_names = ["buffer_overflow","request_flood","evasion","cookie_protection","credential_stuffing"]
 
 @security_policy_.route('/<int:security_policy_id>/exception_url_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required()
 def exception_url(security_policy_id):
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
-
+    
+    headers = basic_auth()
     try:
         if request.method == 'GET':
             url = f'{base_url}/security_policy/{security_policy_id}/sql_injection/exception_url_list'
@@ -77,9 +77,9 @@ def exception_url(security_policy_id):
         return jsonify({'error': error_message}), 500
     
 @security_policy_.route('/<int:security_policy_id>/exception_ip_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required()
 def exception_ip_list(security_policy_id):
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
+    headers = basic_auth()
 
     try:
         if request.method == 'GET':
@@ -142,9 +142,9 @@ def exception_ip_list(security_policy_id):
         return jsonify({'error': error_message}), 500
     
 @security_policy_.route('/<int:security_policy_id>/apply_url_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required()
 def apply_url_list(security_policy_id):
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
+    headers = basic_auth()
 
     try:
         if request.method == 'GET':
@@ -202,9 +202,9 @@ def apply_url_list(security_policy_id):
     
     
 @security_policy_.route('/<int:security_policy_id>/apply_ip_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required()
 def apply_ip_list(security_policy_id):
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
+    headers = basic_auth()
 
     try:
         if request.method == 'GET':
@@ -269,9 +269,9 @@ def apply_ip_list(security_policy_id):
 
 
 @security_policy_.route('/<int:security_policy_id>/block_ip_filter/ip_list', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@jwt_required()
 def block_ip_filter(security_policy_id):
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
+    headers = basic_auth()
 
     try:
         if request.method == 'GET':
@@ -328,10 +328,10 @@ def block_ip_filter(security_policy_id):
     
 
 @security_policy_.route('/security-settings/policy-details/<policy_name>/information', methods=['GET'])
+@jwt_required()
 def get_policy_infomation_signature(policy_name):
     external_url = "https://wf.awstest.piolink.net:8443/api/kui/api/v3/information/signature"
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
+    headers = basic_auth()
     response = make_api_request(external_url, 'GET', headers)
 
     if response is not None and response.status_code == 200:

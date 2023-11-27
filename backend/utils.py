@@ -8,6 +8,7 @@ import json
 import policy_data
 from urllib.parse import urlparse
 import ipaddress
+import base64
 
 bcrypt = Bcrypt()
 invalid_tokens = set()
@@ -36,34 +37,43 @@ def make_api_request(url, method="GET", headers=None, data=None):
         print(f"Error in API request: {e}")
         return None
 
-def generate_token():
-    post_data = {
-        "username": config_('NAME'),
-        "password": config_('PASSWORD'),
-        "otp_code": config_('OTP_CODE')
-    }
-    external_url = "https://wf.awstest.piolink.net:8443/api/v3/system/token"
-    headers = {}
+def basic_auth():
+    credentials = f"{config_('NAME')}:{config_('PASSWORD')}"
+    base64_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+    return {'Authorization': f'Basic {base64_credentials}'}
     
-    response = make_api_request(external_url, "POST", headers, post_data)
+
+
+# def generate_token():
+#     post_data = {
+#         "username": config_('NAME'),
+#         "password": config_('PASSWORD'),
+#         "otp_code": config_('OTP_CODE')
+#     }
+#     external_url = "https://wf.awstest.piolink.net:8443/api/v3/system/token"
+#     headers = {}
     
-    if response:
-        try:
-            response.raise_for_status()
-            response_data = response.json()
-            token = response_data.get('information', [{}])[0].get('token')
-            if token:
-                print(f"Token retrieved successfully: {token}")
-                return token
-            else:
-                print("Token not found in the response.")
-                return None
-        except requests.exceptions.RequestException as e:
-            print(f"Error in API request: {e}")
-            return None
-    else:
-        print("Failed to make API request.")
-        return None
+#     response = make_api_request(external_url, "POST", headers, post_data)
+    
+#     if response:
+#         try:
+#             response.raise_for_status()
+#             response_data = response.json()
+#             token = response_data.get('information', [{}])[0].get('token')
+#             if token:
+#                 print(f"Token retrieved successfully")
+#                 return token
+#             else:
+#                 print("Token not found in the response.")
+#                 return None
+#         except requests.exceptions.RequestException as e:
+#             print(f"Error in API request: {e}")
+#             return None
+#     else:
+#         print("Failed to make API request.")
+#         return None
+
+
 
 
 def determine_ip_version(ip):

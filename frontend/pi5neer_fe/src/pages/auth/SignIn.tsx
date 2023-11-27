@@ -40,13 +40,11 @@ function SignIn() {
         .then((response) => response.json())
         .then((data) => {
             const user: UserType = data;
-            console.log(user.access_token);
-            setCookie("access_token", user.access_token);
+            localStorage.setItem('token', data.access_token);
             setCookie("user_id", user.id.toString());
             setCookie("security_policy_id", user.security_policy_id.toString());
             setCookie("wf_app_id", user.app_id.toString());
             setCookie("app_name", user.app_name.toString());
-            console.log(getCookie("access_token"));
             navigate("/customers/dashboard");
         })
         .catch((error) => {

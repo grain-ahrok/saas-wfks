@@ -13,12 +13,12 @@ const generateRoute = (): ReactNode => {
     const users: RouteType[] = appRoutes.appUserRoutes;
     const customers: RouteType[] = appRoutes.appCustomerRoutes;
     const policyDetails: RouteType[] = appRoutes.appPolicyDetailRoutes;
-
+    const token = localStorage.getItem('token');
     return [
         users.map((route, index) => (
             <Route path={route.path} element={route.element} />
         )),
-        getCookie("access_token") ?
+        token ?
             <Route element={<MainLayout />}>
                 {customers.map((route, index) => (
                     route.index ? (
@@ -45,7 +45,7 @@ const generateRoute = (): ReactNode => {
                     )
                 ))}</Route>
             : <Route path='/users/signup' element={<SignIn />} />,
-        getCookie("access_token") ? <Route element={<MainLayout />}>
+        token ? <Route element={<MainLayout />}>
             {policyDetails.map((route, index) => (
                 <Route path={route.path} element={
                     <PageWrapper>

@@ -1,6 +1,6 @@
 from flask import Blueprint, session, jsonify, request
 import requests
-from utils import make_api_request,generate_token
+from utils import make_api_request,basic_auth
 import json
 import urllib3
 from models.domain import Domain,datetime
@@ -13,7 +13,7 @@ from models import *
 from datetime import datetime, timedelta
 from collections import Counter
 from sqlalchemy import func
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required,get_jwt_identity
 from sqlalchemy.orm import joinedload
 app = Blueprint('app', __name__, url_prefix='/app')
 
@@ -25,7 +25,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시�
 @app.route('/<int:app_id>/dashboard', methods=['GET'])
 @jwt_required()
 def dashboard(app_id):
-    print(app_id)
     existing_logs = Log.get_app_by_logs(app_id)
     if existing_logs:
         response_data = fetch_dashboard_data(app_id)
@@ -78,12 +77,10 @@ def get_logs_by_year_range(start_time, end_time,app_id):
         Log.timestamp >= start_time
     ).group_by(func.DATE_FORMAT(Log.timestamp, '%Y-%m')).all()
 
-    print(result)
     # Create a dictionary to store month-wise log counts
     month_counts = [{"interval": month, "count": count} for month, count in result]
 
-    # Output the dictionary
-    print(month_counts)
+
     return month_counts
 
 def count_occurrences_in_intervals(logs, end_time, interval_minutes,app_id):
@@ -98,17 +95,16 @@ def count_occurrences_in_intervals(logs, end_time, interval_minutes,app_id):
     while current_time !=start_time:
         interval_start = current_time
         interval_end = current_time + timedelta(minutes=interval_minutes)
-        print(interval_start,interval_end)
-        # Count occurrences within the current interval
+
         count = sum(1 for log in logs if interval_start <= log.timestamp < interval_end and log.app_id == app_id)
         interval_counts.append({"interval": f"{interval_start} - {interval_end}", "count": count})
         current_time = interval_end
 
-    #print(interval_counts)
     return interval_counts
 
 
 @app.route('/<int:app_id>/logs', methods=['GET'])
+@jwt_required()
 def security_logs(app_id):
     # Check if logs are already present in the database
     existing_logs = Log.get_app_by_logs(app_id)
@@ -245,6 +241,7 @@ def security_logs(app_id):
 
 
 @app.route('/<int:app_id>/logs/refresh', methods=['GET'])
+@jwt_required()
 def logs_refresh(app_id):
     log_s = refresh_logs(app_id)
     return jsonify({
@@ -252,13 +249,14 @@ def logs_refresh(app_id):
         }), 200
 
 @app.route('/<int:app_id>/domain-list', methods=['GET', 'PUT', 'POST','DELETE'])
+@jwt_required()
 def manage_domain_settings(app_id):
 
     domain_url = f"https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/general/domain_list"
     server_list_url = f'https://wf.awstest.piolink.net:8443/api/v3/app/{app_id}/load_balance/server_list'
         
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
+
+    headers = basic_auth()
     user_id = request.args.get('user_id')
 
     try:
@@ -281,12 +279,11 @@ def manage_domain_settings(app_id):
             
             response = make_api_request(server_list_url, method='GET', headers=headers)
             data = response.json()
-            print(data)
+
             if response and response.status_code == 200:
                 data = response.json()
                 for app in apps:
                     for server_list_data in data:
-                        print(app['ip'] , server_list_data['server_ip'])
                         if app['ip'] == server_list_data['server_ip']:
                             app['server_id'] = server_list_data['id']
                         
@@ -295,7 +292,6 @@ def manage_domain_settings(app_id):
             
             response = make_api_request(domain_url, method='GET', headers=headers)
             data = response.json()
-            #print(data)
             if response and response.status_code == 200:
                 data = response.json()
                 for app in apps:
@@ -304,9 +300,6 @@ def manage_domain_settings(app_id):
                             if domain_app['domain'] == domain_data['domain']:
                                 domain_app['id'] = domain_data['id']
 
-                
-                
-                print("apps is ->:",apps)
                 return jsonify(apps), 200
             else:
                 return jsonify({"error": "Failed to retrieve domain data."}), 500
@@ -335,7 +328,6 @@ def manage_domain_settings(app_id):
                 }
                 domain_list.append(domain_info)
                 response = make_api_request(domain_url, method='PUT', data=domain_info, headers=headers)
-                print(response.content)
                 if response.status_code == 200:
                     Domain.update_domain_by_id(domain_data.get("table_id"), name=domain_data.get("domain"), desc=domain_data.get("desc", ""))
                     
@@ -346,7 +338,6 @@ def manage_domain_settings(app_id):
             response = make_api_request(server_list_url, method='PUT', headers=headers,data=app_info)
             
             if response and response.status_code == 200:
-                print(response.content)
                 app_data = {"ip_ver": app_data.get("version"), "ip_addr": app_data.get("ip"), "port": app_data.get("port"), "status": app_data.get("status"), "server_name": server_name}
                 UserApplication.update_app_by_id(Domain.user_application_id, app_data)
                 return response.json(), 200
@@ -368,16 +359,11 @@ def manage_domain_settings(app_id):
             if app_database:
                 security_policy_id = app_database.security_policy_id
                 server_list_data = [{"status": status, "version":ip_ver , "server_name": data.get("server_name"), "server_ip": data.get("ip"), "server_port": str(data.get('port')),  "desc": ""}]
-                print("server_list")
                 print(server_list_data)
                 server_list_response = make_api_request(server_list_url,method="POST", headers=headers, data=server_list_data)
-                print(server_list_response.content)
                 if server_list_response and server_list_response.status_code == 200:
                     protocol = "https" if isinstance(port, list) and 443 in port else "http"
-                    
-                    
                     app_data = {"wf_app_id":app_id,"security_policy_id":security_policy_id,"user_id":user_id,"protocol":protocol,"ip_ver": ip_ver,"ip_addr":data.get("ip"),"port":data.get("port"),"server_name":data.get("server_name"),"status":status}
-                    print(app_data)
                     user_application = UserApplication.create(**app_data)
                     
                     for domain,desc in zip(domains,descs):
@@ -402,56 +388,49 @@ def manage_domain_settings(app_id):
                     return jsonify({"error": "server_list_response."}), 500# Server List
             else:
                 return {"Error : app_database"}, 500
-            
-            
 
         elif request.method == 'DELETE':
             data = request.json
-            print(data)
             id = data.get("server_id")
-            
-            data = [{"id": id}]
+            post_data = [{"id": id}]
 
             if 'domain_list' in data:
                 domain_list = data['domain_list']
-                print(domain_list)
             else:
                 print("'domain_list' not found in data")
             domain_table_ids = [item.get('table_id') for item in domain_list]
             domain_ids = [item.get('id') for item in domain_list]
-            
+    
             for domain_id,domain_table_id in zip(domain_ids,domain_table_ids):
-                response = make_api_request(domain_url, method='DELETE', data=domain_id)
-                print(domain_id)
-                print(response.content)
+                domain_data = [{"id":domain_id}]
+                print(domain_data)
+                response = make_api_request(domain_url, method='DELETE', data=domain_data,headers=headers)
+
                 if response and response.status_code == 200:
                     # 1. user_application_id에 해당하는 Domain 모델들을 조회
-                    
                     domain_to_delete = Domain.query.filter_by(id=domain_table_id).first()
                     db.session.delete(domain_to_delete)
                     db.session.commit()
+                
                     
                 else:
                     return jsonify({"error": "도메인 삭제에 실패하셨습니다.."}), 500
   
+            print(post_data)
+            response = make_api_request(server_list_url, method='DELETE', data=post_data,headers=headers)
             
-            response = make_api_request(server_list_url, method='DELETE', data=data)
-            print(data)
-            print(response.content)
             if response.status_code == 200:
-                user_application_to_delete = UserApplication.get_app_by_id(id)
+                user_application_to_delete = UserApplication.get_app_by_id(data.get('id'))
                 
                 db.session.delete(user_application_to_delete)
                 db.session.commit()
+                
                 return response.json()  
             else:
                 return jsonify({"error": "도메인 삭제에 실패하셨습니다.."}), 500
 
     except Exception as e:
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
-
-
-
 
 
 def fetch_logs_from_external_api(app_id):
@@ -635,3 +614,4 @@ def refresh_logs(app_id):
 
         if log_s:
             return log_s
+        
