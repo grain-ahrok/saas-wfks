@@ -4,5 +4,5 @@ export type UserType = {
     app_id: number
     app_name: number
     security_policy_id: number
-    access_token: string
+
 }
