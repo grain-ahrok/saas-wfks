@@ -11,14 +11,9 @@ base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
 
 headers = basic_auth()
 
-def createHeader() :
-    return basic_auth()
-
 # @security_policy_.before_request
 # def before_request():
 #     jwt_required()  # Call jwt_required directly within the before_request function
-
-
 
 policy_names = ["sql_injection",
 "buffer_overflow",
@@ -292,8 +287,6 @@ def apply_ip_list(security_policy_id):
         return jsonify({'error': error_message}), 500
     
 
-def createHeader() :
-    return {'Authorization': 'token ' + generate_token()}
 
 """
 GET 차단 IP 불러오기
@@ -331,7 +324,7 @@ def create_block_ip_filter(security_policy_id) :
             "value": data.get('ip') + "/" + str(data.get('subnetmask')),
             "condition": "include"
         }]
-        response = make_api_request(url, method='POST', data=post_data, headers=createHeader())
+        response = make_api_request(url, method='POST', data=post_data, headers=headers)
         print(response)
         return response.json()
     except Exception as e:
@@ -352,7 +345,7 @@ def update_block_ip_filter(security_policy_id) :
             "value": data.get('ip') + "/" + data.get('subnetmask'),
             "condition": "include",
         }]
-        response = make_api_request(url, method='PUT', data=post_data, headers=createHeader())
+        response = make_api_request(url, method='PUT', data=post_data, headers=headers)
         return response.json()
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
@@ -367,7 +360,7 @@ def delete_block_ip_filter(security_policy_id) :
         url = f'{base_url}/security_policy/{security_policy_id}/request_user_define_filter/filter_list/1/inspection_list'
         data = request.json
         id_list = [{"id": item.get('id')} for item in data]
-        response = make_api_request(url, method='DELETE', data=id_list, headers=createHeader())
+        response = make_api_request(url, method='DELETE', data=id_list, headers=headers)
         return response.json()
     except Exception as e:
         return create_response(success=True, message=e, status_code = 500)
