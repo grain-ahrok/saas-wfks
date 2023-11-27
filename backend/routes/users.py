@@ -9,7 +9,7 @@ from utils import *
 import urllib3
 import automic_setting
 from urllib.parse import urlparse
-from flask_jwt_extended import jwt_required, get_jwt_identity,create_access_token,unset_jwt_cookies
+from flask_jwt_extended import jwt_required,create_access_token,unset_jwt_cookies
 
 
 users = Blueprint('users', __name__, url_prefix='/users')

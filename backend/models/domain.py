@@ -66,3 +66,11 @@ class Domain(db.Model):
     def check_domain_by_name(cls, new_name):
         existing_domain = Domain.query.filter_by(name=new_name).first()
         return existing_domain is not None
+    
+    @classmethod
+    def delete_by_id(cls, domain_id):
+        domain = cls.get_domain_by_id(domain_id)
+
+        if domain:
+            db.session.delete(domain)
+            db.session.commit()

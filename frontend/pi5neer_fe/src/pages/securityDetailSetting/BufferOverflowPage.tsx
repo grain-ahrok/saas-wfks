@@ -16,7 +16,7 @@ const BufferOverflowPage = (props: Props) => {
   const [status, setStatus] = useState('');
 
   useEffect(() => {
-    fetch(url)
+    fetch(url,{headers : authHeaders})
       .then((response) => response.json())
       .then((data) => {
         setStatus(data['result']['status']);

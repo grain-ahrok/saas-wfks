@@ -4,7 +4,7 @@ from decouple import config
 from models.user_application import UserApplication
 from models.security_policy import SecurityPolicy
 from models.domain import Domain
-
+import base64
 import json
 import ipaddress
 from urllib.parse import urlparse
@@ -67,34 +67,10 @@ def update_security_policy_settings(external_url, headers, security_policy_json,
     except requests.exceptions.RequestException as e:
         print(f"Error in API request: {e}")
 
-def generate_token():
-    post_data = {
-        "username": config('NAME'),
-        "password": config('PASSWORD'),
-        "otp_code": config('OTP_CODE')
-    }
-    external_url = "https://wf.awstest.piolink.net:8443/api/v3/system/token"
-    headers = {}
-    
-    response = make_api_request(external_url, "POST", headers, post_data)
-    
-    if response:
-        try:
-            response.raise_for_status()
-            response_data = response.json()
-            token = response_data.get('information', [{}])[0].get('token')
-            if token:
-                print(f"Token retrieved successfully: {token}")
-                return token
-            else:
-                print("Token not found in the response.")
-                return None
-        except requests.exceptions.RequestException as e:
-            print(f"Error in API request: {e}")
-            return None
-    else:
-        print("Failed to make API request.")
-        return None
+def basic_auth():
+    credentials = f"{config('NAME')}:{config('PASSWORD')}"
+    base64_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
+    return {'Authorization': f'Basic {base64_credentials}'}
 
 def make_api_request(url, method="GET", headers=None, data=None):
     try:
@@ -119,9 +95,9 @@ def get_existing_priorities(url, headers):
     except requests.exceptions.RequestException as e:
         print(f"Error in get_existing_priorities: {e}")
         
-def create_security_policy(data, token):
+def create_security_policy(data):
     security_policy_url = "https://wf.awstest.piolink.net:8443/api/v3/security_policy"
-    headers = {'Authorization': 'token ' + token}
+    headers = {'Authorization': 'token ' + basic_auth()}
     post_data = {"name": data.get('companyName'),"status": "enable","create_type": "sync","vendor_policy": "standard", "vendor_policy_block_status": "disable","sync_id": 4}
     response = make_api_request(security_policy_url, "POST", headers, post_data)
     if response:
@@ -131,9 +107,9 @@ def create_security_policy(data, token):
             print(f"Failed to create security policy. Status code: {response.status_code}, Response content: {response.content}")
             raise Exception("보안 정책 생성 실패")
 
-def get_security_policy_id(company_name, token):
+def get_security_policy_id(company_name):
     get_security_policy_url = "https://wf.awstest.piolink.net:8443/api/v3/security_policy?depth=1"
-    headers = {'Authorization': 'token ' + token}
+    headers = basic_auth()
 
     response = make_api_request(get_security_policy_url, "GET", headers)
 
@@ -147,9 +123,9 @@ def get_security_policy_id(company_name, token):
     return None
 
 ### 보안 정책 설정
-def configure_security_policies(data, headers, token):
-    create_security_policy(data, token)
-    security_policy_id = get_security_policy_id(data.get('companyName'),token)
+def configure_security_policies(data, headers):
+    create_security_policy(data)
+    security_policy_id = get_security_policy_id(data.get('companyName'))
     if security_policy_id:
         print(f"Security policy ID: {security_policy_id}")
         status = 'block'
@@ -248,10 +224,8 @@ def automic_setting(data,userId):
         companyName = data.get('companyName')
         ip_address = data.get('IP_address')
         
-        token = generate_token() 
-        
-        headers = {'Authorization': 'token ' + token}
-        security_policy_table_id,security_policy_id = configure_security_policies(data, headers, token)
+        headers = basic_auth()
+        security_policy_table_id,security_policy_id = configure_security_policies(data, headers)
         
         if security_policy_table_id:
             create_user_application(data, headers, security_policy_id, protocol, port, ip_version, domain_parsed, ip_address,companyName)

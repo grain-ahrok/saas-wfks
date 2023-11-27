@@ -23,7 +23,7 @@ interface SecurityLog {
 }
 
 const app_id = getCookie('wf_app_id');
-const token = getCookie('token');
+const token = localStorage.getItem('token');;
 const app_name = getCookie('app_name');
 
 const columns: GridColDef[] = [

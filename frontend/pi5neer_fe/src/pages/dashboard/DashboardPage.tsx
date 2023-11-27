@@ -17,7 +17,7 @@ export type AttackType = {
 };
 const app_id = getCookie('wf_app_id');
 const app_name = getCookie('app_name');
-const token = getCookie("access_token");
+const token = localStorage.getItem('token');
 
 const DashboardPage = () => {
   const url = `/app/${app_id}/dashboard?app_name=${app_name}`;

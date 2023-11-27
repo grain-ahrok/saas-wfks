@@ -75,3 +75,10 @@ class UserApplication(db.Model):
         return cls.query.filter_by(user_id=user_id).all()
     
 
+    @classmethod
+    def delete_by_id(cls, app_id):
+        app = cls.get_app_by_id(app_id)
+
+        if app:
+            db.session.delete(app)
+            db.session.commit()

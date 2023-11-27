@@ -14,7 +14,7 @@ const DomainSettingPage = () => {
   const [loading, setLoading] = useState(true);
 
   const app_id = getCookie('wf_app_id');
-  const token = getCookie('access_token');
+  const token = localStorage.getItem('token');
   const user_id = getCookie('user_id');
   const url = '/app/' + app_id + '/domain-list?user_id=' + user_id;
 
