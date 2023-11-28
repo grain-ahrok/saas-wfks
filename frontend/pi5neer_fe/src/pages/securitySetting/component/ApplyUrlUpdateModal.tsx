@@ -1,17 +1,16 @@
-import { Box, Button, Divider, Modal, Stack, TextField, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
-import colorConfigs from '../../../config/colorConfigs'
-import { getCookie } from '../../../utils/cookie'
-import { authHeaders } from '../../../utils/headers'
-import { useNavigate } from 'react-router-dom'
-import { URLType } from '../../../models/URLType'
+import { Box, Button, CircularProgress, Divider, Modal, Stack, TextField, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import colorConfigs from '../../../config/colorConfigs';
+import { getCookie } from '../../../utils/cookie';
+import { authHeaders } from '../../../utils/headers';
+import { useNavigate } from 'react-router-dom';
+import { URLType } from '../../../models/URLType';
 
 type Props = {
-  isOpen : boolean,
-  closeModal : any,
-  excepUrl? : URLType 
-}
-
+  isOpen: boolean,
+  closeModal: any,
+  excepUrl?: URLType
+};
 
 const style = {
   position: 'absolute' as 'absolute',
@@ -27,10 +26,10 @@ const style = {
 };
 
 const ApplyUrlUpdateModal = (props: Props) => {
-
   const navigate = useNavigate();
   const [expUrl, setUrl] = useState(props.excepUrl?.url);
   const [desc, setDesc] = useState(props.excepUrl?.desc);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setUrl(props.excepUrl?.url);
@@ -41,70 +40,82 @@ const ApplyUrlUpdateModal = (props: Props) => {
   const url = '/security_policy/' + security_policy_id + '/apply_url_list';
 
   const updateExcpUrl = function () {
+    setLoading(true);
+
     fetch(url, {
       method: 'put',
-      headers : authHeaders,
+      headers: authHeaders,
       body: JSON.stringify([{
-        id : props.excepUrl?.id,
-        url : expUrl,
-        desc : desc
+        id: props.excepUrl?.id,
+        url: expUrl,
+        desc: desc
       }])
     }).then((response) => response.json())
       .then((data) => {
+        setLoading(false);
+
         if (data['header']['isSuccessful'] !== true) {
-          alert("중복된 URL이 없는지 확인해 주세요")
+          alert("중복된 URL이 없는지 확인해 주세요");
         } else {
           window.location.reload();
         }
       })
       .catch((error) => {
+        setLoading(false);
         console.error('요청 중 오류 발생:', error);
       });
   }
 
   const deleteExcpUrl = function () {
+    setLoading(true);
+
     fetch(url, {
       method: 'delete',
-      headers : authHeaders,
+      headers: authHeaders,
       body: JSON.stringify([{
-        id : props.excepUrl?.id,
+        id: props.excepUrl?.id,
       }])
     }).then((response) => response.json())
       .then((data) => {
+        setLoading(false);
+
         if (data['header']['isSuccessful'] !== true) {
           alert("다시 시도해주세요");
         } else {
-            window.location.reload();
+          window.location.reload();
         }
       })
       .catch((error) => {
+        setLoading(false);
         console.error('요청 중 오류 발생:', error);
       });
   }
 
   return (
     <Modal
-        open={props.isOpen}
-        onClose={props.closeModal}>
-        <Stack sx={style} spacing={3}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            수정하기
-          </Typography>
-          <Divider />
-          <TextField
-            label="예외 URL"
-            placeholder='예외 URL ex) /test/*'
-            value={expUrl}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-          <TextField
-            label="설명"
-            placeholder='설명'
-            value={desc}
-            onChange={(e) => setDesc(e.target.value)}
-          />
-          <Box display="flex" justifyContent="flex-end">
-            <Button sx={{
+      open={props.isOpen}
+      onClose={props.closeModal}
+    >
+      <Stack sx={style} spacing={3}>
+        <Typography id="modal-modal-title" variant="h6" component="h2">
+          수정하기
+        </Typography>
+        <Divider />
+        <TextField
+          label="예외 URL"
+          placeholder='예외 URL ex) /test/*'
+          value={expUrl}
+          onChange={(e) => setUrl(e.target.value)}
+        />
+        <TextField
+          label="설명"
+          placeholder='설명'
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+        <Box display="flex" justifyContent="flex-end">
+          <Button
+            sx={{
               color: colorConfigs.button.red,
               border: 1,
               borderColor: colorConfigs.button.red,
@@ -116,11 +127,15 @@ const ApplyUrlUpdateModal = (props: Props) => {
                 color: colorConfigs.button.white,
                 background: colorConfigs.button.red,
               }
-            }} onClick={() => deleteExcpUrl()} >
-              삭제하기
-            </Button>
+            }}
+            onClick={() => deleteExcpUrl()}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : '삭제하기'}
+          </Button>
 
-            <Button sx={{
+          <Button
+            sx={{
               color: colorConfigs.button.white,
               backgroundColor: colorConfigs.button.blue,
               border: 1,
@@ -133,12 +148,15 @@ const ApplyUrlUpdateModal = (props: Props) => {
                 color: colorConfigs.button.blue
               }
             }}
-              onClick={() => updateExcpUrl()}
-            >수정하기</Button>
-          </Box>
-        </Stack>
-      </Modal>
+            onClick={() => updateExcpUrl()}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : '수정하기'}
+          </Button>
+        </Box>
+      </Stack>
+    </Modal>
   )
 }
 
-export default ApplyUrlUpdateModal
+export default ApplyUrlUpdateModal;

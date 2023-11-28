@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Modal, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, CircularProgress, Divider, Modal, Stack, TextField, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import colorConfigs from '../../../config/colorConfigs'
 import { getCookie } from '../../../utils/cookie'
@@ -6,10 +6,9 @@ import { authHeaders } from '../../../utils/headers'
 import { useNavigate } from 'react-router-dom'
 
 type Props = {
-    isOpen : boolean,
-    closeModal : any
+    isOpen: boolean,
+    closeModal: any
 }
-
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -22,7 +21,7 @@ const style = {
     boxShadow: 24,
     p: 4,
     m: '2rem'
-  };
+};
 
 const ExcepUrlCreateModal = (props: Props) => {
 
@@ -31,27 +30,33 @@ const ExcepUrlCreateModal = (props: Props) => {
 
     const [expUrl, setUrl] = useState('');
     const [desc, setDesc] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const send_button = function () {
+        setLoading(true);
+
         fetch(url, {
-          method: 'post',
-          headers : authHeaders,
-          body: JSON.stringify({
-            url : expUrl,
-            desc : desc
-          })
+            method: 'post',
+            headers: authHeaders,
+            body: JSON.stringify({
+                url: expUrl,
+                desc: desc
+            })
         }).then((response) => response.json())
-          .then((data) => {
-            if (data['header']['isSuccessful'] !== true) {
-              alert("중복된 URL이 있는지 확인해 주세요");
-            } else {
-              window.location.reload();
-            }
-          })
-          .catch((error) => {
-            console.error('요청 중 오류 발생:', error);
-          });
-      }
+            .then((data) => {
+                setLoading(false);
+
+                if (data['header']['isSuccessful'] !== true) {
+                    alert("중복된 URL이 있는지 확인해 주세요");
+                } else {
+                    window.location.reload();
+                }
+            })
+            .catch((error) => {
+                setLoading(false);
+                console.error('요청 중 오류 발생:', error);
+            });
+    }
 
     return (
         <Modal
@@ -87,12 +92,15 @@ const ExcepUrlCreateModal = (props: Props) => {
                             color: colorConfigs.button.blue
                         }
                     }}
-                        onClick={() => {send_button()}}
-                    >추가하기</Button>
+                        onClick={() => { send_button() }}
+                        disabled={loading}
+                    >
+                        {loading ? <CircularProgress size={20} color="inherit" /> : '추가하기'}
+                    </Button>
                 </Box>
             </Stack>
         </Modal>
     )
 }
 
-export default ExcepUrlCreateModal
+export default ExcepUrlCreateModal;
