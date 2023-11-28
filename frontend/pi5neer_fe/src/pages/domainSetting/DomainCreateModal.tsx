@@ -1,4 +1,4 @@
-import { Box, Button, Divider, FormControlLabel, IconButton, Radio, RadioGroup, TextField, Typography } from '@mui/material'
+import { Box, Button, Divider, FormControlLabel, IconButton, Radio, RadioGroup, TextField, Typography, CircularProgress } from '@mui/material'
 import React, { ChangeEvent, useState } from 'react'
 import ModalWrapper from '../../components/layout/ModalWrapper'
 import colorConfigs from '../../config/colorConfigs'
@@ -23,9 +23,11 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
   const [port, setPort] = useState('');
   const [protocol, setProtocol] = useState('');
   const [domainListName, setDomainName] = useState<DomainType[]>([{domain : '', desc : ''}]);
-  
+  const [loading, setLoading] = useState(false);
+
   const app_id = getCookie("wf_app_id");
   const user_id = getCookie("user_id");
+
   function createDomain() {
     const url = '/app/' + app_id + '/domain-list?user_id='+user_id;
 
@@ -38,6 +40,8 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
       server_name: serverName
     }
 
+    setLoading(true);
+
     fetch(url, {
       method: 'post',
       headers : authHeaders,
@@ -45,6 +49,8 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
     })
       .then((response) => response.json())
       .then((data) => {
+        setLoading(false);
+
         if (data['header']['isSuccessful'] !== true) {
           alert("다시 시도해주세요");
         } else {
@@ -54,15 +60,14 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
         window.location.reload();
       })
       .catch((error) => {
+        setLoading(false);
         console.error('요청 중 오류 발생:', error);
       });
   }
 
-
   const handleChange = (event : ChangeEvent<HTMLInputElement>) => {
     setProtocol(event.target.value);
   };
-
 
   const addInput = () => {
     if(domainListName.every((item) => item.domain !== '') && domainListName.length <= 5 ) {
@@ -90,14 +95,14 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
   const renderInputs = () => {
     return domainListName.map((item, index) => (
       <Box display="flex">
-      <TextField
-        fullWidth
-        size='small'
-        key={index}
-        value={item.domain}
-        onChange={(e) => handleInputChange(index, e.target.value)}
-      />
-      <IconButton
+        <TextField
+          fullWidth
+          size='small'
+          key={index}
+          value={item.domain}
+          onChange={(e) => handleInputChange(index, e.target.value)}
+        />
+        <IconButton
           color="secondary"
           onClick={() => removeInput(index)}
           aria-label="delete">
@@ -176,16 +181,20 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
             borderRadius : "40px",
             paddingX : "32px",
             margin : "4px",
+            width : "180px",
             "&: hover" : {
               color : colorConfigs.button.blue
             }
           }}
           onClick={createDomain}
-          >추가하기</Button>
+          disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : '추가하기'}
+          </Button>
         </Box>
       </Box>
     </ModalWrapper>
   )
 }
 
-export default DomainCreateModal
+export default DomainCreateModal;

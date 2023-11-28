@@ -12,6 +12,7 @@ import ApplyIpCreateModal from './component/ApplyIpCreateModal';
 import ApplyIpUpdateModal from './component/ApplyIpUpdateModal';
 import ExcepIpCreateModal from './component/ExcepIpCreateModal';
 import ExcepIpUpdateModal from './component/ExcepIpUpdateModal';
+import { authHeaders } from '../../utils/headers';
 
 
 type Props = {}
@@ -76,7 +77,9 @@ const ExceptionIpPage = (props: Props) => {
 
   useEffect(() => {
 
-    fetch(urlApply)
+    fetch(urlApply, {
+      headers: authHeaders
+    })
       .then((response) => response.json())
       .then((data) => {
         if (data['header']['isSuccessful'] === true) {
@@ -88,7 +91,9 @@ const ExceptionIpPage = (props: Props) => {
       });
     setTimeout(() => {}, 4000);
   
-    fetch(urlExcp)
+    fetch(urlExcp, {
+      headers: authHeaders
+    })
       .then((response) => response.json())
       .then((data) => {
         if (data['header']['isSuccessful'] === true) {
@@ -152,6 +157,7 @@ const ExceptionIpPage = (props: Props) => {
             rows={exceptionIpList}
             columns={columns}
             pageSizeOptions={[5, 10]}
+            autoPageSize
             onRowSelectionModelChange={(selectionModel) => handleSelectedExpChange(selectionModel.map(Number))}
             />
         </Box>

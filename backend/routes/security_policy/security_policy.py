@@ -171,6 +171,7 @@ def apply_url_list(security_policy_id):
 
         elif request.method == 'POST':
             data = request.json
+            print(data)
             post_data = [
                     {
                         "status": "enable",
@@ -232,6 +233,7 @@ def apply_ip_list(security_policy_id):
 
         elif request.method == 'POST':
             data = request.json
+            print(data)
             post_data = [
                         {
                             "status": "enable",

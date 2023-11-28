@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import Divider from '@mui/material-next/Divider';
 import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress'; // 추
 
 
 import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
@@ -19,6 +20,7 @@ import ExcepUrlCreateModal from './component/ExcepUrlCreateModal';
 import ExcepUrlUpdateModal from './component/ExcepUrlUpdateModal';
 import ApplyUrlCreateModal from './component/ApplyUrlCreateModal';
 import ApplyUrlUpdateModal from './component/ApplyUrlUpdateModal';
+import { authHeaders } from '../../utils/headers';
 
 
 type Props = {}
@@ -35,6 +37,7 @@ const ExceptionUrlPage = (props: Props) => {
 
   const [exceptionUrlList, setExceptionUrlList] = useState<URLType[]>([]);
   const [applyUrlList, setApplyUrlList] = useState<URLType[]>([]);
+  const [loading, setLoading] = useState(false); // 추가
 
   const [selectedExpItem, setSelectedExpItem] = useState<URLType | undefined>();
 
@@ -80,29 +83,41 @@ const ExceptionUrlPage = (props: Props) => {
       openApplyUpdateModal()
   };
 
+  
   useEffect(() => {
+    setLoading(true); 
 
-    fetch(urlApply)
+    fetch(urlApply, {
+      headers: authHeaders
+    })
       .then((response) => response.json())
       .then((data) => {
+        setLoading(false); 
+
         if (data['header']['isSuccessful'] === true) {
           setApplyUrlList(data['result'])
         }
       })
       .catch((error) => {
+        setLoading(false); // 데이터 로딩 에러 시 종료
         console.error('요청 중 오류 발생:', error);
       });
 
     setTimeout(() => {}, 4000);
-  
-    fetch(urlExcp)
+
+    fetch(urlExcp, {
+      headers: authHeaders
+    })
       .then((response) => response.json())
       .then((data) => {
+        setLoading(false); // 데이터 로딩 종료
+
         if (data['header']['isSuccessful'] === true) {
           setExceptionUrlList(data['result'])
         }
       })
       .catch((error) => {
+        setLoading(false); // 데이터 로딩 에러 시 종료
         console.error('요청 중 오류 발생:', error);
       });
   }, [urlExcp, urlApply]);
@@ -149,7 +164,7 @@ const ExceptionUrlPage = (props: Props) => {
             margin: "4px",
           }}
             onClick={openExpCreateModal}>
-            예외 URL 추가하기
+            {loading ? <CircularProgress size={20} color="inherit" /> : '예외 URL 추가하기'}
           </Button>
         </Box>
 

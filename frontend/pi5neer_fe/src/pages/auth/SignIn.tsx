@@ -45,6 +45,7 @@ function SignIn() {
                 setCookie("security_policy_id", user.security_policy_id.toString());
                 setCookie("wf_app_id", user.app_id.toString());
                 setCookie("app_name", user.app_name.toString());
+                console.log(localStorage.getItem('token'))
                 
                 navigate("/customers/dashboard");
             })

@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Modal, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Divider, Modal, Stack, TextField, Typography, CircularProgress } from '@mui/material'
 import React, { useState } from 'react'
 import colorConfigs from '../../../config/colorConfigs'
 import { getCookie } from '../../../utils/cookie'
@@ -6,10 +6,9 @@ import { authHeaders } from '../../../utils/headers'
 import { useNavigate } from 'react-router-dom'
 
 type Props = {
-    isOpen : boolean,
-    closeModal : any
+    isOpen: boolean,
+    closeModal: any
 }
-
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -22,7 +21,7 @@ const style = {
     boxShadow: 24,
     p: 4,
     m: '2rem'
-  };
+};
 
 const ApplyUrlCreateModal = (props: Props) => {
 
@@ -32,27 +31,33 @@ const ApplyUrlCreateModal = (props: Props) => {
     const navigate = useNavigate();
     const [expUrl, setUrl] = useState('');
     const [desc, setDesc] = useState('');
+    const [loading, setLoading] = useState(false); // 추가
 
     const send_button = function () {
+        setLoading(true); // 버튼 클릭 시 로딩 시작
+
         fetch(url, {
-          method: 'post',
-          headers : authHeaders,
-          body: JSON.stringify({
-            url : expUrl,
-            desc : desc
-          })
+            method: 'post',
+            headers: authHeaders,
+            body: JSON.stringify([{
+                url: expUrl,
+                desc: desc
+            }])
         }).then((response) => response.json())
-          .then((data) => {
-            if (data['header']['isSuccessful'] !== true) {
-              alert("중복된 URL이 있는지 확인해 주세요");
-            } else {
-              window.location.reload();
-            }
-          })
-          .catch((error) => {
-            console.error('요청 중 오류 발생:', error);
-          });
-      }
+            .then((data) => {
+                setLoading(false); // 요청 완료 시 로딩 종료
+
+                if (data['header']['isSuccessful'] !== true) {
+                    alert("중복된 URL이 있는지 확인해 주세요");
+                } else {
+                    window.location.reload();
+                }
+            })
+            .catch((error) => {
+                setLoading(false); // 에러 발생 시 로딩 종료
+                console.error('요청 중 오류 발생:', error);
+            });
+    }
 
     return (
         <Modal
@@ -75,21 +80,25 @@ const ApplyUrlCreateModal = (props: Props) => {
                     onChange={(e) => setDesc(e.target.value)}
                 />
                 <Box display="flex" justifyContent="flex-end">
-                    <Button sx={{
-                        color: colorConfigs.button.white,
-                        backgroundColor: colorConfigs.button.blue,
-                        border: 1,
-                        borderColor: colorConfigs.button.blue,
-                        borderRadius: "40px",
-                        paddingX: "32px",
-                        margin: "4px",
-                        width: "130px",
-                        "&: hover": {
-                            color: colorConfigs.button.blue
-                        }
-                    }}
-                        onClick={() => {send_button()}}
-                    >추가하기</Button>
+                    <Button
+                        sx={{
+                            color: colorConfigs.button.white,
+                            backgroundColor: colorConfigs.button.blue,
+                            border: 1,
+                            borderColor: colorConfigs.button.blue,
+                            borderRadius: "40px",
+                            paddingX: "32px",
+                            margin: "4px",
+                            width: "130px",
+                            "&:hover": {
+                                color: colorConfigs.button.blue
+                            }
+                        }}
+                        onClick={() => { send_button() }}
+                        disabled={loading} // 로딩 중일 때 버튼 비활성화
+                    >
+                        {loading ? <CircularProgress size={20} color="inherit" /> : '추가하기'}
+                    </Button>
                 </Box>
             </Stack>
         </Modal>

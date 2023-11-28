@@ -8,6 +8,7 @@ import colorConfigs from '../../config/colorConfigs';
 import BlockIpCreateModal from './component/BlockIpCreateModal';
 import { BlockIpType } from '../../models/BlockIpType';
 import BlockIpUpdateModal from './component/BlockIpUpdateModal';
+import { authHeaders } from '../../utils/headers';
 
 
 type Props = {}
@@ -28,7 +29,9 @@ const BlockedIpPage = (props: Props) => {
   const url = '/security_policy/' + security_policy_id + '/block_ip_filter/ip_list';
   
   useEffect(() => {
-    fetch(url)
+    fetch(url, {
+      headers: authHeaders
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log(data)
