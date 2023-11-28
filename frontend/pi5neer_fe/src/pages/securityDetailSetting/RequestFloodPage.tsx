@@ -42,6 +42,7 @@ const RequestFloodPage = (props: Props) => {
 
 
   function handleStatusChange(value: string) {
+    setStatus(value);
     fetch(url, {
       method: 'put',
       headers: authHeaders,

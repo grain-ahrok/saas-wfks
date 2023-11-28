@@ -1,7 +1,8 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
 import { SignatureType } from '../../../models/SignatureType'
 import colorConfigs from '../../../config/colorConfigs'
+import SignatureModal from './SinatureModal'
 
 type Props = {
     sigList: SignatureType[]
@@ -19,6 +20,12 @@ const columns: readonly Column[] = [
 
 const SignatureListBox = (props: Props) => {
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
+
+    const [selectSigItem, setSelectSigItem ] = useState<SignatureType>();
+
     function warningToColor(warning : Number) {
         switch(warning) {
             case 1 : return colorConfigs.warning.low;
@@ -33,6 +40,14 @@ const SignatureListBox = (props: Props) => {
             case 2 : return "보통";
             case 3 : return "높음";
         }
+    }
+
+    function handleRowClick(e: any, sig: SignatureType) {
+        if (sig !== null && sig !== undefined) {
+            setSelectSigItem(sig)
+            openModal();
+        }
+
     }
 
     return (
@@ -55,18 +70,23 @@ const SignatureListBox = (props: Props) => {
 
                     <TableBody>
                         {props.sigList.map((row) => (
-                            <TableRow hover key={row.id.toString()}>
+                            <TableRow hover key={row.id.toString()} onClick={(e) => handleRowClick(e, row)}>
                                 <TableCell align="center" sx={{
                                     color: warningToColor(Number(row.warning)),
                                     fontWeight: "bold"
                                 }}>{warningToStr(Number(row.warning))}</TableCell>
                                 <TableCell sx={{ paddingX: "60px", fontSize: "16px", fontWeight: "bold" }} align="left">{row.ko_desc}</TableCell>
+                                
                             </TableRow>
                         ))}
                     </TableBody>
+                    
                 </Table>
             </TableContainer>
+            {selectSigItem ? <SignatureModal isOpen={isModalOpen} closeModal={closeModal} sig={selectSigItem} /> : undefined}
+            
         </Paper>
+
     )
 }
 

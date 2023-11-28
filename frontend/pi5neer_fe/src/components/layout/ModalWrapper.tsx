@@ -17,6 +17,8 @@ const ModalWrapper = (props : Props) => {
           position: "absolute",
           top: "50%",
           left: "50%",
+          padding :"10px",
+          borderRadius : '24px',
           transform: "translate(-50%, -50%)",
           width: 600,
           maxWidth: "100%",

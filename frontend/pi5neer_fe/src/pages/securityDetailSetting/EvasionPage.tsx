@@ -30,6 +30,7 @@ const EvasionPage = (props: Props) => {
 
 
   function handleValueChange(value: string) {
+    setStatus(value);
     fetch(url, {
       method : 'put', 
       headers: authHeaders,
