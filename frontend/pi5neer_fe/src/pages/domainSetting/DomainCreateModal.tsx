@@ -111,7 +111,7 @@ const DomainCreateModal = ({ isOpen, closeModal }: Props) => {
     <ModalWrapper isOpen={isOpen} closeModal={closeModal}>
       <Box sx={{
         padding : "20px",
-        borderRadius : "24px",
+        borderRadius : "40px",
       }}>
         <Typography variant='h6'>추가하기</Typography>
         <Divider sx={{

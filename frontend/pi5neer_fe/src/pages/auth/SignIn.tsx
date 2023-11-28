@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom"
 import { Box, Button, TextField, Typography, CircularProgress } from "@mui/material";
 import styleConfigs from "../../config/styleConfigs";
-import { setCookie } from "../../utils/cookie";
+import { getCookie, setCookie } from "../../utils/cookie";
 import { UserType } from "../../models/UserType";
 
 function SignIn() {
@@ -45,6 +45,7 @@ function SignIn() {
                 setCookie("security_policy_id", user.security_policy_id.toString());
                 setCookie("wf_app_id", user.app_id.toString());
                 setCookie("app_name", user.app_name.toString());
+                
                 navigate("/customers/dashboard");
             })
             .catch((error) => {
@@ -53,7 +54,6 @@ function SignIn() {
                 }
             })
             .finally(() => {
-                // Set loading to false when the request is complete
                 setLoading(false);
             });
     };

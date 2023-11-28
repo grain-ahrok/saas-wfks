@@ -313,6 +313,7 @@ def get_block_ip_filter(security_policy_id) :
 POST 차단 IP 추가하기
 """
 @security_policy_.route('/<int:security_policy_id>/block_ip_filter/ip_list', methods=['POST'])
+@jwt_required()
 def create_block_ip_filter(security_policy_id) :
     try : 
         url = f'{base_url}/security_policy/{security_policy_id}/request_user_define_filter/filter_list/1/inspection_list'
@@ -335,6 +336,7 @@ def create_block_ip_filter(security_policy_id) :
 PUT 차단 IP 수정하기
 """
 @security_policy_.route('/<int:security_policy_id>/block_ip_filter/ip_list', methods=['PUT'])
+@jwt_required()
 def update_block_ip_filter(security_policy_id) :
     try :
         url = f'{base_url}/security_policy/{security_policy_id}/request_user_define_filter/filter_list/1/inspection_list'
@@ -355,6 +357,7 @@ def update_block_ip_filter(security_policy_id) :
 DELETE 차단 IP 삭제하기
 """
 @security_policy_.route('/<int:security_policy_id>/block_ip_filter/ip_list', methods=['DELETE'])
+@jwt_required()
 def delete_block_ip_filter(security_policy_id) :
     try : 
         url = f'{base_url}/security_policy/{security_policy_id}/request_user_define_filter/filter_list/1/inspection_list'

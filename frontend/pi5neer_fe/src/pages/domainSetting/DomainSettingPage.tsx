@@ -5,12 +5,14 @@ import DomainNoticeBox from './DomainNoticeBox';
 import colorConfigs from '../../config/colorConfigs';
 import DomainCreateModal from './DomainCreateModal';
 import { getCookie } from '../../utils/cookie';
+import { authHeaders } from '../../utils/headers';
+import { AppType } from '../../models/DomainType';
 
 const DomainSettingPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  const [appList, setAppList] = useState([]);
+  const [appList, setAppList] = useState<AppType[]>([]);
   const [loading, setLoading] = useState(true);
 
   const app_id = getCookie('wf_app_id');
@@ -20,16 +22,11 @@ const DomainSettingPage = () => {
 
   useEffect(() => {
     setLoading(true);
-  
     fetch(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+      headers: authHeaders,
     })
       .then((response) => response.json())
       .then((data) => {
-        
         setAppList(data);
       })
       .catch((error) => {
