@@ -11,9 +11,12 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 security_policy_detail_ = Blueprint('security_policy_detail', __name__, url_prefix='/security_policy')
 base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
 
+<<<<<<< HEAD
 def createHeader() :
     return basic_auth()
 
+=======
+>>>>>>> main
 def update_poc_examples(data,policy_name):
     file_path = f'./json/sig_list/{policy_name}.json'    
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -44,7 +47,11 @@ GET SQL injection
 @jwt_required()
 def get_policy_sql_injection(security_policy_id) : 
     try : 
+<<<<<<< HEAD
         response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/sql_injection", method='GET', headers=createHeader())
+=======
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/sql_injection", method='GET', headers=basic_auth())
+>>>>>>> main
         
         data = json.loads(response.content.decode('utf-8'))
         update_poc_examples(data,"sql_injection")
@@ -61,7 +68,7 @@ GET url 정규식 검사
 @jwt_required()
 def get_policy_url_regex(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/url_regex", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/url_regex", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         update_poc_examples(data,"url_regex")
         spDto = SecurityPolicyDto(status=data['sig_list'][0]['status'], sig_list=data['sig_list'])
@@ -76,7 +83,7 @@ GET xss
 @jwt_required()
 def get_policy_xss(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/xss", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/xss", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         update_poc_examples(data,"xss")
         spDto = SecurityPolicyDto(status=data['sig_list'][0]['status'], sig_list=data['sig_list'])
@@ -91,7 +98,7 @@ GET 디렉토리 리스팅
 @jwt_required()
 def get_policy_directory_listing(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/directory_listing", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/directory_listing", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         update_poc_examples(data,"directory_listing")
         spDto = SecurityPolicyDto(status=data['sig_list'][0]['status'], sig_list=data['sig_list'])
@@ -106,7 +113,7 @@ GET 쉘코드
 @jwt_required()
 def get_policy_shellcode(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/shellcode", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/shellcode", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         update_poc_examples(data,"shellcode")
         spDto = SecurityPolicyDto(status=data['sig_list'][0]['status'], sig_list=data['sig_list'])
@@ -121,7 +128,7 @@ GET access_control
 @jwt_required()
 def get_policy_access_control(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/access_control", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/access_control", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         update_poc_examples(data,"access_control")
         spDto = SecurityPolicyDto(status=data['sig_list'][0]['status'], sig_list=data['sig_list'])
@@ -136,8 +143,8 @@ GET 파일 업/다운로드
 @jwt_required()
 def get_policy_updownload(security_policy_id) : 
     try : 
-        response_down = make_api_request(f"{base_url}/security_policy/{security_policy_id}/download", method='GET', headers=createHeader())
-        response_up = make_api_request(f"{base_url}/security_policy/{security_policy_id}/upload", method='GET', headers=createHeader())
+        response_down = make_api_request(f"{base_url}/security_policy/{security_policy_id}/download", method='GET', headers=basic_auth())
+        response_up = make_api_request(f"{base_url}/security_policy/{security_policy_id}/upload", method='GET', headers=basic_auth())
         data_down = json.loads(response_down.content.decode('utf-8'))
         data_up = json.loads(response_up.content.decode('utf-8'))
         data = data_down['sig_list'] + data_up['sig_list']
@@ -157,7 +164,7 @@ GET 과다 요청 제어
 @jwt_required()
 def get_policy_request_flood(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/request_flood", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/request_flood", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         spDto = SecurityPolicyDto(status=data['adv_options']['proxy_status'], adv_options=data['adv_options'])
         return create_response(data=spDto.__dict__)
@@ -171,7 +178,7 @@ GET 검사 회피
 @jwt_required()
 def get_policy_evasion(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/evasion", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/evasion", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         spDto = SecurityPolicyDto(status=data['adv_options']['enable_tildotslash'], adv_options=data['adv_options'])
         return create_response(data=spDto.__dict__)
@@ -185,7 +192,7 @@ GET 크리덴셜 스터프
 @jwt_required()
 def get_policy_credential_stuffing(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/credential_stuffing", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/credential_stuffing", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         adv_options = { "success_rule": data['success_rule'], "fail_rule" : data['fail_rule']}
         spDto = SecurityPolicyDto(status=data['success_rule']['action'], adv_options=adv_options)
@@ -200,7 +207,7 @@ GET 쿠키 보호
 @jwt_required()
 def get_policy_cookie_protection(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/cookie_protection", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/cookie_protection", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         spDto = SecurityPolicyDto(status=data['adv_options']['hijack_status'], adv_options=data['adv_options'])
         return create_response(data=spDto.__dict__)
@@ -214,7 +221,7 @@ GET 버퍼 오버 플로우
 @jwt_required()
 def get_policy_buffer_overflow(security_policy_id) : 
     try : 
-        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/buffer_overflow", method='GET', headers=createHeader())
+        response = make_api_request(f"{base_url}/security_policy/{security_policy_id}/buffer_overflow", method='GET', headers=basic_auth())
         data = json.loads(response.content.decode('utf-8'))
         spDto = SecurityPolicyDto(status=data['adv_options']['header_length_status'], adv_options=data['adv_options'])
         return create_response(data=spDto.__dict__)
@@ -240,8 +247,8 @@ def update_policy_up_download(security_policy_id) :
     update_upload = [{"id": item["id"], "status": status} for item in sig_list if item["id"].startswith("1111")]
     update_download = [{"id": item["id"], "status": status} for item in sig_list if item["id"].startswith("1112")]
 
-    make_api_request(url_upload, method='PUT', headers=createHeader(), data=update_upload)
-    make_api_request(url_download, method='PUT', headers=createHeader(), data=update_download)
+    make_api_request(url_upload, method='PUT', headers=basic_auth(), data=update_upload)
+    make_api_request(url_download, method='PUT', headers=basic_auth(), data=update_download)
     return create_response()
 
 """
@@ -252,7 +259,7 @@ PUT 과다 요청 제어 옵션 횟수 수정
 def update_policy_request_flood_option(security_policy_id) :
     data = request.json
     url = f'{base_url}/security_policy/{security_policy_id}/request_flood/adv_options'
-    make_api_request(url, method='PUT', headers=createHeader(), data=data)
+    make_api_request(url, method='PUT', headers=basic_auth(), data=data)
     return create_response()
 
 """

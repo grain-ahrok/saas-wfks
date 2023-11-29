@@ -9,218 +9,177 @@ import Typography from '@mui/material/Typography';
 import Modal from '@mui/material/Modal';
 import Divider from '@mui/material-next/Divider';
 import TextField from '@mui/material/TextField';
+import CircularProgress from '@mui/material/CircularProgress'; // 추
 
 
-import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
-import { Dictionary } from '@reduxjs/toolkit';
+import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { getCookie } from '../../utils/cookie';
+import { URLType } from '../../models/URLType';
+import colorConfigs from '../../config/colorConfigs';
+import ExcepUrlCreateModal from './component/ExcepUrlCreateModal';
+import ExcepUrlUpdateModal from './component/ExcepUrlUpdateModal';
+import ApplyUrlCreateModal from './component/ApplyUrlCreateModal';
+import ApplyUrlUpdateModal from './component/ApplyUrlUpdateModal';
+import { authHeaders } from '../../utils/headers';
 
 
 type Props = {}
-let rows = [
-  {id : '0' , URL : '0', reason : 'test' } //line for test
-];
-
-interface exceptionip  {
-  id : string,
-  URL : string,
-  reason : string
-}
-
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 100 },
-  { field: 'URL', headerName: '적용 URL', width: 350 },
-  { field: 'reason', headerName: '적용사유', width: 500 },
+  { field: 'url', headerName: '적용 URL', width: 350 },
+  { field: 'desc', headerName: '적용 사유', width: 500 },
 ];
 
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 1000,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  m:'2rem'
-};
 
 
+const ExceptionUrlPage = (props: Props) => {
 
-const ExceptionIpPage = (props: Props) => {
+  const [exceptionUrlList, setExceptionUrlList] = useState<URLType[]>([]);
+  const [applyUrlList, setApplyUrlList] = useState<URLType[]>([]);
+  const [loading, setLoading] = useState(false); // 추가
 
-    const [deletebutton, setdeletebutton] = useState(false);
+  const [selectedExpItem, setSelectedExpItem] = useState<URLType | undefined>();
 
-    const urlref = useRef('0');
-    const reasonref = useRef('0');
+  const [isExpCreateModalOpen, setIsExpCreateModalOpen] = useState(false);
+  const openExpCreateModal = () => setIsExpCreateModalOpen(true);
+  const closeExpCreateModal = () => setIsExpCreateModalOpen(false);
 
-    let now_id = -1;
-    const [open, setOpen] = React.useState(false);
+  const [isExpUpdateModalOpen, setIsExpUpdateModalOpen] = useState(false);
+  const openExpUpdateModal = () => setIsExpUpdateModalOpen(true);
+  const closeExpUpdateModal = () => setIsExpUpdateModalOpen(false);
 
-    const handleOpen = function(params : GridRowParams) {
-      const rowData:exceptionip = params.row as exceptionip;
-      now_id = Number(rowData.id);
-      console.log(rowData);
-      setdeletebutton(true);
-      setOpen(true);
-    }
-    const handleOpenbutton = () => {
-      now_id = -1;
-      setdeletebutton(false);
-      setOpen(true);
-    }
-    const handleClose = function() {
-      now_id = 0;
-      setOpen(false);
-      console.log(now_id);
-    } 
+  const [selectedApplyItem, setSelectedApplyItem] = useState<URLType | undefined>();
 
-    //get 부분 완료
-    const security_policy_id = getCookie("security_policy_id");
-    const url = '/security_policy/' + security_policy_id + '/exception_url_list';
-    fetch(url)
+  const [isApplyCreateModalOpen, setIsApplyCreateModalOpen] = useState(false);
+  const openApplyCreateModal = () => setIsApplyCreateModalOpen(true);
+  const closeApplyCreateModal = () => setIsApplyCreateModalOpen(false);
+
+  const [isApplyUpdateModalOpen, setIsApplyUpdateModalOpen] = useState(false);
+  const openApplyUpdateModal = () => setIsApplyUpdateModalOpen(true);
+  const closeApplyUpdateModal = () => setIsApplyUpdateModalOpen(false);
+  
+
+  const security_policy_id = getCookie("security_policy_id");
+  const urlExcp = '/security_policy/' + security_policy_id + '/exception_url_list';
+  const urlApply = '/security_policy/' + security_policy_id + '/apply_url_list';
+
+  const handleSelectedExpChange = (selectionModel: number[]) => {
+    const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
+    const selectedRowData = selectedId
+      ? exceptionUrlList.find((row) => row.id === selectedId) || null
+      : undefined;
+      selectedRowData && setSelectedExpItem(selectedRowData);
+      openExpUpdateModal()
+  };
+
+
+  const handleSelectedApplyChange = (selectionModel: number[]) => {
+    const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
+    const selectedRowData = selectedId
+      ? applyUrlList.find((row) => row.id === selectedId) || null
+      : undefined;
+      selectedRowData && setSelectedApplyItem(selectedRowData);
+      openApplyUpdateModal()
+  };
+
+  
+  useEffect(() => {
+    setLoading(true); 
+
+    fetch(urlApply, {
+      headers: authHeaders
+    })
       .then((response) => response.json())
-      .then((data) => { 
-        rows = data['result'];
+      .then((data) => {
+        setLoading(false); 
+
+        if (data['header']['isSuccessful'] === true) {
+          setApplyUrlList(data['result'])
+        }
       })
       .catch((error) => {
+        setLoading(false); // 데이터 로딩 에러 시 종료
         console.error('요청 중 오류 발생:', error);
       });
 
-    //POST(Add) 부분, PUT(수정) 부분
-    const send_button = function() {
+    setTimeout(() => {}, 4000);
 
-      const formdata = new FormData();
+    fetch(urlExcp, {
+      headers: authHeaders
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setLoading(false); // 데이터 로딩 종료
 
-      
-      formdata.append("URL",urlref.current);
-      formdata.append("reason",reasonref.current);
-
-      if(now_id == -1){
-
-        const response = fetch(url,{
-          method: 'POST',
-          body:formdata
-        })
-        alert("POST(Add) response is : " + response);
-      }
-      else {
-        formdata.append("request_id",now_id.toString());
-        const response = fetch(url,{
-          method: 'PUT',
-          body:formdata
+        if (data['header']['isSuccessful'] === true) {
+          setExceptionUrlList(data['result'])
+        }
       })
-        alert("PUT(edit) response is : " + response);
-      }
-    }
-    //DELETE(delete) 부분
-    const delete_button = function() {
-      const response = fetch(url,{
-        method: 'DELETE'
-      })
-      alert(response)
-    }
-    
+      .catch((error) => {
+        setLoading(false); // 데이터 로딩 에러 시 종료
+        console.error('요청 중 오류 발생:', error);
+      });
+  }, [urlExcp, urlApply]);
+
 
   return (
-    <Box>
-      <Grid>
-        <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
-          <Box>
-            적용 URL 목록
-          </Box>
-          <Stack direction='row' spacing={3}>
-            <Button variant="contained" endIcon={<SendIcon />} onClick={handleOpenbutton}>
-              ADD
-            </Button>
+    <Box paddingRight="50px" paddingLeft="10px" >
+       <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
+          <Typography fontSize="18px" fontWeight="bold">적용 URL 목록 </Typography>
+          <Button sx={{
+            color: colorConfigs.button.blue,
+            backgroundColor: colorConfigs.button.white,
+            border: 1,
+            borderColor: colorConfigs.button.blue,
+            borderRadius: "40px",
+            paddingX: "32px",
+            margin: "4px",
+          }}
+            onClick={openApplyCreateModal}>
+            적용 URL 추가하기
+          </Button>
+        </Box>
 
-            
-          </Stack>
-        </Grid>
-        <br></br>
-        <div style={{ height: 400, width: '100%' }}>
+        <Box style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={rows}
+            rows={applyUrlList}
             columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 5 },
-              },
-            }}
             pageSizeOptions={[5, 10]}
-            
-            onRowClick={handleOpen}
-          />
-        </div>
-      </Grid>
-      <br></br>
-
-      <Modal
-              open={open}
-              onClose={handleClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-      >
-        <Stack sx={style} spacing = {3}>  
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            security INFO
-          </Typography>
-          <Divider />
-            <TextField
-              required
-              id="outlined-required"
-              label="URL"
-              defaultValue="/your url/*"
-              inputRef={urlref}
+            onRowSelectionModelChange={(selectionModel) => handleSelectedApplyChange(selectionModel.map(Number))}
             />
-            <TextField
-              required
-              id="outlined-required"
-              label="Reason"
-              defaultValue="Just"
-              inputRef={reasonref}
-            />
-            <Box display="flex" justifyContent="space-between">
-                {deletebutton && <Button variant="contained" endIcon={<DeleteIcon />} onClick={() => delete_button()} >
-                Delete this policy
-                </Button>
-                }
-              <Button variant="contained" endIcon={<SendIcon />} onClick={() => send_button()}>
-              Send
-              </Button>
-            </Box>
-          </Stack>
-        </Modal>
+        </Box>
+      <ApplyUrlCreateModal isOpen={isApplyCreateModalOpen} closeModal={closeApplyCreateModal}></ApplyUrlCreateModal>
+      <ApplyUrlUpdateModal isOpen={isApplyUpdateModalOpen} closeModal={closeApplyUpdateModal} excepUrl={selectedApplyItem}></ApplyUrlUpdateModal>
 
-      <Grid>
-        <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
-          <Box>
-            예외 URL 목록
-          </Box>
-          <Stack direction='row' spacing={3}>
-            <Button variant="contained" endIcon={<SendIcon />}>
-              ADD
-            </Button>
-          </Stack>
-        </Grid>
-        <br></br>
-        <div style={{ height: 400, width: '100%' }}>
+        <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
+          <Typography fontSize="18px" fontWeight="bold">예외 URL 목록 </Typography>
+          <Button sx={{
+            color: colorConfigs.button.blue,
+            backgroundColor: colorConfigs.button.white,
+            border: 1,
+            borderColor: colorConfigs.button.blue,
+            borderRadius: "40px",
+            paddingX: "32px",
+            margin: "4px",
+          }}
+            onClick={openExpCreateModal}>
+            {loading ? <CircularProgress size={20} color="inherit" /> : '예외 URL 추가하기'}
+          </Button>
+        </Box>
+
+        <Box style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={rows}
+            rows={exceptionUrlList}
             columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 5 },
-              },
-            }}
             pageSizeOptions={[5, 10]}
-            checkboxSelection
-          />
-        </div>
-      </Grid>
+            onRowSelectionModelChange={(selectionModel) => handleSelectedExpChange(selectionModel.map(Number))}
+            />
+        </Box>
+      <ExcepUrlCreateModal isOpen={isExpCreateModalOpen} closeModal={closeExpCreateModal}></ExcepUrlCreateModal>
+      <ExcepUrlUpdateModal isOpen={isExpUpdateModalOpen} closeModal={closeExpUpdateModal} excepUrl={selectedExpItem}></ExcepUrlUpdateModal>
     </Box>
+    
   );
 }
 
@@ -228,4 +187,4 @@ const ExceptionIpPage = (props: Props) => {
 
 
 
-export default ExceptionIpPage
+export default ExceptionUrlPage

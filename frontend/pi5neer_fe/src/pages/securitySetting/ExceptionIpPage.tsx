@@ -1,134 +1,114 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SendIcon from '@mui/icons-material/Send';
-import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import Modal from '@mui/material/Modal';
-import Divider from '@mui/material-next/Divider';
-import TextField from '@mui/material/TextField';
 
 
-import { DataGrid, GridColDef, GridRowParams, GridRowId } from '@mui/x-data-grid';
-import { Dictionary } from '@reduxjs/toolkit';
+import { DataGrid, GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { getCookie } from '../../utils/cookie';
+import { ExceptionIpType } from '../../models/ExceptionIpType';
+import colorConfigs from '../../config/colorConfigs';
+import ApplyIpCreateModal from './component/ApplyIpCreateModal';
+import ApplyIpUpdateModal from './component/ApplyIpUpdateModal';
+import ExcepIpCreateModal from './component/ExcepIpCreateModal';
+import ExcepIpUpdateModal from './component/ExcepIpUpdateModal';
+import { authHeaders } from '../../utils/headers';
 
 
 type Props = {}
-let rows = [
-  {id : '0' , ip : '0', subnet_mask : '0', reason : 'test' } //line for test
-];
-
-interface exceptionip  {
-  id : string,
-  ip : string,
-  subnet_mask : string,
-  reason : string
-}
-
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 100 },
-  { field: 'ip', headerName: '적용 네트워크 IP', width: 350 },
-  { field: 'subnet_mask', headerName: '서브넷 마스크', width: 350 },
-  { field: 'reason', headerName: '적용사유', width: 500 },
+  { field: 'client_ip', headerName: '적용 네트워크 IP', width: 350 },
+  { field: 'client_mask', headerName: '서브넷 마스크', width: 350 },
+  { field: 'desc', headerName: '적용사유', width: 500 },
 ];
-
-const style = {
-  position: 'absolute' as 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 1000,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-  m:'2rem'
-};
 
 
 
 const ExceptionIpPage = (props: Props) => {
+    
+  const [exceptionIpList, setExceptionIpList] = useState<ExceptionIpType[]>([]);
+  const [applyIpList, setApplyIpList] = useState<ExceptionIpType[]>([]);
 
-    const [deletebutton, setdeletebutton] = useState(false);
+  const [selectedExpItem, setSelectedExpItem] = useState<ExceptionIpType | undefined>();
 
-    const ipref = useRef('0');
-    const subnetref = useRef('0');
-    const reasonref = useRef('0');
+  const [isExpCreateModalOpen, setIsExpCreateModalOpen] = useState(false);
+  const openExpCreateModal = () => setIsExpCreateModalOpen(true);
+  const closeExpCreateModal = () => setIsExpCreateModalOpen(false);
 
-    let now_id = -1;
-    const [open, setOpen] = React.useState(false);
+  const [isExpUpdateModalOpen, setIsExpUpdateModalOpen] = useState(false);
+  const openExpUpdateModal = () => setIsExpUpdateModalOpen(true);
+  const closeExpUpdateModal = () => setIsExpUpdateModalOpen(false);
 
-    const handleOpen = function(params : GridRowParams) {
-      const rowData:exceptionip = params.row as exceptionip;
-      now_id = Number(rowData.id);
-      console.log(rowData);
-      setdeletebutton(true);
-      setOpen(true);
-    }
-    const handleOpenbutton = () => {
-      now_id = -1;
-      setdeletebutton(false);
-      setOpen(true);
-    }
-    const handleClose = function() {
-      now_id = 0;
-      setOpen(false);
-      console.log(now_id);
-    } 
+  const [selectedApplyItem, setSelectedApplyItem] = useState<ExceptionIpType | undefined>();
 
-    //get 부분 완료
-    const security_policy_id = getCookie("security_policy_id");
-    const url = '/security_policy/' + security_policy_id + '/exception_ip_list';
-    fetch(url)
+  const [isApplyCreateModalOpen, setIsApplyCreateModalOpen] = useState(false);
+  const openApplyCreateModal = () => setIsApplyCreateModalOpen(true);
+  const closeApplyCreateModal = () => setIsApplyCreateModalOpen(false);
+
+  const [isApplyUpdateModalOpen, setIsApplyUpdateModalOpen] = useState(false);
+  const openApplyUpdateModal = () => setIsApplyUpdateModalOpen(true);
+  const closeApplyUpdateModal = () => setIsApplyUpdateModalOpen(false);
+  
+
+  const security_policy_id = getCookie("security_policy_id");
+  const urlExcp = '/security_policy/' + security_policy_id + '/exception_ip_list';
+  const urlApply = '/security_policy/' + security_policy_id + '/apply_ip_list';
+
+  const handleSelectedExpChange = (selectionModel: number[]) => {
+    const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
+    const selectedRowData = selectedId
+      ? exceptionIpList.find((row) => row.id === selectedId) || null
+      : undefined;
+      selectedRowData && setSelectedExpItem(selectedRowData);
+      openExpUpdateModal()
+  };
+
+
+  const handleSelectedApplyChange = (selectionModel: number[]) => {
+    const selectedId = selectionModel.length > 0 ? selectionModel[0] : null;
+    const selectedRowData = selectedId
+      ? applyIpList.find((row) => row.id === selectedId) || null
+      : undefined;
+      selectedRowData && setSelectedApplyItem(selectedRowData);
+      openApplyUpdateModal()
+  };
+
+  useEffect(() => {
+
+    fetch(urlApply, {
+      headers: authHeaders
+    })
       .then((response) => response.json())
-      .then((data) => { 
-        rows = data['result'];
+      .then((data) => {
+        if (data['header']['isSuccessful'] === true) {
+          setApplyIpList(data['result'])
+        }
       })
       .catch((error) => {
         console.error('요청 중 오류 발생:', error);
       });
-
-    //POST(Add) 부분, PUT(수정) 부분
-    const send_button = function() {
-
-      const formdata = new FormData();
-
-      
-      formdata.append("network_ip",ipref.current);
-      formdata.append("subnet_mask",subnetref.current);
-      formdata.append("reason",reasonref.current);
-
-      if(now_id == -1){
-
-        const response = fetch(url,{
-          method: 'POST',
-          body:formdata
-        })
-        alert("POST(Add) response is : " + response);
-      }
-      else {
-        formdata.append("request_id",now_id.toString());
-        const response = fetch(url,{
-          method: 'PUT',
-          body:formdata
+    setTimeout(() => {}, 4000);
+  
+    fetch(urlExcp, {
+      headers: authHeaders
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data['header']['isSuccessful'] === true) {
+          setExceptionIpList(data['result'])
+        }
       })
-        alert("PUT(edit) response is : " + response);
-      }
-    }
-    //DELETE(delete) 부분
-    const delete_button = function() {
-      const response = fetch(url,{
-        method: 'DELETE'
-      })
-      alert(response)
-    }
+      .catch((error) => {
+        console.error('요청 중 오류 발생:', error);
+      });
+  }, [urlExcp, urlApply]);
+
     
 
   return (
+<<<<<<< HEAD
     <Box>
       {/* <Grid>
         <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
@@ -139,99 +119,72 @@ const ExceptionIpPage = (props: Props) => {
             <Button variant="contained" endIcon={<SendIcon />} onClick={handleOpenbutton}>
               ADD
             </Button>
+=======
+    <Box paddingRight="50px" paddingLeft="10px" >
+       <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
+          <Typography fontSize="18px" fontWeight="bold">적용 IP 목록 </Typography>
+          <Button sx={{
+            color: colorConfigs.button.blue,
+            backgroundColor: colorConfigs.button.white,
+            border: 1,
+            borderColor: colorConfigs.button.blue,
+            borderRadius: "40px",
+            paddingX: "32px",
+            margin: "4px",
+          }}
+            onClick={openApplyCreateModal}>
+            적용 IP 추가하기
+          </Button>
+        </Box>
+>>>>>>> main
 
-            
-          </Stack>
-        </Grid>
-        <br></br>
-        <div style={{ height: 400, width: '100%' }}>
+        <Box style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={rows}
+            rows={applyIpList}
             columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 5 },
-              },
-            }}
             pageSizeOptions={[5, 10]}
-            
-            onRowClick={handleOpen}
-          />
-        </div>
-      </Grid>
-      <br></br>
+            onRowSelectionModelChange={(selectionModel) => handleSelectedApplyChange(selectionModel.map(Number))}
+            />
+        </Box>
+      <ApplyIpCreateModal isOpen={isApplyCreateModalOpen} closeModal={closeApplyCreateModal}></ApplyIpCreateModal>
+      <ApplyIpUpdateModal isOpen={isApplyUpdateModalOpen} closeModal={closeApplyUpdateModal} excepIp={selectedApplyItem}></ApplyIpUpdateModal>
 
-      <Modal
-              open={open}
-              onClose={handleClose}
-              aria-labelledby="modal-modal-title"
-              aria-describedby="modal-modal-description"
-      >
-        <Stack sx={style} spacing = {3}>  
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            security INFO
-          </Typography>
-          <Divider />
-            <TextField
-              required
-              id="outlined-required"
-              label="IP"
-              defaultValue="127.0.0.01"
-              inputRef={ipref}
-            />
-            <TextField
-              required
-              id="outlined-required"
-              label="subnet_mask"
-              defaultValue="255.255.255.0"
-              inputRef={subnetref}
-            />
-            <TextField
-              required
-              id="outlined-required"
-              label="Reason"
-              defaultValue="Just"
-              inputRef={reasonref}
-            />
-            <Box display="flex" justifyContent="space-between">
-                {deletebutton && <Button variant="contained" endIcon={<DeleteIcon />} onClick={() => delete_button()} >
-                Delete this policy
-                </Button>
-                }
-              <Button variant="contained" endIcon={<SendIcon />} onClick={() => send_button()}>
-              Send
-              </Button>
-            </Box>
-          </Stack>
-        </Modal>
+        <Box sx={{ display: 'flex', justifyContent: "space-between" }}>
+          <Typography fontSize="18px" fontWeight="bold">예외 IP 목록 </Typography>
+          <Button sx={{
+            color: colorConfigs.button.blue,
+            backgroundColor: colorConfigs.button.white,
+            border: 1,
+            borderColor: colorConfigs.button.blue,
+            borderRadius: "40px",
+            paddingX: "32px",
+            margin: "4px",
+          }}
+            onClick={openExpCreateModal}>
+            예외 IP 추가하기
+          </Button>
+        </Box>
 
-      <Grid>
-        <Grid sx={{display: 'flex', justifyContent : "space-between"}}>
-          <Box>
-            예외 IP 목록
-          </Box>
-          <Stack direction='row' spacing={3}>
-            <Button variant="contained" endIcon={<SendIcon />}>
-              ADD
-            </Button>
-          </Stack>
-        </Grid>
-        <br></br>
-        <div style={{ height: 400, width: '100%' }}>
+        <Box style={{ height: 400, width: '100%' }}>
           <DataGrid
-            rows={rows}
+            rows={exceptionIpList}
             columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: { page: 0, pageSize: 5 },
-              },
-            }}
             pageSizeOptions={[5, 10]}
+<<<<<<< HEAD
             checkboxSelection
           />
         </div>
       </Grid> */}
+=======
+            autoPageSize
+            onRowSelectionModelChange={(selectionModel) => handleSelectedExpChange(selectionModel.map(Number))}
+            />
+        </Box>
+      <ExcepIpCreateModal isOpen={isExpCreateModalOpen} closeModal={closeExpCreateModal}></ExcepIpCreateModal>
+      <ExcepIpUpdateModal isOpen={isExpUpdateModalOpen} closeModal={closeExpUpdateModal} excepIp={selectedExpItem}></ExcepIpUpdateModal>
+>>>>>>> main
     </Box>
+    
   );
 }
 

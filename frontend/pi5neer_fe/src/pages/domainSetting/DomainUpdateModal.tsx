@@ -9,6 +9,10 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { getCookie } from '../../utils/cookie';
 import { useNavigate } from 'react-router-dom';
 import CircularProgress from '@mui/material/CircularProgress';
+<<<<<<< HEAD
+=======
+import { authHeaders } from '../../utils/headers';
+>>>>>>> main
 type Props = {
   isOpen: boolean,
   closeModal: any,
@@ -53,10 +57,14 @@ const DomainUpdateModal = (props: Props) => {
 
     fetch(url, {
       method: 'put',
+<<<<<<< HEAD
       headers: {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       },
+=======
+      headers: authHeaders,
+>>>>>>> main
       body: JSON.stringify(jsonData)
     })
       .then((response) => response.json())
@@ -105,7 +113,10 @@ const DomainUpdateModal = (props: Props) => {
         if (data['header']['isSuccessful'] !== true) {
           alert("다시 시도해주세요");
         } else {
+<<<<<<< HEAD
           // Remove the deleted item from the UI without reloading the page
+=======
+>>>>>>> main
           const updatedDomainList = domainListName.filter(item => item.id !== props.app.id);
           setDomainName(updatedDomainList);
           window.location.reload();
@@ -152,13 +163,17 @@ const DomainUpdateModal = (props: Props) => {
           value={item.domain}
           onChange={(e) => handleInputChange(index, e.target.value)}
         />
+<<<<<<< HEAD
         <IconButton
+=======
+        {/* <IconButton
+>>>>>>> main
           color="secondary"
           onClick={() => removeInput(index)}
           aria-label="delete"
         >
           <RemoveCircleOutlineIcon />
-        </IconButton>
+        </IconButton> */}
       </Box>
     ));
   };
@@ -214,7 +229,7 @@ const DomainUpdateModal = (props: Props) => {
           <Typography width="20%">도메인 주소</Typography>
           <Box width="80%">
             {renderInputs()}
-            <Button onClick={addInput} >추가하기</Button>
+            {/* <Button onClick={addInput} >추가하기</Button> */}
           </Box>
         </Box>
   

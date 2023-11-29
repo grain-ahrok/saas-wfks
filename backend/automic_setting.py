@@ -98,7 +98,11 @@ def get_existing_priorities(url, headers):
 def create_security_policy(data):
     security_policy_url = "https://wf.awstest.piolink.net:8443/api/v3/security_policy"
     headers = basic_auth()
+<<<<<<< HEAD
     post_data = {"name": data.get('companyName'),"status": "enable","create_type": "vendor_policy","vendor_policy": "standard","vendor_policy_block_status": "disable","sync_id": 4}
+=======
+    post_data = {"name": data.get('companyName'),"status": "enable","create_type": "sync","vendor_policy": "standard", "vendor_policy_block_status": "disable","sync_id": 4}
+>>>>>>> main
     response = make_api_request(security_policy_url, "POST", headers, post_data)
     if response:
         if response.status_code == 200:

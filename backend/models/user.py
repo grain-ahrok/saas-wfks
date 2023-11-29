@@ -4,7 +4,6 @@ from datetime import datetime  # Import the datetime class from the datetime mod
 import secrets
 import string
 from flask_mail import Message
-#from app import mail
 from flask import current_app
 
 class User(db.Model):
@@ -46,6 +45,7 @@ class User(db.Model):
         return temporary_password
     
     def send_reset_password_email(self, temporary_password):
+        from app import mail
         msg = Message('Password Reset', recipients=[self.email])
         with current_app.app_context():
             msg.body = f'Your temporary password is: {temporary_password}. Please use it to log in and reset your password.'

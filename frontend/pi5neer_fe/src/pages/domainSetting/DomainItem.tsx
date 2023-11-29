@@ -22,9 +22,10 @@ const DomainItem = ({ app }: Props) => {
             sx={{
                 justifyContent: 'space-between',
                 display : "flex",
-                minWidth : "420px",
-                maxWidth : "600px",
+                minWidth : "440px",
+                maxWidth : "470px",
                 flex : 1,
+                margin : "20px",
                 padding: "25px 40px",
                 borderRadius: "24px",
                 marginTop: "18px",
@@ -32,7 +33,7 @@ const DomainItem = ({ app }: Props) => {
                 boxShadow: styleConfigs.boxShadow
             }}>
             <Box>
-                <Box sx={{ justifyContent: "space-between", display: "flex", minWidth: "340px", width: "520px" }}>
+                <Box sx={{ justifyContent: "space-between", display: "flex", minWidth: "470px", }}>
                     <Box>
                     <Typography variant='h5' sx={{ paddingBottom: "12px" }}>{app.server_name} </Typography>
                     </Box>

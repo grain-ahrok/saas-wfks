@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify,session
+from flask import Blueprint, request, jsonify, session
 from response.headers import create_response
 from models.domain import Domain
 from models.security_policy import SecurityPolicy

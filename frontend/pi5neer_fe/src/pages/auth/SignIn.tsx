@@ -28,6 +28,7 @@ function SignIn() {
 
         // Set loading to true when starting the request
         setLoading(true);
+<<<<<<< HEAD
 
         fetch('/users/signin', {
             method: 'post',
@@ -58,17 +59,65 @@ function SignIn() {
         });
     };
 
+=======
+
+        fetch('/users/signin', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                companyName: cName,
+                password: pw
+            })
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                const user: UserType = data;
+                localStorage.setItem('token', data.access_token);
+                setCookie("user_id", user.id.toString());
+                setCookie("security_policy_id", user.security_policy_id.toString());
+                setCookie("wf_app_id", user.app_id.toString());
+                setCookie("app_name", user.app_name.toString());
+                console.log(localStorage.getItem('token'));
+            
+                // Navigate only after a successful login
+                navigate("/customers/dashboard", { replace: true });
+            })
+            .catch((error) => {
+                if (error) {
+                    alert("회사 이름과 비밀번호를 다시 확인해주세요")
+                }
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    };
+
+>>>>>>> main
     return (
         <Box sx={{ display: "flex", height: "100vh" }}>
-            <Box sx={{ width: "50%", margin: "auto", padding: "80px" }}>
-                <h1>Pi5neer</h1>
+            <Box sx={{ width: "50%", margin: "auto", padding: "80px", maxWidth: "500px" }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between" sx={{}}>
+                    <h1>Pi5neer</h1>
+                    <Button
+                        onClick={(e) => { navigate('/users/signup'); }}
+                        sx={{
+                            marginTop: "4px",
+
+                            height: "42px",
+                            borderRadius: "8px",
+                            background: "#FFFFFF",
+                            color: "#18A0FB",
+                            border: "1px solid #18A0FB"
+                        }}>Go To Sign Up
+                    </Button>
+                </Box>
                 <p>더 빠르고 안정적이며 안전한 서비스로 고객의 비즈니스 가치를 극대화시킵니다</p>
             </Box>
 
-            <Box sx={{ width: "50%", margin: "auto", padding: "80px", minWidth: "460px" }}>
+            <Box sx={{ width: "50%", margin: "auto", padding: "50px", minWidth: "460px", maxWidth: "580px" }}>
                 <Box sx={{ padding: "30px", background: "white", boxShadow: styleConfigs.boxShadow, borderRadius: "30px" }}>
-                    <Box sx={{ paddingTop: "30px", paddingBottom: "60px" }}>
-                        <Typography variant="h4" paddingBottom="16px" fontWeight="700">Sign in</Typography>
+                    <Box sx={{ paddingTop: "20px", paddingBottom: "50px" }}>
+                        <Typography variant="h4" paddingBottom="16px" fontWeight="700">Sign In</Typography>
 
                         <TextField
                             fullWidth
@@ -95,6 +144,7 @@ function SignIn() {
                                 color: "white",
                                 border: "1px solid #18A0FB"
                             }}
+<<<<<<< HEAD
                             disabled={loading} // Disable the button when loading
                         >
                             {loading ? <CircularProgress size={24} /> : "Login"}
@@ -104,6 +154,13 @@ function SignIn() {
                             <Box>&nbsp;/&nbsp;</Box>
                             <a href="#">forgot my password</a>
                         </Box>
+=======
+                            disabled={loading}>
+                            {loading ? <CircularProgress size={24} /> : "Login"}
+                        </Button>
+
+
+>>>>>>> main
                     </Box>
                 </Box>
             </Box>
