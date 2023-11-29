@@ -6,10 +6,17 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" >
-          {routes}
-        </Route>
-        <Route path="*" element={<SignIn />}></Route>,
+        {/* Redirect to the desired initial route ("/customers") */}
+        <Route
+          path="/"
+          element={<Navigate to="/users/signin" />}
+        />
+
+        {/* Define your routes */}
+        {routes}
+
+        {/* Fallback route for unknown paths */}
+        <Route path="*" element={<SignIn />} />
       </Routes>
     </BrowserRouter>
   );

@@ -45,9 +45,12 @@ function SignIn() {
                 setCookie("security_policy_id", user.security_policy_id.toString());
                 setCookie("wf_app_id", user.app_id.toString());
                 setCookie("app_name", user.app_name.toString());
-
-                navigate("/customers/dashboard");
-                
+                if(user.level === 1) {
+                    navigate("/customers/dashboard");
+                } else if(user.level === 2) {
+                    navigate("/pi5neer/dashboard");
+                }
+                           
             })
             .catch((error) => {
                 if (error) {
