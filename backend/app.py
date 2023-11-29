@@ -21,6 +21,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days=1)  # 30분으로 설정
 jwt = JWTManager(app)
 app.config.from_object(Config)
 
+
 db.init_app(app)
 bcrypt.init_app(app)
 

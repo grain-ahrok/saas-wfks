@@ -8,7 +8,7 @@ from response.dto.security_policy_dto import SecurityPolicyDto
 from response.headers import create_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-security_policy_detail_ = Blueprint('security_policy_detail', __name__, url_prefix='/security_policy')
+security_policy_detail_ = Blueprint('security_policy_detail', __name__, url_prefix='/api/v1/security_policy')
 base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
 
 def update_poc_examples(data,policy_name):

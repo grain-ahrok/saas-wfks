@@ -6,7 +6,7 @@ from response.headers import create_response
 from utils import make_api_request,basic_auth
 from flask_jwt_extended import jwt_required
 
-security_policy_ = Blueprint('security_policy', __name__, url_prefix='/security_policy')
+security_policy_ = Blueprint('security_policy', __name__, url_prefix='/api/v1/security_policy')
 base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
 
 headers = basic_auth()

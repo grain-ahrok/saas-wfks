@@ -13,7 +13,7 @@ from models import *
 from itertools import groupby
 
 from utils import basic_auth,make_api_request
-Pi5neer = Blueprint('pi5neer', __name__, url_prefix='/Pi5neer')
+Pi5neer = Blueprint('pi5neer', __name__, url_prefix='/api/v1/Pi5neer')
 base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
 
 

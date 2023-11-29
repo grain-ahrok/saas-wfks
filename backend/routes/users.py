@@ -12,7 +12,7 @@ from urllib.parse import urlparse
 from flask_jwt_extended import jwt_required,create_access_token,unset_jwt_cookies
 
 
-users = Blueprint('users', __name__, url_prefix='/users')
+users = Blueprint('users', __name__, url_prefix='/api/v1/users')
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning) #지우시요 나중에
 
 def jwt_generate_token(identity, level):

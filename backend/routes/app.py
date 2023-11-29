@@ -16,7 +16,7 @@ from sqlalchemy import func
 from flask_jwt_extended import jwt_required,get_jwt_identity
 from sqlalchemy.orm import joinedload
 
-app = Blueprint('app', __name__, url_prefix='/app')
+app = Blueprint('app', __name__, url_prefix='/api/v1/app')
 
 
 
