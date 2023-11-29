@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid';
 import { IoIosRefresh } from "react-icons/io";
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import { authHeaders } from '../../utils/headers';
 
 export type AttackType = {
   name?: string;
@@ -30,10 +31,7 @@ const DashboardPage = () => {
     setLoading(true);
     try {
       const response = await fetch(url, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        }
+        headers: authHeaders
       });
 
       if (response.ok) {

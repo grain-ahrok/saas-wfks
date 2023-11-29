@@ -13,7 +13,7 @@ const ActiveStatusBox = (props: Props) => {
     
     function handleRadioChange(newValue : string) {
         props.onValueChange(newValue);
-      };
+        };
 
     return (
         <Box sx={{

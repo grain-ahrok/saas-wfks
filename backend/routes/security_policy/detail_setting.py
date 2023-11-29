@@ -269,8 +269,7 @@ def get_policy_details(security_policy_id, policy_name):
         policy_data_extractors = json.load(json_file)
     
     setting_names = policy_data_extractors[policy_name]
-    token = generate_token()
-    headers = {'Authorization': 'token ' + token}
+    headers = basic_auth()
 
     try:
 

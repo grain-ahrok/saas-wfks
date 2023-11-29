@@ -26,6 +26,7 @@ import SignIn from "../pages/auth/SignIn";
 import DirectoryListingPage from "../pages/securityDetailSetting/DirectoryListingPage";
 import BufferOverflowPage from "../pages/securityDetailSetting/BufferOverflowPage";
 import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
+import AdminDashBoardPage from "../pages/admin/AdminDashboardPage";
 
 
 const appUserRoutes: RouteType[] = [
@@ -222,10 +223,37 @@ const appPolicyDetailRoutes: RouteType[] = [
 
 ]
 
+const appAdminRoutes: RouteType[] = [
+    {
+        state: "admin",
+        element: <AdminDashBoardPage />
+    },
+    {
+        path: "/pi5neer/dashboard",
+        state: "pi5neer",
+        element: <AdminDashBoardPage />,
+        sidebarProps: {
+            icon: <SpaceDashboardIcon />,
+            displayText: "대시보드"
+        }
+    },
+    {
+        path: "/pi5neer/user-management",
+        state: "pi5neer",
+        element: <SignIn />,
+        sidebarProps: {
+            displayText: "사용자 관리",
+            icon: <AdminPanelSettingsIcon />
+        }
+    }
+]
+
+
 const appRoutes = {
     appUserRoutes: appUserRoutes,
     appCustomerRoutes: appCustomerRoutes,
-    appPolicyDetailRoutes: appPolicyDetailRoutes
+    appPolicyDetailRoutes: appPolicyDetailRoutes,
+    appAdminRoutes : appAdminRoutes
 }
 
 export default appRoutes;

@@ -93,7 +93,7 @@ function SignUp() {
                 marginLeft : "40px"
             }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" sx={{maxWidth:"500px"}}>
-                    <h1>Pi5neer</h1>
+                <Typography variant="h4" paddingBottom="16px" fontWeight="700">Pi5neer</Typography>
                     <Button
                         onClick={(e) => { navigate('/users/signin'); }}
                         sx={{
@@ -106,8 +106,8 @@ function SignUp() {
                         }}>Go To Sign In
                     </Button>
                 </Box>
-
-                <p>더 빠르고 안정적이며 안전한 서비스로 고객의 비즈니스 가치를 극대화시킵니다</p>
+                <br></br>
+                <Typography>더 빠르고 안정적이며 안전한 서비스로 고객의 비즈니스 가치를 극대화시킵니다</Typography>
             </Box>
 
             <Box sx={{ width: "50%", margin: "auto", padding: "80px", minWidth: "460px", maxWidth:"580px"  }}>
