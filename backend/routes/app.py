@@ -10,11 +10,12 @@ from models.security_policy import SecurityPolicy
 from models.domain import Domain
 import base64
 from models import *
-from datetime import datetime, timedelta
+from datetime import timedelta
 from collections import Counter
 from sqlalchemy import func
 from flask_jwt_extended import jwt_required,get_jwt_identity
 from sqlalchemy.orm import joinedload
+
 app = Blueprint('app', __name__, url_prefix='/app')
 
 
@@ -39,7 +40,8 @@ def dashboard(app_id):
     
 
 def fetch_dashboard_data(app_id):
-    current_time = datetime.now()
+    current_time = datetime.datetime.now()
+
     start_time_1hour_interval = current_time - timedelta(hours=1)
     log_1hour = get_logs_by_time_range(start_time_1hour_interval, current_time,app_id)
     data_timeline_response = count_occurrences_in_intervals(log_1hour, start_time_1hour_interval, 15,app_id)
@@ -79,9 +81,12 @@ def get_logs_by_year_range(start_time, end_time,app_id):
 
     # Create a dictionary to store month-wise log counts
     month_counts = [{"interval": month, "count": count} for month, count in result]
+    def extract_date(interval):
+        return datetime.datetime.strptime(interval, '%Y-%m')
 
+    month_counts_sorted = sorted(month_counts, key=lambda x: extract_date(x["interval"]))
 
-    return month_counts
+    return month_counts_sorted
 
 def count_occurrences_in_intervals(logs, end_time, interval_minutes,app_id):
     current_time = end_time

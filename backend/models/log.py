@@ -56,7 +56,6 @@ class Log(db.Model):
             db.session.add(new_log)
             db.session.commit()
 
-
     @classmethod
     def get_logs(cls, app_name, page=1, limit=10):
         paginated_logs = cls.query.filter_by(app_name=app_name).paginate(page, limit, False)
