@@ -39,7 +39,7 @@ def dashboard(app_id):
     
 
 def fetch_dashboard_data(app_id):
-    current_time = datetime.now()
+    current_time = datetime.datetime.now()
     start_time_1hour_interval = current_time - timedelta(hours=1)
     log_1hour = get_logs_by_time_range(start_time_1hour_interval, current_time,app_id)
     data_timeline_response = count_occurrences_in_intervals(log_1hour, start_time_1hour_interval, 15,app_id)

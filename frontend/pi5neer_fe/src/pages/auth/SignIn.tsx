@@ -63,7 +63,8 @@ function SignIn() {
         <Box sx={{ display: "flex", height: "100vh" }}>
             <Box sx={{ width: "50%", margin: "auto", padding: "80px", maxWidth: "500px" }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" sx={{}}>
-                    <h1>Pi5neer</h1>
+                <Typography variant="h4" paddingBottom="16px" fontWeight="700">Pi5neer</Typography>
+                
                     <Button
                         onClick={(e) => { navigate('/users/signup'); }}
                         sx={{
@@ -77,7 +78,8 @@ function SignIn() {
                         }}>Go To Sign Up
                     </Button>
                 </Box>
-                <p>더 빠르고 안정적이며 안전한 서비스로 고객의 비즈니스 가치를 극대화시킵니다</p>
+                <br></br>
+                <Typography>더 빠르고 안정적이며 안전한 서비스로 고객의 비즈니스 가치를 극대화시킵니다</Typography>
             </Box>
 
             <Box sx={{ width: "50%", margin: "auto", padding: "50px", minWidth: "460px", maxWidth: "580px" }}>

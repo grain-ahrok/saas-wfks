@@ -6,12 +6,15 @@ import PageWrapper from "../components/layout/PageWrapper";
 import MainLayout from "../components/layout/MainLayout";
 import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
 import SignIn from "../pages/auth/SignIn";
+import AdminDashBoardPage from "../pages/admin/AdminDashboardPage";
+import AdminMainLayout from "../components/layout/AdminMainLayout";
 
 const generateRoute = (): ReactNode => {
 
     const users: RouteType[] = appRoutes.appUserRoutes;
     const customers: RouteType[] = appRoutes.appCustomerRoutes;
     const policyDetails: RouteType[] = appRoutes.appPolicyDetailRoutes;
+    const admins: RouteType[] = appRoutes.appAdminRoutes;
     const token = localStorage.getItem('token');
     return [
         users.map((route, index) => (
@@ -55,6 +58,17 @@ const generateRoute = (): ReactNode => {
                 }></Route>
             ))}
         </Route>
+            : <Route path='/users/signup' element={<SignIn />} />,
+
+        token ? <Route element={<AdminMainLayout />}>{
+            admins.map((route, index) => (
+                <Route path={route.path} element={
+                    <PageWrapper>
+                        <AdminDashBoardPage></AdminDashBoardPage>
+                    </PageWrapper>
+                }></Route>
+            ))}
+            </Route>
             : <Route path='/users/signup' element={<SignIn />} />
     ]
 }
