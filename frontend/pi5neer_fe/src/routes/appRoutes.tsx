@@ -27,7 +27,7 @@ import DirectoryListingPage from "../pages/securityDetailSetting/DirectoryListin
 import BufferOverflowPage from "../pages/securityDetailSetting/BufferOverflowPage";
 import DetailPolicyWrapper from "../pages/securityDetailSetting/component/DetailPolicyWrapper";
 import AdminDashBoardPage from "../pages/admin/AdminDashboardPage";
-
+import UserManagementPage from "../pages/admin/UserManagementPage"; 
 
 const appUserRoutes: RouteType[] = [
     {
@@ -238,12 +238,12 @@ const appAdminRoutes: RouteType[] = [
         }
     },
     {
-        path: "/pi5neer/user-management",
+        path: "/pi5neer/user-management", // Adjust the path as needed
         state: "pi5neer",
-        element: <SignIn />,
+        element: <UserManagementPage />,
         sidebarProps: {
-            displayText: "사용자 관리",
-            icon: <AdminPanelSettingsIcon />
+          displayText: "사용자 관리",
+          icon: <AdminPanelSettingsIcon />
         }
     }
 ]

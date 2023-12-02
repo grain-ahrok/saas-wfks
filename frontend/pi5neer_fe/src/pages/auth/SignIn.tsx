@@ -29,7 +29,7 @@ function SignIn() {
         // Set loading to true when starting the request
         setLoading(true);
 
-        fetch('/users/signin', {
+        fetch('/api/v1/users/signin', {
             method: 'post',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

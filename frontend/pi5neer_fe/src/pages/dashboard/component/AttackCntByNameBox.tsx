@@ -50,7 +50,7 @@ export type AttackType = {
             <Tooltip />
             <Legend />
             <Bar dataKey="value" fill={colorConfigs.chart.medium} label="공격 시도 횟수" />
-            </BarChart>
+        </BarChart>
       </Box>
     );
   };

@@ -11,7 +11,7 @@
     "@mui/material": "^5.14.18",
     "@mui/material-next": "^6.0.0-alpha.110",
     "@mui/x-charts": "^6.18.2",
-    "@mui/x-data-grid": "^6.18.1",
+    "@mui/x-data-grid": "^6.18.2",
     "@reduxjs/toolkit": "^1.9.7",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -22,6 +22,7 @@
     "@types/react-dom": "^18.2.14",
     "axios": "^1.5.1",
     "chart.js": "^4.4.0",
+    "mui": "^0.0.1",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
@@ -58,7 +59,7 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000/api/v1",
+  "proxy": "http://localhost:5004",
   "devDependencies": {
     "@types/react-router-dom": "^5.3.3",
     "@types/react-window": "^1.8.8"

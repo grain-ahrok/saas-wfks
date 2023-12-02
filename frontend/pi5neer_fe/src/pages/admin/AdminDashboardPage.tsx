@@ -39,7 +39,7 @@ const AdminDashBoardPage = (props: Props) => {
 
 
   useEffect(() => {
-    fetch('/Pi5neer/dashboard/resource', {
+    fetch('/kui/api/v1/Pi5neer/dashboard/resource', {
       headers: authHeaders,
     })
       .then((response) => response.json())
@@ -65,7 +65,7 @@ const AdminDashBoardPage = (props: Props) => {
       });
 
 
-    fetch('/Pi5neer/dashboard2', {headers: authHeaders})
+    fetch('/kui/api/v1/Pi5neer/dashboard/traffic', {headers: authHeaders})
       .then((response) => response.json())
       .then((data) => {
         if (data['header']['resultMessage'] === 'ok') {

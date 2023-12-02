@@ -8,7 +8,7 @@ import DetailPolicyWrapper from "../pages/securityDetailSetting/component/Detail
 import SignIn from "../pages/auth/SignIn";
 import AdminDashBoardPage from "../pages/admin/AdminDashboardPage";
 import AdminMainLayout from "../components/layout/AdminMainLayout";
-
+import UserManagementPage from "../pages/admin/UserManagementPage";
 const generateRoute = (): ReactNode => {
 
     const users: RouteType[] = appRoutes.appUserRoutes;
@@ -60,16 +60,28 @@ const generateRoute = (): ReactNode => {
         </Route>
             : <Route path='/users/signup' element={<SignIn />} />,
 
-        token ? <Route element={<AdminMainLayout />}>{
-            admins.map((route, index) => (
-                <Route path={route.path} element={
+            token ? (
+                <Route element={<AdminMainLayout />}>
+                  {admins.map((route, index) => (
+                    <Route path={route.path} element={
+                      <PageWrapper>
+                        {route.state === "pi5neer" ? (
+                          route.element // Render the corresponding element for the "pi5neer" state
+                        ) : null}
+                      </PageWrapper>
+                    } />
+                  ))}
+                  {/* Add a route for UserManagementPage */}
+                  <Route path="/pi5neer/user-management" element={
                     <PageWrapper>
-                        <AdminDashBoardPage></AdminDashBoardPage>
+                      <UserManagementPage />
                     </PageWrapper>
-                }></Route>
-            ))}
-            </Route>
-            : <Route path='/users/signup' element={<SignIn />} />
+                  } />
+                </Route>
+              ) : (
+                <Route path='/users/signup' element={<SignIn />} />
+              ),
+
     ]
 }
 export const routes: ReactNode = generateRoute(); 

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, redirect, url_for
 from response.headers import create_response
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from utils import bcrypt
 from models.log import Log
 from models.user import User
@@ -13,14 +13,21 @@ from models import *
 from itertools import groupby
 
 from utils import basic_auth,make_api_request
-Pi5neer = Blueprint('pi5neer', __name__, url_prefix='/api/v1/Pi5neer')
+Pi5neer = Blueprint('pi5neer', __name__, url_prefix='/kui/api/v1/Pi5neer')
 base_url = 'https://wf.awstest.piolink.net:8443/api/v3'
 
 
 
 
 @Pi5neer.route('/dashboard/basic', methods=['GET'])
+@jwt_required()
 def dashboardAdmin():
+    userId = get_jwt_identity()
+    
+    user = User.query.get(userId)
+    if user.level != 2:
+        return jsonify({"error": "Insufficient privileges."}), 403
+    
     existing_logs = Log.query.all()
     if existing_logs:
         grouped_logs = {key: list(group) for key, group in groupby(existing_logs, key=lambda log: log.app_id)}
@@ -33,8 +40,13 @@ def dashboardAdmin():
 
 
 @Pi5neer.route('/dashboard/traffic', methods=['GET'])
-# @jwt_required
+@jwt_required()
 def dashboardAdmin2():
+    userId = get_jwt_identity()
+    
+    user = User.query.get(userId)
+    if user.level != 2:
+        return jsonify({"error": "Insufficient privileges."}), 403
     existing_logs = Log.query.all()
     if existing_logs:
         grouped_logs = {key: list(group) for key, group in groupby(existing_logs, key=lambda log: log.app_id)}
@@ -70,51 +82,65 @@ def dashboardAdmin2():
 
 
 @Pi5neer.route('/dashboard/resource', methods=['GET'])
-@jwt_required
+@jwt_required()
 def getUsage() :
+    userId = get_jwt_identity()
+    
+    user = User.query.get(userId)
+    if user.level != 2:
+        return jsonify({"error": "Insufficient privileges."}), 403
     url = base_url + '/system/monitoring/resource_info'
     response = make_api_request(url, method='GET', headers=basic_auth())
     return create_response(data=response.json()) 
 
-@Pi5neer.route('/user-management_user', methods=['GET'])
-# @jwt_required
-def user_mgmt_user():
+@Pi5neer.route('/management/users', methods=['GET'])
+@jwt_required()
+def get_users():
+    userId = get_jwt_identity()
+    
+    user = User.query.get(userId)
+    if user.level != 2:
+        return jsonify({"error": "Insufficient privileges."}), 403
     existing_users = User.query.all()
     if existing_users:
         user_list = [
-            {
-                'id': user.id,
-                'companyName': user.companyName,
-            } for user in existing_users
+            {'id': user.id, 'companyName': user.companyName} for user in existing_users
         ]
         return jsonify({'users': user_list}), 200
-    return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+    return jsonify({"error": "Failed to retrieve user data."}), 500
 
-@Pi5neer.route('<int:user_id>/user-management_application', methods=['GET'])
-# @jwt_required
-def user_mgmt_app(user_id):
+@Pi5neer.route('/management/<int:user_id>/user_app', methods=['GET'])
+@jwt_required()
+def get_user_apps(user_id):
+    userId = get_jwt_identity()
+    
+    user = User.query.get(userId)
+    if user.level != 2:
+        return jsonify({"error": "Insufficient privileges."}), 403
     existing_user_apps = UserApplication.get_apps_by_user_id(user_id)
-    user_app_list = {}
+    domain_list = []
     if existing_user_apps:
-
-        for user_app in existing_user_apps:            
-            domain_list = Domain.get_domains_by_app_id(user_app.id)
-            
+        for user_app in existing_user_apps:
+            domains = Domain.get_domains_by_app_id(user_app.id)
+            domain_list.extend(domains)
         return jsonify({'domain_list': domain_list}), 200
-    return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+    return jsonify({"error": "Failed to retrieve user application data."}), 500
 
-@Pi5neer.route('/user-management', methods=['GET'])
-# @jwt_required
-def user_mgmt():
-    existing_logs = Log.query.all()
+@Pi5neer.route('/management/<int:app_id>/user_app_log', methods=['GET'])
+@jwt_required()
+def get_user_logs(app_id):
+    userId = get_jwt_identity()
+    
+    user = User.query.get(userId)
+    if user.level != 2:
+        return jsonify({"error": "Insufficient privileges."}), 403
+    existing_logs = Log.query.filter_by(app_id=app_id).all()
+
     if existing_logs:
-        grouped_logs = {key: [log.serialize() for log in group] for key, group in groupby(existing_logs, key=lambda log: log.app_id)}
-        response_data = {}
-        for app_id, logs in grouped_logs.items():
-            app_response = fetch_dashboard_data_admin(logs, app_id)
-            response_data[app_id] = app_response
-        return jsonify(response_data), 200
-    return jsonify({"error": "데이터를 가져오지 못했습니다."}), 500
+        #logs_data = [log.serialize() for log in existing_logs]
+        dashboard_data = fetch_dashboard_data_admin(existing_logs, app_id)
+        return dashboard_data, 200
+    return jsonify({"error": f"Failed to retrieve log data for app_id={app_id}."}), 500
 
 
 def fetch_dashboard_data_admin(logs, app_id):

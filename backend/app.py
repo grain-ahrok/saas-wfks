@@ -36,7 +36,7 @@ app.register_blueprint(security_policy_)
 
 
 # Configure CORS    
-CORS(app, origins='http://127.0.0.1:3000', supports_credentials=True)
+CORS(app, origins='http://127.0.0.1:3002', supports_credentials=True)
 
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
@@ -45,4 +45,4 @@ if __name__ == '__main__':
     # Remove the app.run() and replace it with the following block
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(port=5004,debug=True)
