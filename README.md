@@ -24,8 +24,8 @@ SaaS ( Software as a Service)의 일종으로 보안 서비스에 특화된 SaaS
 
 ## 프로세스 정리
 <img width="1060" alt="스크린샷 2024-04-04 오후 9 22 07" src="https://github.com/grain-ahrok/saas-wfks/assets/81209784/32780911-ec33-4f5e-8290-b8836fcd5d61">
-
-<img width="847" alt="image" src="https://github.com/grain-ahrok/saas-wfks/assets/81209784/89d7aa19-ca86-44ac-8ad0-8f9a1807fd52">
+<br/>
+![image](https://github.com/user-attachments/assets/a589a323-0c12-40a6-81ab-e8a78e66b3b8)
 
 
 <br/>
